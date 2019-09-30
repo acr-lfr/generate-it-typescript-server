@@ -7,11 +7,11 @@ command="${1:-prod}"
 case $command in
   watch)
     npm install
-    npm run watch:ts
+    npm run dev:build-watch
   ;;
   dev)
     echo "Running dev server..."
-    npm run watch:server
+    npm run dev:start-watch
   ;;
   prod)
     echo "Running server..."

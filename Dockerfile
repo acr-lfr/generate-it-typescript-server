@@ -11,7 +11,7 @@ FROM environment as build
 
 COPY . /code
 
-RUN npm run build:ts
+RUN npm run build
 
 # -----------------------------------------------------
 FROM environment as runtime
