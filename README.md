@@ -14,3 +14,16 @@
 This API was generated using [openapi-nodegen](https://github.com/acrontum/openapi-nodegen)
 
 {{swagger.info.description}}
+
+## Setup
+In a new directory run: `npm init`
+
+Add to the dev dependencies openapi-nodegen
+ - run: `npm i --save-dev openapi-nodegen`
+
+Add the nodegen generate test rig to the package.json scripts object. The following will load a local swagger file api.1.0.0.yml and generate the test rig with the given git repository:
+```
+  "scripts": {
+      "generate:nodegen:test-rig": "openapi-nodegen ./swagger/api_1.0.0.yml -t https://github.com/acrontum/openapi-nodegen-typescript-server.git",
+```
+
