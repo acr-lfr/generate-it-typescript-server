@@ -1,14 +1,28 @@
 version: "3"
 
+# virtual volume
+volumes:
+  build:
+
 services:
-  cdc-auth:
-    image: "{{ package.name }}"
+  {{ kebabCase(package.name) }}-watch:
+    image: "${IMAGE_PREFIX}{{ kebabCase(package.name) }}-service:${IMAGE_TAG:-latest}"
+    depends_on:
+      - {{ kebabCase(package.name) }}-service
+    volumes:
+      - .:/code
+      - build:/code/build
+    command: watch
+
+  {{ kebabCase(package.name) }}-service:
+    image: "${IMAGE_PREFIX}{{ kebabCase(package.name) }}-service:${IMAGE_TAG:-latest}"
     build:
       dockerfile: Dockerfile
       context: .
     ports:
       - "8080:8000"
-networks:
-  default:
-    external:
-      name: {{ package.name }}-network
+    volumes:
+      - build:/code/build
+    networks:
+      - default
+    command: dev
