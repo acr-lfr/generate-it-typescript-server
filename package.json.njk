@@ -11,6 +11,8 @@
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "tslint --project tsconfig.json --fix",
     "start": "node ./build/server.js",
+    "pm2:start:dev": "pm2 start pm2.dev.config.js",
+    "pm2:start:prod": "pm2 start pm2.prod.config.js",
     "test": "npm run lint && npm run test:unit",
     "test:unit": "jest"
   },
@@ -57,7 +59,7 @@
     "nodemon": "^1.19.3",
     "npm-update-git-deps": "^1.2.5",
     "openapi-nodegen-mockers": "^0.0.6",
-    "swagger-ui-express": "^4.1.1",
+    "swagger-ui-express": "^4.1.2",
     "ts-jest": "^24.0.2",
     "tslint": "^5.19.0",
     "ttypescript": "^1.5.7",
