@@ -1,4 +1,5 @@
 {
   "nodegenDir": "src/http/nodegen",
-  "nodegenMockDir": "src/domains/__mocks__"
+  "nodegenMockDir": "src/domains/__mocks__",
+  "nodegenType": "server"
 }
