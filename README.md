@@ -8,13 +8,6 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-
-## Description
-
-This API was generated using [openapi-nodegen](https://github.com/acrontum/openapi-nodegen)
-
-{{swagger.info.description}}
-
 ## Setup
 In a new directory run: `npm init`
 
@@ -27,3 +20,16 @@ Add the nodegen generate the server to the package.json scripts object. The foll
       "generate:nodegen": "openapi-nodegen ./swagger/api_1.0.0.yml -t https://github.com/acrontum/openapi-nodegen-typescript-server.git",
 ```
 
+## Older versions of openapi-nodegen
+
+Reference a tag:
+```
+  "scripts": {
+      "generate:nodegen": "openapi-nodegen ./swagger/api_1.0.0.yml -t https://github.com/acrontum/openapi-nodegen-typescript-server.git#3.0.6",
+```
+
+## Description
+
+This API was generated using [openapi-nodegen](https://github.com/acrontum/openapi-nodegen)
+
+{{swagger.info.description}}
