@@ -15,7 +15,7 @@ services:
     command: watch
 
   {{ _.kebabCase(package.name) }}-service:
-    image: "${IMAGE_PREFIX}{{ kebabCase(package.name) }}-image:${IMAGE_TAG:-latest}"
+    image: "${IMAGE_PREFIX}{{ _.kebabCase(package.name) }}-image:${IMAGE_TAG:-latest}"
     build:
       dockerfile: Dockerfile
       context: .
