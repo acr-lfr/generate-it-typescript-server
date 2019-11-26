@@ -7,9 +7,9 @@ import NodegenRequest from '../interfaces/NodegenRequest'
 {{ celebrateImport(operations) }}
 import jwtMiddleware from '../middleware/jwtMiddleware'
 import apiKeyMiddleware from '../middleware/apiKeyMiddleware'
-import {{ camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
+import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
 import {{ucFirst(operation_name)}}Domain from '../../../domains/{{ucFirst(operation_name)}}Domain'
-import {{camelCase(operation_name)}}TransformOutputs from '../transformOutputs/{{operation_name}}TransformOutput'
+import {{_.camelCase(operation_name)}}TransformOutputs from '../transformOutputs/{{operation_name}}TransformOutput'
 
 export default function() {
   const router = Router();
