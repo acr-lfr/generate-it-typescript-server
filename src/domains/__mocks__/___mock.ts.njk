@@ -1,8 +1,8 @@
+import { mockItGenerator } from 'openapi-nodegen-mockers'
 {% set interfaces = importInterfaces(operations) %}
 {% for interface in interfaces -%}
-import {{ interface }} from '../../http/nodegen/interfaces/{{ interface }}';
+import { {{ interface }} } from '../../http/nodegen/interfaces/{{ interface }}';
 {%- endfor %}
-import { mockItGenerator } from 'openapi-nodegen-mockers'
 
 class {{ ucFirst(operation_name) }}DomainMock {
   {% for op in operations -%}
