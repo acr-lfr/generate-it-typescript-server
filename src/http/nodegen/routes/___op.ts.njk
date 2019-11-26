@@ -29,7 +29,7 @@ export default function() {
       return res.json(
         objectReduceByMap(
           await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(path, false, true, 'params')}}),
-          {{camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
+          {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
         )
       );
       {% else %}
