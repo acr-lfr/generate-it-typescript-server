@@ -5,7 +5,7 @@ import objectReduceByMap from 'object-reduce-by-map'
 import NodegenRequest from '../interfaces/NodegenRequest'
 
 {{ celebrateImport(operations) }}
-import jwtMiddleware from '../middleware/jwtMiddleware'
+import jwtMiddleware from '../middleware/accessTokenMiddleware'
 import apiKeyMiddleware from '../middleware/apiKeyMiddleware'
 import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
 import {{ucFirst(operation_name)}}Domain from '../../../domains/{{ucFirst(operation_name)}}Domain'
