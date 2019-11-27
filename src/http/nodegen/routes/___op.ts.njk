@@ -5,7 +5,7 @@ import objectReduceByMap from 'object-reduce-by-map'
 import NodegenRequest from '../interfaces/NodegenRequest'
 
 {{ celebrateImport(operations) }}
-import jwtMiddleware from '../middleware/accessTokenMiddleware'
+import accessTokenMiddleware from '../middleware/accessTokenMiddleware'
 import apiKeyMiddleware from '../middleware/apiKeyMiddleware'
 import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
 import {{ucFirst(operation_name)}}Domain from '../../../domains/{{ucFirst(operation_name)}}Domain'
@@ -21,9 +21,10 @@ export default function() {
    * {% if path.summary %}Summary: {{ path.summary }}{% endif %}
    * {% if path.description %}Description: {{ path.description }}{% endif %}
    */
+  {% set securityNames = getSecurityNames(path, swagger) %}
   router.{{key}}(
     '{{op.subresource}}',
-    {{getSecDefMiddleware(path, swagger)}} {{celebrateRoute(operation_name, path.parameters, path.operationId)}}
+    {% if securityNames %}accessTokenMiddleware({{ securityNames }}), {% endif %} {{celebrateRoute(operation_name, path.parameters, path.operationId)}}
     async (req: any, res: express.Response) => {
       {% if not path.produces or path.produces and arrayContains('application/json', path.produces) %}
       return res.json(

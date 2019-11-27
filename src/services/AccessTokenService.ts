@@ -26,21 +26,29 @@ class AccessTokenService {
   }
 
   /**
-   * Validates incoming requests
+   * Validates incoming requests, expects Bearer <token>
+   * Passes on the 1st security element found in the headers.
+   * !! Extend this accordingly as required should Bearer not be used.
+   * !! Note the src/http/nodegen/security/definitions.ts.njk contains all security definitions
    * @param req
    * @param res
    * @param next
-   * @param headerName
+   * @param headerNames
    */
-  public validateRequest (req: NodegenRequest, res: express.Response, next: express.NextFunction, headerName: string) {
-    let tokenRaw = String(req.headers[headerName.toLowerCase()] || req.headers[headerName] || '');
-    let token = '';
-    if (tokenRaw.length > 0) {
-      let tokenParts = tokenRaw.split('Bearer ');
-      if (tokenParts.length > 0) {
-        token = tokenParts[1];
+  public validateRequest (req: NodegenRequest, res: express.Response, next: express.NextFunction, headerNames: string[]) {
+    let token;
+    for (let i = 0; i < headerNames.length; ++i) {
+      let tokenRaw = String(req.headers[headerNames[i].toLowerCase()] || req.headers[headerNames[i]] || '');
+      if (tokenRaw.length > 0) {
+        let tokenParts = tokenRaw.split('Bearer ');
+        if (tokenParts.length > 0) {
+          token = tokenParts[1];
+          break;
+        }
       }
-    } else {
+    }
+
+    if (!token) {
       return this.denyRequest(
         res,
         'No token to parse',
