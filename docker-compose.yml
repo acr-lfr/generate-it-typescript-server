@@ -8,14 +8,14 @@ services:
   watcher-service:
     image: "${IMAGE_PREFIX}watcher-image:${IMAGE_TAG:-latest}"
     depends_on:
-      - {{ kebabCase(package.name) }}-service
+      - {{ _.kebabCase(package.name) }}-service
     volumes:
       - .:/code
       - build:/code/build
     command: watch
 
-  {{ kebabCase(package.name) }}-service:
-    image: "${IMAGE_PREFIX}{{ kebabCase(package.name) }}-image:${IMAGE_TAG:-latest}"
+  {{ _.kebabCase(package.name) }}-service:
+    image: "${IMAGE_PREFIX}{{ _.kebabCase(package.name) }}-image:${IMAGE_TAG:-latest}"
     build:
       dockerfile: Dockerfile
       context: .
@@ -23,6 +23,6 @@ services:
       - "8080:8000"
     volumes:
       - build:/code/build
-    networks:{{ kebabCase(package.name) }}
+    networks:{{ _.kebabCase(package.name) }}
       - default
     command: dev
