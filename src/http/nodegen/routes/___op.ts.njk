@@ -21,7 +21,7 @@ export default function() {
    * {% if path.summary %}Summary: {{ path.summary }}{% endif %}
    * {% if path.description %}Description: {{ path.description }}{% endif %}
    */
-  {% set securityNames = getSecurityNames(path) %}
+  {% set securityNames = getSecurityNames(path, swagger) %}
   router.{{key}}(
     '{{op.subresource}}',
     {% if securityNames %}accessTokenMiddleware({{ securityNames }}), {% endif %} {{celebrateRoute(operation_name, path.parameters, path.operationId)}}
