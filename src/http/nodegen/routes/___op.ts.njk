@@ -28,10 +28,7 @@ export default function() {
     async (req: any, res: express.Response) => {
       {% if not path.produces or path.produces and arrayContains('application/json', path.produces) %}
       return res.json(
-        objectReduceByMap(
-          await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(path, false, true, 'params')}}),
-          {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
-        )
+        await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(path, false, true, 'params')}})
       );
       {% else %}
         return res.download(
