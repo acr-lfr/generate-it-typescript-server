@@ -4,3 +4,4 @@ build/
 .env
 .DS_Store
 npm-debug.log
+.openapi-nodegen/git/
