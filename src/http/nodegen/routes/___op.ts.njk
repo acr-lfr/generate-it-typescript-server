@@ -4,7 +4,7 @@ import objectReduceByMap from 'object-reduce-by-map'
 
 import NodegenRequest from '../interfaces/NodegenRequest'
 
-{% if operationsPathsHasParamsToValidate(operations) %}import celebrate from 'celebrate'{% endif %}
+{% if operationsPathsHasParamsToValidate(operations) %}import {celebrate} from 'celebrate'{% endif %}
 import permissionMiddleware from '../middleware/permissionMiddleware.ts'
 import accessTokenMiddleware from '../middleware/accessTokenMiddleware'
 import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
