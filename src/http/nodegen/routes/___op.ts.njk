@@ -4,7 +4,8 @@ import objectReduceByMap from 'object-reduce-by-map'
 
 import NodegenRequest from '../interfaces/NodegenRequest'
 
-{{ celebrateImport(operations) }}
+{% if operationsPathsHasParamsToValidate(operations) %}import celebrate from 'celebrate'{% endif %}
+import permissionMiddleware from '../middleware/permissionMiddleware.ts'
 import accessTokenMiddleware from '../middleware/accessTokenMiddleware'
 import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
 import {{ucFirst(operation_name)}}Domain from '../../../domains/{{ucFirst(operation_name)}}Domain'
@@ -23,7 +24,9 @@ export default function() {
   {% set securityNames = getSecurityNames(path, swagger) %}
   router.{{key}}(
     '{{op.subresource}}',
-    {% if securityNames %}accessTokenMiddleware({{ securityNames }}), {% endif %} {{celebrateRoute(operation_name, path.parameters, path.operationId)}}
+    {% if securityNames %}accessTokenMiddleware({{ securityNames }}), /* Validate request security tokens */{% endif %}
+    {% if path['x-permission'] %}permissionMiddleware({{ securityNames }}), /* Check permission of the incoming user */ {% endif %}
+    {% if pathsHasParamsToValidate(path) %}celebrate({{ _.camelCase(operation_name) }}'Validators.{{path.operationId}}), /* Finally, validate the request data and return validation errors */ {% endif %}
     async (req: any, res: express.Response) => {
       {% if not path.produces or path.produces and arrayContains('application/json', path.produces) %}
       return res.json(
