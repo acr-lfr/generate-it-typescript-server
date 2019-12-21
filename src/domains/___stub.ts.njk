@@ -17,11 +17,7 @@ class {{ ucFirst(operation_name) }}Domain {
    */
   public async {{ path.operationId }} ({{ pathParamsToDomainParams(path, true) }}): Promise<{{ path['x-response-definitions']['200'] if path['x-response-definitions']['200'] else 'any' }}> {
     {% if mockServer %}
-    return {{ ucFirst(operation_name) }}DomainMock.{{ path.operationId }}(
-      {% for requestType, value in path['x-request-definitions'] -%}
-      {{ requestType }},
-      {%- endfor %}
-    );
+    return {{ ucFirst(operation_name) }}DomainMock.{{ path.operationId }}({{ pathParamsToDomainParams(path, true) }});
     {% else %}
     return {};
     {% endif %}
