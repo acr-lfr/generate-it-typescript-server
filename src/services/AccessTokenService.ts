@@ -17,7 +17,12 @@ class AccessTokenService {
    * @param msg
    * @param headersProvidedString
    */
-  private denyRequest (res: express.Response, e: any, msg = 'Invalid auth token provided', headersProvidedString: string = '') {
+  private denyRequest (
+    res: express.Response,
+    e: any = 'AccessTokenService did not match the given keys or tokens',
+    msg: string = 'Invalid auth token provided',
+    headersProvidedString: string = '',
+  ) {
     console.error(e);
     res.status(401).json({
       message: msg,
@@ -26,9 +31,8 @@ class AccessTokenService {
   }
 
   /**
-   * Validates incoming requests, expects Bearer <token>
-   * Passes on the 1st security element found in the headers.
-   * !! Extend this accordingly as required should Bearer not be used.
+   * Checks a JWT or API key differentiating between the two with the existence or not of Bearer.
+   * !! Extend this method as required.
    * !! Note the src/http/nodegen/security/definitions.ts.njk contains all security definitions
    * @param req
    * @param res
@@ -36,19 +40,26 @@ class AccessTokenService {
    * @param headerNames
    */
   public validateRequest (req: NodegenRequest, res: express.Response, next: express.NextFunction, headerNames: string[]) {
-    let token;
+    let jwtToken;
+    let apiKey;
     for (let i = 0; i < headerNames.length; ++i) {
       let tokenRaw = String(req.headers[headerNames[i].toLowerCase()] || req.headers[headerNames[i]] || '');
       if (tokenRaw.length > 0) {
+        // Assuming this API will be used more frequently by humans with JWT tokens check for JWT 1st.
         let tokenParts = tokenRaw.split('Bearer ');
         if (tokenParts.length > 0) {
-          token = tokenParts[1];
+          // this is a JWT token
+          jwtToken = tokenParts[1];
+          break;
+        } else {
+          // This is a token but not JWT thus API key
+          apiKey = tokenParts[1];
           break;
         }
       }
     }
 
-    if (!token) {
+    if (!jwtToken && !apiKey) {
       return this.denyRequest(
         res,
         'No token to parse',
@@ -56,16 +67,23 @@ class AccessTokenService {
         JSON.stringify(req.headers)
       );
     }
-
-    this.verifyAccessJWT(token)
-      .then((decodedToken: any) => {
-        req.jwtData = decodedToken;
-        req.originalToken = token;
-        next();
-      })
-      .catch(() => {
-        this.denyRequest(res, 'Auth signature invalid.', 'Invalid auth token!');
-      });
+    if (jwtToken) {
+      // verify the JWT token
+      this.verifyAccessJWT(jwtToken)
+        .then((decodedToken: any) => {
+          req.jwtData = decodedToken;
+          req.originalToken = jwtToken;
+          next();
+        })
+        .catch(() => {
+          this.denyRequest(res);
+        });
+    } else if(config.apiKey === apiKey) {
+      // verify the access token
+      next();
+    } else {
+      this.denyRequest(res)
+    }
   }
 
   /**
