@@ -25,7 +25,7 @@ export default function() {
   router.{{key}}(
     '{{op.subresource}}',
     {% if securityNames %}accessTokenMiddleware({{ securityNames }}), /* Validate request security tokens */{% endif %}
-    {% if path['x-permission'] %}permissionMiddleware({{ path['x-permission'] }}), /* Check permission of the incoming user */ {% endif %}
+    {% if path['x-permission'] %}permissionMiddleware('{{ path['x-permission'] }}'), /* Check permission of the incoming user */ {% endif %}
     {% if pathsHasParamsToValidate(path) %}celebrate({{ _.camelCase(operation_name) }}Validators.{{path.operationId}}), /* Finally, validate the request data and return validation errors */ {% endif %}
     async (req: any, res: express.Response) => {
       {% if not path.produces or path.produces and arrayContains('application/json', path.produces) %}
