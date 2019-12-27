@@ -2,12 +2,16 @@
   "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
-    "target": "ES2017",
     "moduleResolution": "node",
+    "noImplicitAny": true,
+    "sourceMap": true,
     "outDir": "build",
     "baseUrl": "./",
-    "sourceMap": true,
     "resolveJsonModule": true,
+    "importHelpers": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@constants": [
         "src/constants"
