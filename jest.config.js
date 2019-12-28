@@ -10,7 +10,8 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest'
   },
   transformIgnorePatterns: [
-    '/node_modules/'
+    '/node_modules/',
+    '/build/',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
