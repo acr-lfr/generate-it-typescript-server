@@ -6,6 +6,12 @@ module.exports = {
     'ts',
     'tsx'
   ],
+  collectCoverage: true,
+  collectCoverageFrom: [
+    'src/domains/*.{js,ts}',
+    'src/services/*.{js,ts}',
+    'src/utils/*.{js,ts}',
+  ],
   transform: {
     '^.+\\.tsx?$': 'ts-jest'
   },
@@ -20,6 +26,9 @@ module.exports = {
     '**/tests/unit/**/*.spec.(js|jsx|ts|tsx)',
     '**/__tests__/*.spec.(js|jsx|ts|tsx)',
   ],
+
+  setupFilesAfterEnv: ['./jest.setup.js'],
+
   testURL: 'http://localhost/',
   watchPlugins: [
     'jest-watch-typeahead/filename',
