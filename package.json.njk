@@ -15,7 +15,7 @@
     "pm2:start:prod": "pm2 start pm2.prod.config.js",
     "test": "npm run lint && npm run test:unit",
     "test:unit": "ENVIRONMENT=test && jest",
-    "test:unit:single": "ENVIRONMENT=test && jest --collect-coverage false"
+    "test:unit:single": "ENVIRONMENT=test && jest --collect-coverage false --forceExit --detectOpenHandles"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
@@ -23,7 +23,7 @@
     "command-line-args": "^5.1.1",
     "cors": "^2.8.5",
     "custom-error": "^0.2.1",
-    "dotenv": "^8.0.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-form-data": "^2.0.10",
     "express-auth-middle": "^1.0.4",
@@ -34,7 +34,7 @@
     "morgan": "^1.9.1",
     "object-reduce-by-map": "^1.4.0",
     "openapi-nodegen-config-helper": "1.1.0",
-    "openapi-nodegen-logger": "1.0.0",
+    "openapi-nodegen-logger": "^1.0.0",
     "recursive-readdir-sync": "^1.0.6",
     "request-ip": "^2.1.3",
     "winston": "^3.2.1",
@@ -58,13 +58,13 @@
     "@types/yamljs": "^0.2.30",
     "@zerollup/ts-transform-paths": "^1.7.3",
     "jest": "^24.9.0",
-    "nodemon": "^1.19.3",
+    "nodemon": "^2.0.2",
     "npm-update-git-deps": "^1.2.5",
     "openapi-nodegen-mockers": "^0.0.6",
     "swagger-ui-express": "^4.1.2",
-    "ts-jest": "^24.0.2",
-    "tslint": "^5.19.0",
-    "ttypescript": "^1.5.7",
-    "typescript": "^3.6.2"
+    "ts-jest": "^24.2.0",
+    "tslint": "^5.20.1",
+    "ttypescript": "^1.5.8",
+    "typescript": "^3.6.4"
   }
 }
