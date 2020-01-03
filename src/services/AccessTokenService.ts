@@ -40,8 +40,8 @@ class AccessTokenService {
    * @param headerNames
    */
   public validateRequest (req: NodegenRequest, res: express.Response, next: express.NextFunction, headerNames: string[]) {
-    let jwtToken;
-    let apiKey;
+    let jwtToken: string;
+    let apiKey: string;
     for (let i = 0; i < headerNames.length; ++i) {
       let tokenRaw = String(req.headers[headerNames[i].toLowerCase()] || req.headers[headerNames[i]] || '');
       if (tokenRaw.length > 0) {
@@ -69,7 +69,7 @@ class AccessTokenService {
     }
     if (jwtToken) {
       // verify the JWT token
-      this.verifyAccessJWT(jwtToken)
+      this.verifyJWT(jwtToken)
         .then((decodedToken: any) => {
           req.jwtData = decodedToken;
           req.originalToken = jwtToken;
@@ -109,12 +109,15 @@ class AccessTokenService {
     });
   }
 
-  /**
-   * Verifies a given JWT token
-   * @param token
-   */
-  public async verifyAccessJWT (token: string) {
-    return jwt.verify(token, config.jwtSecret);
+  public verifyJWT (token: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, config.jwtSecret, (err: any, data: any) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(data);
+      });
+    });
   }
 }
 
