@@ -1,6 +1,6 @@
 {% set interfaces = importInterfaces(operations) %}
 {% for interface in interfaces -%}
-  import { {{ interface }} } from '../http/nodegen/interfaces/{{ interface }}';
+  import { {{ interface }} } from '@/http/nodegen/interfaces/{{ interface }}';
 {%- endfor %}
 {% if mockServer %}
 import {{ ucFirst(operation_name) }}DomainMock from './__mocks__/{{ ucFirst(operation_name) }}DomainMock'
