@@ -12,13 +12,15 @@
 These templates inject into the code helpful elements depending on the provided api file.
 
 #### Input/ouput filters
-The [input](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by npm the [celebrate](https://www.npmjs.com/package/celebrate) package. Anything not declared in the request by the swagger file will not pass through and result in a 422 error.
-The [output](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L33) is protected by the npm [objectReduceByMap](https://www.npmjs.com/package/object-reduce-by-map) package which strips out any content from an object of array of objects that should not be there.
+The [**input**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by the npm package [celebrate](https://www.npmjs.com/package/celebrate). Anything not declared in the request by the swagger file will simply result in a 422 error being passed back to the client and will not hit the domain layer.
 
-Both the input and output are provided the request and response object respectively from the api file. 
+The [**output**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L33) is protected by the npm package [object-reduce-by-map](https://www.npmjs.com/package/object-reduce-by-map) which strips out any content from an object or array, or array of objects that should not be there.
 
-This means that once in the domain layer you can be safe to think that there is no additional content in the request object than that specific in the request of the path object from the swagger file.
-Conversely as the output is reduced, should a domain accidentally return attributes it should they will never be passed back out to the client.
+Both the input and output are provided the request and response object, respectively, from the api file. 
+
+This means that once in the domain layer you can be safe to think that there is no additional content in the request object than that specified in the swagger file.
+
+Conversely as the output is reduced, should a domain accidentally return attributes it shouldn't they will never be passed back out to the client.
 
 #### Permission helper
 `src/http/nodegen/routes/___op.ts.njk` will look for the `x-permission` attribute within a path object eg:
