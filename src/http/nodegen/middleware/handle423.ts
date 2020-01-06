@@ -5,6 +5,7 @@ import express = require('express');
 
 /**
  * Required for if an unauthorised response should be thrown from a domain or controller
+ * Read: ../errors/423.ts
  * @returns {Function}
  */
 export default () => {

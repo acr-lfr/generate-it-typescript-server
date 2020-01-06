@@ -5,6 +5,7 @@ import express = require('express');
 
 /**
  * Required for if an too many request response should be thrown from a domain or controller
+ * Read: ../errors/429.ts
  * @returns {Function}
  */
 export default () => {
