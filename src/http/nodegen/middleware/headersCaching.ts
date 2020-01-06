@@ -1,6 +1,6 @@
 import express = require('express');
 
-import NodegenRequest from '../interfaces/NodegenRequest'
+import NodegenRequest from '../interfaces/NodegenRequest';
 import HttpHeadersCacheService from '@/services/HttpHeadersCacheService';
 
 /**

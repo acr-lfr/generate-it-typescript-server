@@ -1,6 +1,9 @@
 import express = require('express');
 import NodegenRequest from '../interfaces/NodegenRequest';
 
+/**
+ * Default 404 handler for the express app
+ */
 export default () => {
   return (req: NodegenRequest, res: express.Response) => {
     res.status(404);

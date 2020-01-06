@@ -1,7 +1,7 @@
-{% set interfaces = importInterfaces(operations) %}
-{% for interface in interfaces -%}
-  import { {{ interface }} } from '@/http/nodegen/interfaces/{{ interface }}';
-{%- endfor %}
+import { {% for interface in importInterfaces(operations) -%}{{ interface }},{%- endfor %} } from '@/http/nodegen/interfaces';
+import {JwtAccess} from '@/http/nodegen/interfaces/JwtAccess';
+import NodegenRequest from '@/http/nodegen/interfaces/NodegenRequest';
+
 {% if mockServer %}
 import {{ ucFirst(operation_name) }}DomainMock from './__mocks__/{{ ucFirst(operation_name) }}DomainMock'
 {% endif %}
