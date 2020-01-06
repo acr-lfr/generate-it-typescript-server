@@ -11,6 +11,15 @@
 ## API Spec file helpers
 These templates inject into the code helpful elements depending on the provided api file.
 
+#### Input/ouput filters
+The [input](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by npm the [celebrate](https://www.npmjs.com/package/celebrate) package. Anything not declared in the request by the swagger file will not pass through and result in a 422 error.
+The [output](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L33) is protected by the npm [objectReduceByMap](https://www.npmjs.com/package/object-reduce-by-map) package which strips out any content from an object of array of objects that should not be there.
+
+Both the input and output are provided the request and response object respectively from the api file. 
+
+This means that once in the domain layer you can be safe to think that there is no additional content in the request object than that specific in the request of the path object from the swagger file.
+Conversely as the output is reduced, should a domain accidentally return attributes it should they will never be passed back out to the client.
+
 #### Permission helper
 `src/http/nodegen/routes/___op.ts.njk` will look for the `x-permission` attribute within a path object eg:
 ```
