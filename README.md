@@ -35,7 +35,7 @@ The default `.nodegenrc` will contain:
 ```
 The stub helpers will mean the domain method types will be `JwtAccess` or `NodegenRequest` opposed to `any`.
 
-The `NodegenRequest` interface is [provided by these templates](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/interfaces/NodegenRequest.ts) out of the box so nothing extra required (a domain gets a full req object based on the [core feature](https://acrontum.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)).
+The `NodegenRequest` interface is [provided by these templates](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/interfaces/NodegenRequest.ts) out of the box so nothing extra required (a domain gets a full req object based on the [core feature](https://acrontum.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)). This interface extends the express request interface with the additional attributes added by this setup.
 
 The `JwtAccess` interface is not provided, it expects that you have in your api file a definition by this name. You can see an example in the core: [example JwtAccess interface](https://github.com/acrontum/openapi-nodegen/blob/develop/test_swagger.yml#L176). If you want to use a different interface name, change the value of "jwtType", if you don't want it at all, just delete it from your `.nodegenrc` file.
 
