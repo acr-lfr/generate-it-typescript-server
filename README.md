@@ -4,7 +4,16 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [{{swagger.info.title}}](#swaggerinfotitle)
+- [API Spec file helpers](#api-spec-file-helpers)
+    - [Input/ouput filters](#inputouput-filters)
+    - [Permission helper](#permission-helper)
+    - [NodegenRC Helpers](#nodegenrc-helpers)
+    - [Access validation service](#access-validation-service)
+    - [Caching](#caching)
+    - [Errors](#errors)
+- [Setup](#setup)
+    - [Tip 1 local api file pointer](#tip-1-local-api-file-pointer)
+    - [Tip 2 for older versions of openapi-nodegen](#tip-2-for-older-versions-of-openapi-nodegen)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
