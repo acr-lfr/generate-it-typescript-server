@@ -17,8 +17,27 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## API Spec file helpers
+## API Spec file helpers/features
 These templates inject into the code helpful elements depending on the provided api file.
+
+#### Access full request in domain
+Accessing the full request object is handled by the core feature: [pass-full-request-object-to-___stub-method](https://acrontum.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)
+
+#### Allow non authenticated request to access domain
+With some API designs there is the need to offer 1 API route which returns content for authenticated users and non-authenticated users. The content could be a newsfeed for example with authenticated users getting a extra attributes in the new objects returned compared to non-authenticated users.
+
+This can be acheived by marking a route with an additional attribute: `x-passThruWithoutJWT`
+
+This will pass the request through to the domain with or without a jwt, but it also allows the domain to check if a decoded token has been passed or not. Invalid tokens will result in an unauthenticated response from the route and not hit the domain. The output will also pass the JwtAccess to the domain with `| undefined` making it very clear within the domain that the decoded jwt may or may not be there:
+```typescript
+  public async weatherIdGet(
+    jwtData: JwtAccess | undefined,
+    path: WeatherIdGetPath
+  ): Promise<WeatherFull> {
+    // check jwtData and react accordingly
+  }
+```
+
 
 #### Input/ouput filters
 The [**input**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by the npm package [celebrate](https://www.npmjs.com/package/celebrate). Anything not declared in the request by the swagger file will simply result in a 422 error being passed back to the client and will not hit the domain layer.
