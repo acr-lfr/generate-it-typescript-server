@@ -4,7 +4,9 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [API Spec file helpers](#api-spec-file-helpers)
+- [API Spec file helpers/features](#api-spec-file-helpersfeatures)
+    - [Access full request in domain](#access-full-request-in-domain)
+    - [Allow non authenticated request to access domain](#allow-non-authenticated-request-to-access-domain)
     - [Input/ouput filters](#inputouput-filters)
     - [Permission helper](#permission-helper)
     - [NodegenRC Helpers](#nodegenrc-helpers)
