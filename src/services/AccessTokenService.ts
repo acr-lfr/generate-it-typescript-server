@@ -58,7 +58,7 @@ class AccessTokenService {
           break;
         } else {
           // This is a token but not JWT thus API key
-          apiKey = tokenParts[1];
+          apiKey = tokenRaw;
           break;
         }
       }
