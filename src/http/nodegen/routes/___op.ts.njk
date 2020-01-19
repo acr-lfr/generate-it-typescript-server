@@ -34,6 +34,10 @@ export default function() {
           {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
         )
       );
+      {% elseif not path.produces or path.produces and arrayContains('image/', path.produces)%}
+        return res.sendFile(
+          await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(path, false, true, 'params')}})
+        );
       {% else %}
         return res.download(
           await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(path, false, true, 'params')}})
