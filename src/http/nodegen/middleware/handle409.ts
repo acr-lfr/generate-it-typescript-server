@@ -5,7 +5,7 @@ import NodegenRequest from '../interfaces/NodegenRequest';
 
 /**
  * Required for if an unauthorised response should be thrown from a domain or controller
- * Read: ../errors/410.ts
+ * Read: ../errors/409.ts
  * @returns {Function}
  */
 export default () => {
