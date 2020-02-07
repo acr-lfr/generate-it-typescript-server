@@ -9,9 +9,9 @@ const http409 = customError('http409');
  // somewhere in your app, eg a domain throw it
  throw http409('request could not be completed due to a conflict with the current state of the resource');
 
- * Throwing this custom error will then be caught in the handle 410 middleware
+ * Throwing this custom error will then be caught in the handle 409 middleware
  * src/http/nodegen/middleware/handle409.ts
  *
- * The request will simply get in return a http 410 status code
+ * The request will simply get in return a http 409 status code
  */
 export default http409;
