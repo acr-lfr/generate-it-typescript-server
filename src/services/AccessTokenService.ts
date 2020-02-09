@@ -117,13 +117,17 @@ class AccessTokenService {
     });
   }
 
+  /**
+   * Verify a JWT and return its payload
+   * @param token
+   */
   public verifyJWT (token: string): Promise<any> {
     return new Promise((resolve, reject) => {
       jwt.verify(token, config.jwtSecret, (err: any, data: any) => {
         if (err) {
           return reject(err);
         }
-        return resolve(data);
+        return resolve(data.data);
       });
     });
   }
