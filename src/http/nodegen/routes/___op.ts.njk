@@ -13,15 +13,15 @@ import {{_.camelCase(operation_name)}}TransformOutputs from '../transformOutputs
 export default function() {
   const router = Router();
   {% for op in operations -%}
-    {% for key, path in op.path -%}
-      {% if isValidMethod(key)%}
+    {% for method, path in op.path -%}
+      {% if isValidMethod(method)%}
   /**
    * Operation ID: {{ path.operationId }}
    * {% if path.summary %}Summary: {{ path.summary }}{% endif %}
    * {% if path.description %}Description: {{ path.description }}{% endif %}
    */
   {% set securityNames = getSecurityNames(path, swagger) %}
-  router.{{key}}(
+  router.{{method}}(
     '{{op.subresource}}',
     {% if securityNames %}accessTokenMiddleware({{ securityNames }}  {% if path['x-passThruWithoutJWT'] %}, {passThruWithoutJWT: true}{% endif %}), /* Validate request security tokens */{% endif %}
     {% if path['x-permission'] %}permissionMiddleware('{{ path['x-permission'] }}'), /* Check permission of the incoming user */ {% endif %}
@@ -30,17 +30,17 @@ export default function() {
       {% if not path.produces or path.produces and arrayContains('application/json', path.produces) %}
       return res.json(
         objectReduceByMap(
-          await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(path, false, true, 'params')}}),
+          await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
           {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
         )
       );
       {% elseif not path.produces or path.produces and arrayContains('image/', path.produces)%}
         return res.sendFile(
-          await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(path, false, true, 'params')}})
+          await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(metod, path, false, true, 'params')}})
         );
       {% else %}
         return res.download(
-          await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(path, false, true, 'params')}})
+          await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}})
         );
       {% endif %}
     }
