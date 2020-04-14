@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 import config from '../config';
-import NodegenRequest from '@/http/nodegen/interfaces/NodegenRequest';
+import NodegenRequest from '@/http/interfaces/NodegenRequest';
 import express = require('express');
 
 interface JwtDetails {

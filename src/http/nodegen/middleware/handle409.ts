@@ -1,7 +1,7 @@
 import http409 from '../errors/409';
 import express = require('express');
 
-import NodegenRequest from '../interfaces/NodegenRequest';
+import NodegenRequest from '../../interfaces/NodegenRequest';
 
 /**
  * Required for if an unauthorised response should be thrown from a domain or controller
