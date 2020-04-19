@@ -1,13 +1,12 @@
 import express from 'express'
 import Router from 'express-promise-router'
 import objectReduceByMap from 'object-reduce-by-map'
-import NodegenRequest from '../../interfaces/NodegenRequest'
-import WorkerService from '../../../services/WorkerService'
 
 {% if operationsPathsHasParamsToValidate(operations) %}import {celebrate} from 'celebrate'{% endif %}
-import apiCaching from '../middleware/apiCaching'
-import accessTokenMiddleware from '../middleware/accessTokenMiddleware'
-import permissionMiddleware from '../middleware/permissionMiddleware'
+{% if pathMethodsHaveAttr(operations, 'security') %}import accessTokenMiddleware from '../middleware/accessTokenMiddleware'{% endif %}
+{% if pathMethodsHaveAttr(operations, 'x-cache') %}import apiCaching from '../middleware/apiCaching'{% endif %}
+{% if pathMethodsHaveAttr(operations, 'x-permission') %}import permissionMiddleware from '../middleware/permissionMiddleware'{% endif %}
+{% if pathMethodsHaveAttr(operations, 'x-worker') %}import WorkerService from '../../../services/WorkerService'{% endif %}
 import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
 import {{ucFirst(operation_name)}}Domain from '../../../domains/{{ucFirst(operation_name)}}Domain'
 import {{_.camelCase(operation_name)}}TransformOutputs from '../transformOutputs/{{operation_name}}TransformOutput'
