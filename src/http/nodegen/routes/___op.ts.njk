@@ -1,12 +1,12 @@
 import express from 'express'
 import Router from 'express-promise-router'
 import objectReduceByMap from 'object-reduce-by-map'
-import NodegenRequest from '../../interfaces/NodegenRequest'
 
 {% if operationsPathsHasParamsToValidate(operations) %}import {celebrate} from 'celebrate'{% endif %}
-import apiCaching from '../middleware/apiCaching'
-import accessTokenMiddleware from '../middleware/accessTokenMiddleware'
-import permissionMiddleware from '../middleware/permissionMiddleware'
+{% if pathMethodsHaveAttr(operations, 'security') %}import accessTokenMiddleware from '../middleware/accessTokenMiddleware'{% endif %}
+{% if pathMethodsHaveAttr(operations, 'x-cache') %}import apiCaching from '../middleware/apiCaching'{% endif %}
+{% if pathMethodsHaveAttr(operations, 'x-permission') %}import permissionMiddleware from '../middleware/permissionMiddleware'{% endif %}
+{% if pathMethodsHaveAttr(operations, 'x-worker') %}import WorkerService from '../../../services/WorkerService'{% endif %}
 import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
 import {{ucFirst(operation_name)}}Domain from '../../../domains/{{ucFirst(operation_name)}}Domain'
 import {{_.camelCase(operation_name)}}TransformOutputs from '../transformOutputs/{{operation_name}}TransformOutput'
@@ -30,12 +30,26 @@ export default function() {
         {% if path['x-cache'] %}apiCaching({{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}), /* Lastly, if x-cache is found, call the api cache middleware */ {% endif %}
         async (req: any, res: express.Response) => {
           {% if not path.produces or path.produces and arrayContains('application/json', path.produces) %}
-          return res.json(
-            objectReduceByMap(
-              await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
-              {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
-            )
-          );
+            {% if path['x-worker'] %}
+              return res.json(
+                objectReduceByMap(
+                  await WorkerService.handleRequestWithWorker(
+                    req,
+                    '{{ucFirst(operation_name)}}Domain',
+                    '{{path.operationId}}',
+                    [{{pathParamsToDomainParams(method, path, false, true, 'params')}}]
+                  ),
+                  {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
+                )
+              );
+            {% else %}
+              return res.json(
+                objectReduceByMap(
+                  await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
+                  {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
+                )
+              );
+            {% endif %}
           {% elseif not path.produces or path.produces and arrayContains('image/', path.produces)%}
             return res.sendFile(
               await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(metod, path, false, true, 'params')}})
