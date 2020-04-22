@@ -19,7 +19,7 @@ export default function() {
   /**
    * Operation ID: {{ path.operationId }}
    * {% if path.summary %}Summary: {{ path.summary }}{% endif %}
-   * {% if path.description %}Description: {{ path.description }}{% endif %}
+   * {% if path.description %}Description: {{ path.description | trim }}{% endif %}
    */
       {% set securityNames = getSecurityNames(path, swagger) %}
       router.{{method}}(
