@@ -31,7 +31,11 @@ export default function() {
         async (req: any, res: express.Response) => {
           {% if not path.produces or path.produces and arrayContains('application/json', path.produces) %}
             {% if path['x-worker'] %}
+                {% if getSingleSuccessResponse(path.responses) %}
+              return res.status({{ getSingleSuccessResponse(path.responses) }}).json(
+                {% else %}
               return res.json(
+                {% endif %}
                 objectReduceByMap(
                   await WorkerService.handleRequestWithWorker(
                     req,
