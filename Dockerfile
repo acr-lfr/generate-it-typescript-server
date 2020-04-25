@@ -1,4 +1,4 @@
-FROM node:10-alpine as environment
+FROM node:12-alpine as environment
 
 # @TODO: Build node_modules into the build
 COPY ./package.json ./package-lock.json /code/
