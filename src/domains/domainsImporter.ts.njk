@@ -5,5 +5,4 @@ import {{ucFirst(prettifyRouteName(endpoint))}}Domain from './{{ucFirst(prettify
 export {
   {% for endpoint in endpoints -%}
   {{ucFirst(prettifyRouteName(endpoint))}}Domain,
-  {% endfor %}
-};
+  {% endfor %}};
