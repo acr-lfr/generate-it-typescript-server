@@ -43,7 +43,11 @@ export default function() {
                 )
               );
             {% else %}
-              return res.json(
+              {% if getSingleSuccessResponse(path.responses) %}
+                return res.status({{ getSingleSuccessResponse(path.responses) }}).json(
+              {% else %}
+                return res.json(
+              {% endif %}
                 objectReduceByMap(
                   await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
                   {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
