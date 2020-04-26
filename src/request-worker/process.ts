@@ -4,7 +4,7 @@ import { WorkerData } from './worker-data';
 
 const pool = new StaticPool({
   size: config.requestWorker.threadsPerProcess,
-  task: `${process.cwd()}/build/src/request-worker/thread.js`
+  task: `${process.cwd()}/build/src/request-worker/thread.js`,
 });
 
 console.log('[request worker] process ready');
@@ -13,12 +13,12 @@ module.exports = async ({ domainName, domainFunction, domainFunctionArgs }: Work
   const { error, response } = await pool.exec({
     domainName,
     domainFunction,
-    domainFunctionArgs
+    domainFunctionArgs,
   }, config.requestWorker.timeoutMs);
 
   if (error) {
     return callback(error);
   }
 
-  callback(null, response);
+  callback(undefined, response);
 };
