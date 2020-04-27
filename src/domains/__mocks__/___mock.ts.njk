@@ -1,4 +1,4 @@
-import { mockItGenerator } from 'openapi-nodegen-mockers'
+import { mockItGenerator } from 'generate-it-mockers'
 {% set interfaces = importInterfaces(operations) %}
 {% for interface in interfaces -%}
 import { {{ interface }} } from '@/http/nodegen/interfaces/{{ interface }}';
