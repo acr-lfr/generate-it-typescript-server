@@ -2,6 +2,7 @@ import express from 'express';
 import handle401 from './nodegen/middleware/handle401';
 import handle403 from './nodegen/middleware/handle403';
 import handle410 from './nodegen/middleware/handle410';
+import handle422 from './nodegen/middleware/handle422';
 import handle423 from './nodegen/middleware/handle423';
 import handle429 from './nodegen/middleware/handle429';
 import handle500 from './nodegen/middleware/handle500';
@@ -19,6 +20,7 @@ export default (app: express.Application) => {
   app.use(handle401());
   app.use(handle403());
   app.use(handle410());
+  app.use(handle422());
   app.use(handle423());
   app.use(handle429());
 
