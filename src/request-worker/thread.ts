@@ -1,6 +1,6 @@
 import { parentPort } from 'worker_threads';
 import 'openapi-nodegen-logger';
-import * as Domains from '@/domains/domainsImporter';
+import * as Domains from '@/http/nodegen/domainsImporter';
 import { WorkerData } from './worker-data';
 // Check the config default config to ensure you have the
 // worker attibutes: https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/config.ts
