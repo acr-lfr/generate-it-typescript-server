@@ -11,9 +11,9 @@ import NodegenRequest from '../../interfaces/NodegenRequest';
 export default () => {
   return (err: any, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
     if (err instanceof http422) {
-      res.status(422).send()
+      res.status(422).json({ message: err.message || 'Unprocessable' });
     } else {
-      next(err)
+      next(err);
     }
   }
 }
