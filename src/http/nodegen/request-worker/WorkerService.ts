@@ -3,7 +3,7 @@ import { pick } from 'lodash';
 import workerFarm from 'worker-farm';
 import config from '@/config';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
-import { WorkerData } from '@/request-worker/worker-data';
+import { WorkerData } from './worker-data';
 
 const REQUEST_SERIALIZED_KEYS: string[] = [
   'jwtData',
@@ -29,7 +29,7 @@ const execWorker = workerFarm(
     maxConcurrentCallsPerWorker: config.requestWorker.threadsPerProcess,
     autoStart: true,
   },
-  `${process.cwd()}/build/src/request-worker/process.js`,
+  `${process.cwd()}/build/src/http/nodegen/request-worker/process.js`,
 );
 
 class WorkerService {
