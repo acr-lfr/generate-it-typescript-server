@@ -1,4 +1,5 @@
 import { mockItGenerator } from 'generate-it-mockers'
+{% if pathMethodsHaveAttr(operations, 'security', 'jwtToken') %}import {JwtAccess} from '@/http/nodegen/interfaces/JwtAccess';{% endif %}
 {% set interfaces = importInterfaces(operations) %}
 {% for interface in interfaces -%}
 import { {{ interface }} } from '@/http/nodegen/interfaces/{{ interface }}';
