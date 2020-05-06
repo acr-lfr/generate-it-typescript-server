@@ -1,5 +1,6 @@
 import { parentPort } from 'worker_threads';
 import 'openapi-nodegen-logger';
+import requestWorkerThreadLoader from '@/utils/requestWorkerThreadLoader';
 import * as Domains from './domainsImporter';
 import { WorkerData } from './worker-data';
 // Check the config default config to ensure you have the
@@ -8,6 +9,7 @@ import { WorkerData } from './worker-data';
 // "node-worker-threads-pool": "^1.2.2",
 // "worker-farm": "^1.7.0",
 (async () => {
+  await requestWorkerThreadLoader()
   console.warn(`[request worker] thread ready`);
   parentPort.on('message', async (data: WorkerData) => {
     const { domainName, domainFunction, domainFunctionArgs } = data;
