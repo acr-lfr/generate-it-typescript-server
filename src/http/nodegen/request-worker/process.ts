@@ -1,6 +1,6 @@
 import { Worker } from 'worker_threads';
 import config from '@/config';
-import { WorkerData, WorkerMessage, WorkerResult } from './types';
+import { WorkerData, WorkerMessage } from './types';
 import uuidv4 from 'uuid/v4';
 
 // Check the config default config to ensure you have the
@@ -37,7 +37,7 @@ const initStaticPool = () => {
       const worker = workers[currentWorkerIndex];
       const currentCallId = uuidv4();
 
-      const handleMessage = ({ callId, error, response }: WorkerResult) => {
+      const handleMessage = ({ callId, error, response }) => {
         if (callId !== currentCallId) {
           return worker.once('message', handleMessage);
         }

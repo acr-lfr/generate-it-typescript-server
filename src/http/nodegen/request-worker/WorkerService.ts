@@ -3,7 +3,7 @@ import { pick } from 'lodash';
 import workerFarm from 'worker-farm';
 import config from '@/config';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
-import { WorkerData } from './worker-data';
+import { WorkerData } from './types';
 
 const REQUEST_SERIALIZED_KEYS: string[] = [
   'jwtData',
