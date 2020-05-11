@@ -9,7 +9,7 @@ export default () => {
     res.status(404);
 
     // respond with json
-    if (req.accepts('json')) {
+    if (`${req.headers.accept || ''}`.match('json')) {
       return res.send({error: 'Not found'});
     }
     // default to plain-text. send()
