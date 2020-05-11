@@ -27,6 +27,7 @@ const execWorker = workerFarm(
   {
     maxConcurrentWorkers: config.requestWorker.processes,
     maxConcurrentCallsPerWorker: config.requestWorker.threadsPerProcess,
+    maxRetries: 1,
     autoStart: true,
   },
   `${process.cwd()}/build/src/http/nodegen/request-worker/process.js`,
@@ -54,7 +55,7 @@ class WorkerService {
         }),
       };
 
-      execWorker(workerData, (error: any, response: any) => {
+      execWorker(workerData, (error?: any, response?: any) => {
         if (error) {
           return reject(Error(error));
         }
