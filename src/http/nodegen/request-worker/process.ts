@@ -37,7 +37,7 @@ const initStaticPool = () => {
       const worker = workers[currentWorkerIndex];
       const currentCallId = uuidv4();
 
-      const handleMessage = ({ callId, error, response }) => {
+      const handleMessage = ({ callId, error, response }: any) => {
         if (callId !== currentCallId) {
           return worker.once('message', handleMessage);
         }
