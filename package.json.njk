@@ -3,9 +3,9 @@
   "description": "{{ inline( swagger.info.description) }}",
   "version": "{{ swagger.info.version }}",
   "scripts": {
+    "preinstall": "git config core.hooksPath githooks && cp -n .env.example .env",
     "build": "ttsc -p .",
     "dev:build-watch": "ttsc --watch -p .",
-    "dev:setup": "npm i && cp -n ./githooks/* .git/hooks && cp -n .env.example .env",
     "dev:start-watch": "nodemon ./build/server.js",
     "npm-update-git-deps": "npm-update-git-deps",
     "lint": "tslint --project tsconfig.json",
