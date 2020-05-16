@@ -9,7 +9,6 @@ import {{prettifyRouteName(endpoint)}}Routes from './routes/{{prettifyRouteName(
 import {{prettifyRouteName(endpoint)}}Routes from './routes/{{prettifyRouteName(endpoint)}}Routes'
 {% endif -%}
 {% endfor -%}
-import swaggerRoutes from './routes/swaggerRoutes'
 
 export default function (app: express.Application) {
   {% for endpoint in endpoints -%}
@@ -22,9 +21,9 @@ export default function (app: express.Application) {
 
   if (config.env === 'develop') {
     {% if(endsWith(swagger.basePath, '/')) %}
-    app.use('{{ swagger.basePath }}swagger', swaggerRoutes())
+    app.use('{{ swagger.basePath }}swagger', require('./routes/swaggerRoutes').default())
     {% else %}
-    app.use('{{ swagger.basePath }}/swagger', swaggerRoutes())
+    app.use('{{ swagger.basePath }}/swagger', require('./routes/swaggerRoutes').default())
     {% endif %}
   }
 }
