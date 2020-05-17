@@ -9,7 +9,11 @@ dotenv.config();
  */
 export default {
   // Swagger file
-  swaggerFile: ConfigHelper.withDefault('SWAGGER_FILE', 'latest'),
+  loadSwaggerUIRoute: ConfigHelper.withDefault('LOAD_SWAGGER_UI_ROUTE', false),
+  swaggerBasicAuth: [{
+    basicAuthUname: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_UNAME', 'user')),
+    basicAuthPword: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_PWORD', 'password')),
+  }],
 
   // Instance
   env: ConfigHelper.withDefault('ENVIRONMENT', 'production'),
@@ -19,11 +23,7 @@ export default {
   corsWhiteList: ConfigHelper.withDefault('CORS_WHITELIST', '*'),
 
   // Authentication
-  basicAuthUname: ConfigHelper.withDefault('BASIC_AUTH_UNAME', 'user'),
-  basicAuthPword: ConfigHelper.withDefault('BASIC_AUTH_PWORD', 'pw'),
   jwtSecret: ConfigHelper.required('JWT_SECRET'),
-
-  // Api key
   apiKey: ConfigHelper.withDefault('API_KEY', false),
 
   // Request worker config - allThreadsCount = processes * threadsPerProcess

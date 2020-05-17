@@ -1,22 +1,37 @@
 import { Router } from 'express';
+import expressAuthMiddle from 'express-auth-middle';
+import { ValidateSwitchType } from 'express-auth-middle/build/enums/ValidateSwitchType';
 import swaggerUi from 'swagger-ui-express';
-import YAML from 'yamljs';
 import path from 'path';
-import config from '../../../config';
-const expressAuthMiddle = require('express-auth-middle');
+import YAML from 'yamljs';
+import config from '@/config';
 
 export default () => {
   const router = Router({});
 
   let doc = YAML.load(path.resolve('openapi-nodegen-api-file.yml'));
   // Middleware for basicauth and xauth
+  const credentials = config.swaggerBasicAuth ? {
+    basicAuthArray: config.swaggerBasicAuth
+  } : {
+    // This block is a simple fall back for the older typescript server templates.
+    // If you are here wondering.. your config object should contain:
+    /**
+     *  // Swagger file
+     *  loadSwaggerUIRoute: ConfigHelper.withDefault('LOAD_SWAGGER_UI_ROUTE', false),
+     *  swaggerBasicAuth: [{
+     *    basicAuthUname: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_UNAME', 'user')),
+     *    basicAuthPword: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_PWORD', 'pw')),
+     *  }],
+     */
+    basicAuthUname: 'user',
+    basicAuthPword: 'pw'
+  };
+
   router.use(
     expressAuthMiddle({
-      methods: ['basic-auth'],
-      credentials: {
-        basicAuthUname: config.basicAuthUname,
-        basicAuthPword: config.basicAuthPword,
-      },
+      methods: [ValidateSwitchType['basic-auth']],
+      credentials,
       challenge: 'Protected area',
     }),
   );
