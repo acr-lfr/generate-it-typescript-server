@@ -1,7 +1,7 @@
 import { Worker } from 'worker_threads';
 import config from '@/config';
 import { WorkerData, WorkerMessage } from './types';
-import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 // Check the config default config to ensure you have the
 // worker attibutes: https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/config.ts
