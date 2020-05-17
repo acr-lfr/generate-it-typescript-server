@@ -3,8 +3,8 @@
   "description": "{{ inline( swagger.info.description) }}",
   "version": "{{ swagger.info.version }}",
   "scripts": {
-    "preinstall": "git config core.hooksPath githooks && cp -n .env.example .env",
     "build": "ttsc -p .",
+    "dev:setup": "git config core.hooksPath githooks && cp -n .env.example .env",
     "dev:build-watch": "ttsc --watch -p .",
     "dev:start-watch": "nodemon ./build/server.js",
     "npm-update-git-deps": "npm-update-git-deps",
@@ -41,6 +41,7 @@
     "tslib": "^2.0.0",
     "winston": "^3.2.1",
     "worker-farm": "^1.7.0",
+    "uuid": "^8.0.0",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
@@ -56,13 +57,12 @@
     "@types/morgan": "^1.9.0",
     "@types/node": "14.0.1",
     "@types/swagger-ui-express": "^4.1.2",
-    "@types/uuid": "^3.4.5",
+    "@types/uuid": "^7.0.3",
     "@types/yamljs": "^0.2.31",
     "@zerollup/ts-transform-paths": "^1.7.17",
     "jest": "^26.0.1",
     "generate-it-mockers": "^1.0.2",
     "nodemon": "^2.0.4",
-    "npm-update-git-deps": "^1.2.5",
     "swagger-ui-express": "^4.1.4",
     "ts-jest": "^26.0.0",
     "ts-node": "^8.10.1",
