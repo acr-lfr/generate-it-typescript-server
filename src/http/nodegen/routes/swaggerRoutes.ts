@@ -38,7 +38,11 @@ export default () => {
 
   router.use('/', (req: any, res: any, next: any) => {
     if (doc.swagger) {
-      doc.host = req.get('host');
+      doc.host = req.headers['x-forwarded-host'] || req.headers['host'] || doc.host;
+      const basePath = process.env.API_BASE_PATH || doc.basePath || undefined;
+      if (basePath) {
+        doc.basePath = basePath;
+      }
     }
     req.swaggerDoc = doc;
     return next();
