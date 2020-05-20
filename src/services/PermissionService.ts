@@ -18,4 +18,4 @@ class PermissionService {
     next();
   }
 }
-export default new PermissionService()
+export default new PermissionService();

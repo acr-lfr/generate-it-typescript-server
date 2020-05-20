@@ -10,7 +10,7 @@ interface JwtDetails {
 }
 
 export interface ValidateRequestOptions {
-  passThruWithoutJWT: boolean
+  passThruWithoutJWT: boolean;
 }
 
 class AccessTokenService {
@@ -48,10 +48,10 @@ class AccessTokenService {
     let jwtToken: string;
     let apiKey: string;
     for (let i = 0; i < headerNames.length; ++i) {
-      let tokenRaw = String(req.headers[headerNames[i].toLowerCase()] || req.headers[headerNames[i]] || '');
+      const tokenRaw = String(req.headers[headerNames[i].toLowerCase()] || req.headers[headerNames[i]] || '');
       if (tokenRaw.length > 0) {
         // Assuming this API will be used more frequently by humans with JWT tokens check for JWT 1st.
-        let tokenParts = tokenRaw.split('Bearer ');
+        const tokenParts = tokenRaw.split('Bearer ');
         if (tokenParts.length > 0) {
           // this is a JWT token
           jwtToken = tokenParts[1];
@@ -66,7 +66,7 @@ class AccessTokenService {
 
     if (!jwtToken && !apiKey) {
       if (options && options.passThruWithoutJWT) {
-        return next()
+        return next();
       }
       return this.denyRequest(
         res,
