@@ -23,7 +23,7 @@ export default {
   corsWhiteList: ConfigHelper.withDefault('CORS_WHITELIST', '*'),
 
   // Authentication
-  jwtSecret: ConfigHelper.required('JWT_SECRET'),
+  jwtAccessSecret: ConfigHelper.required('JWT_ACCESS_SECRET'),
   apiKey: ConfigHelper.withDefault('API_KEY', false),
 
   // Request worker config - allThreadsCount = processes * threadsPerProcess
