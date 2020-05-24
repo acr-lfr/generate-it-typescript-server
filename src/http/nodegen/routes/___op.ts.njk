@@ -47,16 +47,18 @@ export default function() {
                 )
               );
             {% else %}
-              {% if getSingleSuccessResponse(path.responses) %}
-                return res.status({{ getSingleSuccessResponse(path.responses) }}).json(
+              {% set successCode = getSingleSuccessResponse(path.responses) -%}
+              {% if successCode and path.responses[successCode].schema -%}
+                return res.status({{ successCode }}).json(
+                  objectReduceByMap(
+                    await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
+                      {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
+                  )
+                );
               {% else %}
-                return res.json(
+                await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}})
+                return res.sendStatus(200)
               {% endif %}
-                objectReduceByMap(
-                  await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
-                  {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
-                )
-              );
             {% endif %}
           {% elseif not path.produces or path.produces and arrayContains('image/', path.produces)%}
             return res.sendFile(
