@@ -47,8 +47,8 @@ export default function() {
                 )
               );
             {% else %}
-              {% set successCode = getSingleSuccessResponse(path.responses) -%}
-              {% if successCode and path.responses[successCode].schema -%}
+              {% set successCode = getSingleSuccessResponse(path.responses) or 200 -%}
+              {% if path.responses[successCode].schema -%}
                 return res.status({{ successCode }}).json(
                   objectReduceByMap(
                     await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
@@ -57,7 +57,7 @@ export default function() {
                 );
               {% else %}
                 await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}})
-                return res.sendStatus(200)
+                return res.sendStatus({{ successCode }});
               {% endif %}
             {% endif %}
           {% elseif not path.produces or path.produces and arrayContains('image/', path.produces)%}
