@@ -111,7 +111,7 @@ class AccessTokenService {
     }, {});
     return jwt.sign({
       data: details.sessionData,
-    }, config.jwtSecret, {
+    }, config.jwtAccessSecret, {
       algorithm: 'HS256',
       expiresIn: details.maxAge,
     });
@@ -123,7 +123,7 @@ class AccessTokenService {
    */
   public verifyJWT (token: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      jwt.verify(token, config.jwtSecret, (err: any, data: any) => {
+      jwt.verify(token, config.jwtAccessSecret, (err: any, data: any) => {
         if (err) {
           return reject(err);
         }
