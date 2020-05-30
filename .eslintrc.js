@@ -28,6 +28,6 @@ module.exports = {
     ],
     'quotes': ['error', 'single', { avoidEscape: true }],
     'curly': ['error', 'all'],
-    'max-lines-per-function': ['error', 30],
+    'max-lines-per-function': ['error', 40],
   },
 };
