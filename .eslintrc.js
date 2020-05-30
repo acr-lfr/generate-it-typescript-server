@@ -26,6 +26,8 @@ module.exports = {
       'error',
       { vars: 'all', args: 'none', ignoreRestSiblings: false },
     ],
-    quotes: ['error', 'single', { avoidEscape: true }],
+    'quotes': ['error', 'single', { avoidEscape: true }],
+    'curly': ['error', 'all'],
+    'max-lines-per-function': ['error', 30],
   },
 };
