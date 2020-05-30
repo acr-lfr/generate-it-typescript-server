@@ -14,7 +14,7 @@ import handleValidationErrors from './nodegen/middleware/handleValidationErrors'
  * Injects routes into the passed express app
  * @param app
  */
-export default (app: express.Application) => {
+export default (app: express.Application): void => {
   app.use(handleExpress404());
   app.use(handleDomain404());
   app.use(handle401());
