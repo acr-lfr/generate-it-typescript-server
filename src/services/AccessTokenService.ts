@@ -3,6 +3,7 @@ import _ from 'lodash';
 import config from '../config';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
 import express = require('express');
+import { IncomingHttpHeaders } from 'http';
 
 interface JwtDetails {
   maxAge: number;
@@ -23,15 +24,42 @@ class AccessTokenService {
    */
   private denyRequest (
     res: express.Response,
-    e: any = 'AccessTokenService did not match the given keys or tokens',
-    msg: string = 'Invalid auth token provided',
-    headersProvidedString: string = '',
-  ) {
+    e = 'AccessTokenService did not match the given keys or tokens',
+    msg = 'Invalid auth token provided',
+    headersProvidedString = '',
+  ): void {
     console.error(e);
     res.status(401).json({
       message: msg,
       token: headersProvidedString,
     });
+  }
+
+  /**
+   * Simple function that assumes a prefix or bearer is a jwt else it is a simple api key
+   * @param headers
+   * @param headerNames
+   */
+  public extractAuthHeader (headers: IncomingHttpHeaders, headerNames: string[]): { jwtToken: string, apiKey: string } {
+    let jwtToken: string;
+    let apiKey: string;
+    for (let i = 0; i < headerNames.length; ++i) {
+      const tokenRaw = String(headers[headerNames[i].toLowerCase()] || headers[headerNames[i]] || '');
+      if (tokenRaw.length > 0) {
+        const tokenParts = tokenRaw.split('Bearer ');
+        if (tokenRaw.substring(0, 7) === 'Bearer ') {
+          jwtToken = tokenParts[1];
+          break;
+        } else {
+          // This is a token but not JWT thus API key
+          apiKey = tokenRaw;
+        }
+      }
+    }
+    return {
+      jwtToken,
+      apiKey
+    };
   }
 
   /**
@@ -44,26 +72,8 @@ class AccessTokenService {
    * @param headerNames
    * @param options
    */
-  public validateRequest (req: NodegenRequest, res: express.Response, next: express.NextFunction, headerNames: string[], options?: ValidateRequestOptions) {
-    let jwtToken: string;
-    let apiKey: string;
-    for (let i = 0; i < headerNames.length; ++i) {
-      const tokenRaw = String(req.headers[headerNames[i].toLowerCase()] || req.headers[headerNames[i]] || '');
-      if (tokenRaw.length > 0) {
-        // Assuming this API will be used more frequently by humans with JWT tokens check for JWT 1st.
-        const tokenParts = tokenRaw.split('Bearer ');
-        if (tokenParts.length > 0) {
-          // this is a JWT token
-          jwtToken = tokenParts[1];
-          break;
-        } else {
-          // This is a token but not JWT thus API key
-          apiKey = tokenRaw;
-          break;
-        }
-      }
-    }
-
+  public validateRequest (req: NodegenRequest, res: express.Response, next: express.NextFunction, headerNames: string[], options?: ValidateRequestOptions): void {
+    const { jwtToken, apiKey } = this.extractAuthHeader(req.headers, headerNames);
     if (!jwtToken && !apiKey) {
       if (options && options.passThruWithoutJWT) {
         return next();
