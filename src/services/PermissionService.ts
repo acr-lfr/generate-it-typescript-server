@@ -1,6 +1,6 @@
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
 import express = require('express');
-import http401 from '@/http/nodegen/errors/401';
+// import http401 from '@/http/nodegen/errors/401';
 
 class PermissionService {
   middleware (req: NodegenRequest, res: express.Response, next: express.NextFunction, permission: string) {

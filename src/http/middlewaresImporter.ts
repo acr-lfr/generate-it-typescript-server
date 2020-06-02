@@ -1,25 +1,27 @@
 import bodyParser from 'body-parser';
 import express from 'express';
+import expressFormData from 'express-form-data';
 import morgan from 'morgan';
 import packageJson from '../../package.json';
-import queryArrayParserMiddleware from './nodegen/middleware/queryArrayParserMiddleware';
+import requestIp from 'request-ip';
 import corsMiddleware from './nodegen/middleware/corsMiddleware';
 import headersCaching from './nodegen/middleware/headersCaching';
-const expressFormData = require('express-form-data');
-const requestIp = require('request-ip');
+import queryArrayParserMiddleware from './nodegen/middleware/queryArrayParserMiddleware';
 
-const responseHeaders = (app: express.Application) => {
+const responseHeaders = (app: express.Application): void => {
   app.use(corsMiddleware());
   app.use(headersCaching());
 };
 
-const requestParser = (app: express.Application) => {
+const requestParser = (app: express.Application): void => {
   // parse data with connect-multiparty
-  app.use(expressFormData.parse({
-    autoClean: true,
-    autoFiles: true,
-    uploadDir: require('os').tmpdir(),
-  }));
+  app.use(
+    expressFormData.parse({
+      autoClean: true,
+      autoFiles: true,
+      uploadDir: require('os').tmpdir(),
+    }),
+  );
   app.use(bodyParser.json({ limit: '50mb' }));
 
   // parse query params
@@ -38,18 +40,20 @@ const requestParser = (app: express.Application) => {
   app.use(requestIp.mw());
 };
 
-const accessLogger = (app: express.Application) => {
+const accessLogger = (app: express.Application): void => {
   // Log all requests
-  /* tslint:disable */
-  app.use(morgan(`[${packageJson.name}] :remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]`));
-  /* tslint:enable */
+  app.use(
+    morgan(
+      `[${packageJson.name}] :remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]`,
+    ),
+  );
 };
 
 /**
  * Injects routes into the passed express app
  * @param app
  */
-export default (app: express.Application) => {
+export default (app: express.Application): void => {
   accessLogger(app);
   requestParser(app);
   responseHeaders(app);
