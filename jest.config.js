@@ -4,7 +4,7 @@ module.exports = {
     'jsx',
     'json',
     'ts',
-    'tsx'
+    'tsx',
   ],
   collectCoverage: true,
   collectCoverageFrom: [
@@ -13,31 +13,26 @@ module.exports = {
     'src/utils/*.{js,ts}',
   ],
   coverageDirectory: 'coverage',
-
   transform: {
-    '^.+\\.tsx?$': 'ts-jest'
+    '^.+\\.tsx?$': 'ts-jest',
   },
   transformIgnorePatterns: [
     '/node_modules/',
-    '/build/'
+    '/build/',
+    '/dist/',
   ],
-
-  testMatch: [
-    '**/__tests__/*.spec.ts',
-  ],
-
+  testMatch: ['**/*.spec.ts'],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/build/',
+    '/dist/',
   ],
-
   testEnvironment: 'node',
-
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1'
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
-
-  setupFilesAfterEnv: ['./jest.setup.js'],
-
-  testURL: 'http://localhost/'
-}
+  setupFilesAfterEnv: [
+    './jest.setup.js',
+  ],
+  testURL: 'http://localhost/',
+};
