@@ -7,6 +7,7 @@ import requestIp from 'request-ip';
 import corsMiddleware from './nodegen/middleware/corsMiddleware';
 import headersCaching from './nodegen/middleware/headersCaching';
 import queryArrayParserMiddleware from './nodegen/middleware/queryArrayParserMiddleware';
+import { tmpdir } from 'os';
 
 const responseHeaders = (app: express.Application): void => {
   app.use(corsMiddleware());
@@ -19,7 +20,7 @@ const requestParser = (app: express.Application): void => {
     expressFormData.parse({
       autoClean: true,
       autoFiles: true,
-      uploadDir: require('os').tmpdir(),
+      uploadDir: tmpdir(),
     }),
   );
   app.use(bodyParser.json({ limit: '50mb' }));
