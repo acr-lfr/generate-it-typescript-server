@@ -4,12 +4,14 @@ FROM node:12-alpine as environment
 COPY ./package.json ./package-lock.json /code/
 WORKDIR /code
 
+RUN npm ci
+
 # -----------------------------------------------------
 FROM environment as build
 
 COPY . /code
 
-RUN npm ci && npm run build
+RUN npm run build
 
 # -----------------------------------------------------
 FROM environment as runtime
