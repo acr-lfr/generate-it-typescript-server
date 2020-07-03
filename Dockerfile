@@ -4,7 +4,7 @@ FROM node:12-alpine as environment
 COPY ./package.json ./package-lock.json /code/
 WORKDIR /code
 
-RUN npm install
+RUN npm ci
 
 # -----------------------------------------------------
 FROM environment as build
@@ -21,4 +21,4 @@ COPY ./docker-entrypoint.sh /sbin/
 RUN chmod 755 /sbin/docker-entrypoint.sh
 
 ENTRYPOINT [ "/sbin/docker-entrypoint.sh" ]
-CMD "prod"
+CMD ["prod"]
