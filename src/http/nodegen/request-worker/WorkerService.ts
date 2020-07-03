@@ -33,7 +33,7 @@ const REQUEST_SERIALIZED_KEYS: string[] = [
   'body',
 ];
 
-const HTTP_ERROR_CONSTRUCTORS = {
+const HTTP_ERROR_CONSTRUCTORS: { [key: string]: typeof Error } = {
   http401,
   http403,
   http404,
