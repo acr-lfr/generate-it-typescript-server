@@ -1,9 +1,23 @@
 import { IncomingMessage } from 'http';
+import { WorkerData } from './types';
 import { pick } from 'lodash';
 import workerFarm from 'worker-farm';
 import config from '@/config';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
-import { WorkerData } from './types';
+import http401 from '@/http/nodegen/errors/401';
+import http403 from '@/http/nodegen/errors/403';
+import http404 from '@/http/nodegen/errors/404';
+import http409 from '@/http/nodegen/errors/409';
+import http410 from '@/http/nodegen/errors/410';
+import http422 from '@/http/nodegen/errors/422';
+import http423 from '@/http/nodegen/errors/423';
+import http429 from '@/http/nodegen/errors/429';
+
+interface SerializedError {
+  message?: string,
+  stack?: string,
+  name?: string
+}
 
 const REQUEST_SERIALIZED_KEYS: string[] = [
   'jwtData',
@@ -18,10 +32,21 @@ const REQUEST_SERIALIZED_KEYS: string[] = [
   'params',
   'body',
 ];
+
+const HTTP_ERROR_CONSTRUCTORS = {
+  http401,
+  http403,
+  http404,
+  http409,
+  http410,
+  http422,
+  http423,
+  http429
+};
+
 // Check the config default config to ensure you have the
 // worker attibutes: https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/config.ts
 // Ensure you also have in the package.json:
-// "node-worker-threads-pool": "^1.2.2",
 // "worker-farm": "^1.7.0",
 const execWorker = workerFarm(
   {
@@ -55,11 +80,23 @@ class WorkerService {
         }),
       };
 
-      execWorker(workerData, (error?: any, response?: any) => {
-        if (error) {
-          return reject(Error(error));
+      execWorker(workerData, (error?: SerializedError, response?: any) => {
+        if (!error) {
+          return resolve(response);
         }
-        resolve(response);
+
+        if (!error.name) {
+          return reject(new Error(error as string));
+        }
+
+        const ErrorConstructor = HTTP_ERROR_CONSTRUCTORS[error.name] || Error;
+
+        try {
+          throw new ErrorConstructor(error.message);
+        } catch (err) {
+          err.stack = error.stack;
+          return reject(err);
+        }
       });
     });
   }
