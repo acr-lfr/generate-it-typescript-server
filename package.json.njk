@@ -6,6 +6,7 @@
   "author": "<add your company or personal name here>",
   "scripts": {
     "build": "ttsc -p .",
+    "cli-script": "VERBOSE=true && node ./build/server.js -r ",
     "dev:setup": "git config core.hooksPath githooks && cp -n .env.example .env",
     "dev:build-watch": "ttsc --watch -p .",
     "dev:start-watch": "nodemon ./build/server.js",
@@ -30,7 +31,7 @@
     "express-auth-middle": "^1.1.2",
     "express-form-data": "^2.0.13",
     "express-promise-router": "^3.0.3",
-    "generate-it-logger": "^1.2.0",
+    "generate-it-logger": "^1.2.4",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
     "morgan": "^1.10.0",

@@ -40,6 +40,16 @@ This will pass the request through to the domain with or without a jwt, but it a
   }
 ```
 
+#### CLI 
+You can run scripts will full access to the loaded api via the cli-scripts command:
+```
+npm run cli-script -- user-seeder
+```
+This will pass "user-seeder" to `src/cli/run.ts` which will attempt to execute the provided script.
+
+If the runner cannot find the provided script within the cli folder an error is thrown.
+
+By default `src/cli/run.ts` will not run on production.
 
 #### Input/ouput filters
 The [**input**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by the npm package [celebrate](https://www.npmjs.com/package/celebrate). Anything not declared in the request by the swagger file will simply result in a 422 error being passed back to the client and will not hit the domain layer.
