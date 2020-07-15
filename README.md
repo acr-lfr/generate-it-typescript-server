@@ -46,7 +46,7 @@ The [**input**](https://github.com/acrontum/openapi-nodegen-typescript-server/bl
 
 The [**output**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L33) is protected by the npm package [object-reduce-by-map](https://www.npmjs.com/package/object-reduce-by-map) which strips out any content from an object or array, or array of objects that should not be there.
 
-Both the input and output are provided the request and response object, respectively, from the api file. 
+Both the input and output are provided the request and response object, respectively, from the api file.
 
 This means that once in the domain layer you can be safe to think that there is no additional content in the request object than that specified in the swagger file.
 
@@ -110,6 +110,18 @@ Add the nodegen generate the server to the package.json scripts object. The foll
   "scripts": {
       "generate:nodegen": "openapi-nodegen ./api_1.0.0.yml -t https://github.com/acrontum/openapi-nodegen-typescript-server.git",
 ```
+
+#### Specifying basePath in OA3
+
+If you need to specify the `basePath` edit the `src/app.ts` and add the `basePath` as second parameter to the `routesImporter`.
+
+For example:
+
+`src/app.ts`
+```typescript
+routesImporter(app, '/v1');
+```
+
 
 #### Tip 1 local api file pointer
 Typically the generation is only done during development. Typically you would orchestrate a full spec file from many little files then build 1 file to share to both openapi-nodegen and things like AWS or other gateways. To make life easier, you can simply point openapi-nodegen to the working directory of your api file repo, instead of manually copying the built file:
