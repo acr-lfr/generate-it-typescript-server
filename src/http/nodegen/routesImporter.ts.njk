@@ -10,20 +10,20 @@ import {{prettifyRouteName(endpoint)}}Routes from './routes/{{prettifyRouteName(
 {% endif -%}
 {% endfor -%}
 
-export default function (app: express.Application) {
+export default function (app: express.Application, basePath = '') {
   {% for endpoint in endpoints -%}
     {% if(endsWith(swagger.basePath, '/')) %}
-  app.use('{{swagger.basePath}}{{endpoint}}', {{prettifyRouteName(endpoint)}}Routes())
+  app.use(basePath + '{{swagger.basePath}}{{endpoint}}', {{prettifyRouteName(endpoint)}}Routes())
     {% else %}
-  app.use('{{swagger.basePath}}/{{endpoint}}', {{prettifyRouteName(endpoint)}}Routes())
+  app.use(basePath + '{{swagger.basePath}}/{{endpoint}}', {{prettifyRouteName(endpoint)}}Routes())
     {% endif %}
   {%- endfor %}
 
   if (config.loadSwaggerUIRoute) {
     {% if(endsWith(swagger.basePath, '/')) %}
-    app.use('{{ swagger.basePath }}swagger', require('./routes/swaggerRoutes').default())
+    app.use(basePath + '{{ swagger.basePath }}swagger', require('./routes/swaggerRoutes').default())
     {% else %}
-    app.use('{{ swagger.basePath }}/swagger', require('./routes/swaggerRoutes').default())
+    app.use(basePath + '{{ swagger.basePath }}/swagger', require('./routes/swaggerRoutes').default())
     {% endif %}
   }
 }
