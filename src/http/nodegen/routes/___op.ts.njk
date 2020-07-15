@@ -48,7 +48,7 @@ export default function() {
               );
             {% else %}
               {% set successCode = getSingleSuccessResponse(path.responses) or 200 -%}
-              {% if path.responses[successCode].schema -%}
+              {% if path.responses[successCode].schema or (path.responses[successCode] and path.responses[successCode].content and path.responses[successCode].content["application/json"]) -%}
                 return res.status({{ successCode }}).json(
                   objectReduceByMap(
                     await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
