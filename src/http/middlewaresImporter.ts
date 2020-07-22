@@ -46,6 +46,9 @@ const accessLogger = (app: express.Application): void => {
   app.use(
     morgan(
       `[${packageJson.name}] :remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]`,
+      {
+        skip: (req: express.Reqest, res: express.Response) => /\/admin\/health$/.test(req.originalUrl) && res.statusCode === 200
+      }
     ),
   );
 };
