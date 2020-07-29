@@ -11,7 +11,7 @@ import NodegenRequest from '../../interfaces/NodegenRequest';
 export default () => {
   return (err: any, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
     if (err instanceof http406) {
-      res.status(403).send()
+      res.status(406).send()
     } else {
       next(err)
     }
