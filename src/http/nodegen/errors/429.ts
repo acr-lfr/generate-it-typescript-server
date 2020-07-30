@@ -2,6 +2,9 @@ const customError = require('custom-error');
 const http429 = customError('http429');
 
 /**
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#Client_error_responses
+ * The user has sent too many requests in a given amount of time ("rate limiting").
+ *
  * Example use:
  // Import it
  import http429 from '@/http/nodegen/errors/429'
