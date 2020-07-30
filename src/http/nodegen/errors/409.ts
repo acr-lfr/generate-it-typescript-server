@@ -2,6 +2,11 @@ const customError = require('custom-error');
 const http409 = customError('http409');
 
 /**
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#Client_error_responses
+ * This response is sent when a request conflicts with the current state of the server.
+ *
+ * This is not the same as 406
+ *
  * Example use:
  // Import it
  import http409 from '@/http/nodegen/errors/409'
