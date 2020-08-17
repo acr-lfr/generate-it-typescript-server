@@ -1,2 +1,2 @@
-/* DEPRECATED - use the expection classes instead */
+/* DEPRECATED -  use the exception classes instead */
 export { ForbiddenException as default } from './'

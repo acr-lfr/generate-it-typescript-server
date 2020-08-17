@@ -1,3 +1,3 @@
-/* DEPRECATED - use the expection classes instead */
+/* DEPRECATED -  use the exception classes instead */
 import { HttpException } from './';
 export default HttpException.bind(HttpException, 423);
