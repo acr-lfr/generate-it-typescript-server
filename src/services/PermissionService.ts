@@ -1,6 +1,6 @@
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
-import express = require('express');
-// import { NotFoundException } from '@/http/nodegen/errors';
+import express from 'express';
+// import { ForbiddenException } from '@/http/nodegen/errors';
 
 class PermissionService {
   middleware (req: NodegenRequest, res: express.Response, next: express.NextFunction, permission: string) {
@@ -13,7 +13,7 @@ class PermissionService {
      * if(appRole[req.jwtData.role].contains(permission)) {
      *   next();
      * }
-     * throw new NotFoundException('Not allowed here, sorry.');
+     * throw new ForbiddenException('Your user does not have permission to do that');
      */
     next();
   }
