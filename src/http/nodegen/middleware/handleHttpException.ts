@@ -5,7 +5,7 @@ import { HttpException } from '../errors';
 /**
  * Http Exception handler
  */
-export const handleHttpException = (err: any, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
+export default () => (err: any, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
   if (err instanceof HttpException) {
     if (err.status === 500) {
       console.error(err);

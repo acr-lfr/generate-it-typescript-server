@@ -8,4 +8,4 @@ export { default as handleValidationErrors } from './handleValidationErrors';
 export { default as headersCaching } from './headersCaching';
 export { default as permissionMiddleware } from './permissionMiddleware';
 export { default as queryArrayParserMiddleware } from './queryArrayParserMiddleware';
-export * from './handleHttpException';
+export { default as handleHttpException } from './handleHttpException';
