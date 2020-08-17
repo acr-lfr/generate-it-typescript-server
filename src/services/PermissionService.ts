@@ -1,6 +1,6 @@
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
 import express = require('express');
-// import http401 from '@/http/nodegen/errors/401';
+// import { NotFoundException } from '@/http/nodegen/errors';
 
 class PermissionService {
   middleware (req: NodegenRequest, res: express.Response, next: express.NextFunction, permission: string) {
@@ -13,7 +13,7 @@ class PermissionService {
      * if(appRole[req.jwtData.role].contains(permission)) {
      *   next();
      * }
-     * throw http401('Not allowed here, sorry.');
+     * throw new NotFoundException('Not allowed here, sorry.');
      */
     next();
   }

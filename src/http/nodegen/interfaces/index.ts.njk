@@ -1,3 +1,4 @@
+export { default as NodegenRequest } from './NodegenRequest';
 {% for interface in swagger.interfaces -%}
 export { {{ interface.name}} } from './{{ interface.name }}';
 {% endfor %}

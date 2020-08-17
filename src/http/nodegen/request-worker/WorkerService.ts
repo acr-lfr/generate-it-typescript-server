@@ -12,6 +12,7 @@ import http410 from '@/http/nodegen/errors/410';
 import http422 from '@/http/nodegen/errors/422';
 import http423 from '@/http/nodegen/errors/423';
 import http429 from '@/http/nodegen/errors/429';
+import { HttpException } from '../errors';
 
 interface SerializedError {
   message?: string,
@@ -33,7 +34,7 @@ const REQUEST_SERIALIZED_KEYS: string[] = [
   'body',
 ];
 
-const HTTP_ERROR_CONSTRUCTORS: { [key: string]: typeof Error } = {
+const HTTP_ERROR_CONSTRUCTORS: Record<string, new (message?: string) => HttpException> = {
   http401,
   http403,
   http404,
@@ -41,7 +42,8 @@ const HTTP_ERROR_CONSTRUCTORS: { [key: string]: typeof Error } = {
   http410,
   http422,
   http423,
-  http429
+  http429,
+  HttpException: HttpException.bind(HttpException, 500),
 };
 
 // Check the config default config to ensure you have the
