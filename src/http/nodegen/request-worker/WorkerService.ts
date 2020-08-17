@@ -1,9 +1,6 @@
-import { IncomingMessage } from 'http';
-import { WorkerData } from './types';
-import { pick } from 'lodash';
-import workerFarm from 'worker-farm';
 import config from '@/config';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
+import { HttpException } from '@/http/nodegen/errors';
 import http401 from '@/http/nodegen/errors/401';
 import http403 from '@/http/nodegen/errors/403';
 import http404 from '@/http/nodegen/errors/404';
@@ -12,12 +9,15 @@ import http410 from '@/http/nodegen/errors/410';
 import http422 from '@/http/nodegen/errors/422';
 import http423 from '@/http/nodegen/errors/423';
 import http429 from '@/http/nodegen/errors/429';
-import { HttpException } from '../errors';
+import { IncomingMessage } from 'http';
+import { pick } from 'lodash';
+import workerFarm from 'worker-farm';
+import { WorkerData } from './types';
 
 interface SerializedError {
-  message?: string,
-  stack?: string,
-  name?: string
+  message?: string;
+  stack?: string;
+  name?: string;
 }
 
 const REQUEST_SERIALIZED_KEYS: string[] = [
@@ -57,7 +57,7 @@ const execWorker = workerFarm(
     maxRetries: 1,
     autoStart: true,
   },
-  `${process.cwd()}/build/src/http/nodegen/request-worker/process.js`,
+  `${process.cwd()}/build/src/http/nodegen/request-worker/process.js`
 );
 
 class WorkerService {
@@ -69,7 +69,12 @@ class WorkerService {
    * @param domainFunction
    * @param domainFunctionArgs
    */
-  public handleRequestWithWorker (req: NodegenRequest, domainName: string, domainFunction: string, domainFunctionArgs: any[]): Promise<any> {
+  public handleRequestWithWorker(
+    req: NodegenRequest,
+    domainName: string,
+    domainFunction: string,
+    domainFunctionArgs: any[]
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       const workerData: WorkerData = {
         domainName,
