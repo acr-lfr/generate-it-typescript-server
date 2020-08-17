@@ -14,7 +14,7 @@ export const handleHttpException = (err: any, req: NodegenRequest, res: express.
     if (err.isJson()) {
       return res.status(err.status).json(err.body);
     } else {
-      return res.status(err.status).send(err.message);
+      return res.status(err.status).send(err.body);
     }
   }
 
