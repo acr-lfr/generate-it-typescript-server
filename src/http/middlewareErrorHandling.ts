@@ -13,7 +13,7 @@ import {
 export default (app: express.Application): void => {
   app.use(handleExpress404());
   app.use(handleDomain404());
-  app.use(handleHttpException);
+  app.use(handleHttpException());
 
   // Validation requests
   app.use(handleValidationErrors());
