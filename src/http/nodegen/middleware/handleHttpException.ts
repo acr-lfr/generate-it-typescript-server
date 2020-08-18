@@ -16,7 +16,8 @@ export default () => (err: any, req: NodegenRequest, res: express.Response, next
     } else {
       return res.status(err.status).send(err.body);
     }
+  } else {
+    console.error(err.stack);
+    return res.status(500).send(JSON.stringify(err));
   }
-
-  next(err);
-}
+};
