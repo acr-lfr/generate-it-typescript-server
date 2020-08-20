@@ -1,2 +1,4 @@
 /* DEPRECATED -  use the exception classes instead */
-export { UnauthorizedException as default } from './'
+import { UnauthorizedException } from './';
+
+export default (message?: string ) => new UnauthorizedException(message);

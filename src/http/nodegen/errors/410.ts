@@ -1,2 +1,4 @@
 /* DEPRECATED -  use the exception classes instead */
-export { GoneException as default } from './'
+import { GoneException } from './';
+
+export default (message?: string) => new GoneException(message);

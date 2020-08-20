@@ -1,2 +1,4 @@
 /* DEPRECATED -  use the exception classes instead */
-export { ConflictException as default } from './'
+import { ConflictException } from './';
+
+export default (message?: string ) => new ConflictException(message);

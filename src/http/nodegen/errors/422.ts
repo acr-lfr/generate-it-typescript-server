@@ -1,2 +1,4 @@
 /* DEPRECATED -  use the exception classes instead */
-export { UnprocessableEntityException as default } from './'
+import { UnprocessableEntityException } from './';
+
+export default (message?: string) => new UnprocessableEntityException(message);

@@ -1,2 +1,4 @@
 /* DEPRECATED -  use the exception classes instead */
-export { TooManyRequestsException as default } from './'
+import { TooManyRequestsException } from './';
+
+export default (message?: string) => new TooManyRequestsException(message);

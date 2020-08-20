@@ -1,2 +1,4 @@
 /* DEPRECATED -  use the exception classes instead */
-export { ForbiddenException as default } from './'
+import { ForbiddenException } from './';
+
+export default (message?: string ) => new ForbiddenException(message);

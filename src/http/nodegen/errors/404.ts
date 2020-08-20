@@ -1,2 +1,4 @@
 /* DEPRECATED -  use the exception classes instead */
-export { NotFoundException as default } from './'
+import { NotFoundException } from './';
+
+export default (message?: string ) => new NotFoundException(message);

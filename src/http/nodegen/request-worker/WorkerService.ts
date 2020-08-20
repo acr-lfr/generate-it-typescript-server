@@ -1,3 +1,6 @@
+import { IncomingMessage } from 'http';
+import { pick } from 'lodash';
+import workerFarm from 'worker-farm';
 import config from '@/config';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
 import { HttpException } from '@/http/nodegen/errors';
@@ -9,9 +12,6 @@ import http410 from '@/http/nodegen/errors/410';
 import http422 from '@/http/nodegen/errors/422';
 import http423 from '@/http/nodegen/errors/423';
 import http429 from '@/http/nodegen/errors/429';
-import { IncomingMessage } from 'http';
-import { pick } from 'lodash';
-import workerFarm from 'worker-farm';
 import { WorkerData } from './types';
 
 interface SerializedError {
@@ -34,7 +34,7 @@ const REQUEST_SERIALIZED_KEYS: string[] = [
   'body',
 ];
 
-const HTTP_ERROR_CONSTRUCTORS: Record<string, new (message?: string) => HttpException> = {
+const HTTP_ERROR_CONSTRUCTORS: Record<string, (message?: string) => HttpException> = {
   http401,
   http403,
   http404,
@@ -99,7 +99,7 @@ class WorkerService {
         const ErrorConstructor = HTTP_ERROR_CONSTRUCTORS[error.name] || Error;
 
         try {
-          throw new ErrorConstructor(error.message);
+          throw ErrorConstructor(error.message);
         } catch (err) {
           err.stack = error.stack;
           return reject(err);
