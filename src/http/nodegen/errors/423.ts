@@ -1,5 +1,5 @@
 /* DEPRECATED -  use the exception classes instead */
-import { HttpException } from './';
+import { LockedException } from './';
 
-export default (message?: string) => new HttpException(423, message);
+export default (message?: string) => new LockedException(message);
 

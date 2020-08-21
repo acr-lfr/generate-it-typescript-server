@@ -9,6 +9,7 @@ export * from './HttpException';
 export * from './HTTPVersionNotSupportedException';
 export * from './ImATeapotException';
 export * from './InternalServerErrorException';
+export * from './LockedException';
 export * from './MethodNotAllowedException';
 export * from './NotAcceptableException';
 export * from './NotFoundException';
