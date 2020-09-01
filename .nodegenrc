@@ -2,6 +2,8 @@
   "nodegenDir": "src/http/nodegen",
   "nodegenMockDir": "src/domains/__mocks__",
   "nodegenType": "server",
+  "segmentFirstGrouping": 2,
+  "segmentSecondGrouping": 4,
   "helpers": {
     "stub": {
       "jwtType": "JwtAccess",
