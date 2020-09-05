@@ -9,16 +9,21 @@ class AsyncValidationService {
     this.parseValidators(req, asyncValidators).then(() => {
       next();
     }).catch((e) => {
-      throw e;
+      throw next(e);
     });
   }
 
   async parseValidators (req: NodegenRequest, asyncValidators: string[]) {
     for (let i = 0; i < asyncValidators.length; ++i) {
       const asyncValidatorParts = asyncValidators[i].split(':');
-      // Expected the 1st element is the function name followed by params for the given given function
+      const methodToCall = String(asyncValidatorParts.shift());
+      // It is expected the custom async validation method will throw its own http errors
       // @ts-ignore
-      await this[asyncValidatorParts.shift()](req, asyncValidatorParts);
+      if (!this[methodToCall]) {
+        throw new Error('Unknown async function called: ' + methodToCall);
+      }
+      // @ts-ignore
+      await this[methodToCall](req, asyncValidatorParts);
     }
   }
 
