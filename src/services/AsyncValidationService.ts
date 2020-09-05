@@ -1,13 +1,9 @@
+import express from 'express';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
-import express = require('express');
 
 class AsyncValidationService {
   /**
-   *
-   * @param req
-   * @param res
-   * @param next
-   * @param asyncValidators
+   * Entry function for the src/http/nodegen/middleware/asyncValidationMiddleware.ts
    */
   middleware (req: NodegenRequest, res: express.Response, next: express.NextFunction, asyncValidators: string[]) {
     for (let i = 0; i < asyncValidators.length; ++i) {

@@ -1,10 +1,12 @@
 import express = require('express');
-
 import NodegenRequest from '../../interfaces/NodegenRequest';
 import AsyncValidationService from '@/services/AsyncValidationService';
 
 /**
- * Express middleware to control the http headers for caching only
+ * Async functions called before hitting a domains layer.
+ * To use, add an x-async-validator attribute to a path object containing
+ * a string[] representing methods from the src/service/AsyncValidationService.ts
+ * The async function will only call next after the async action has completed
  * @returns {Function}
  */
 export default (asyncValidators: string[]) => {
