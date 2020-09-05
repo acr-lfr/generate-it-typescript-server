@@ -6,6 +6,7 @@ import objectReduceByMap from 'object-reduce-by-map'
 {% if pathMethodsHaveAttr(operations, 'security') %}import accessTokenMiddleware from '../middleware/accessTokenMiddleware'{% endif %}
 {% if pathMethodsHaveAttr(operations, 'x-cache') %}import apiCaching from '../middleware/apiCaching'{% endif %}
 {% if pathMethodsHaveAttr(operations, 'x-permission') %}import permissionMiddleware from '../middleware/permissionMiddleware'{% endif %}
+{% if pathMethodsHaveAttr(operations, 'x-async-validator') %}import asyncValidationMiddleware from '../middleware/asyncValidationMiddleware'{% endif %}
 {% if pathMethodsHaveAttr(operations, 'x-worker') %}import WorkerService from '../request-worker/WorkerService'{% endif %}
 import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
 import {{ucFirst(operation_name)}}Domain from '../../../domains/{{ucFirst(operation_name)}}Domain'
@@ -27,6 +28,7 @@ export default function() {
         {% if securityNames %}accessTokenMiddleware({{ securityNames }}  {% if path['x-passThruWithoutJWT'] %}, {passThruWithoutJWT: true}{% endif %}), /* Validate request security tokens */{% endif %}
         {% if path['x-permission'] %}permissionMiddleware('{{ path['x-permission'] }}'), /* Check permission of the incoming user */ {% endif %}
         {% if pathsHasParamsToValidate(path) %}celebrate({{ _.camelCase(operation_name) }}Validators.{{path.operationId}}), /* Validate the request data and return validation errors */ {% endif %}
+        {% if path['x-async-validator'] %}asyncValidationMiddleware({{ path['x-async-validator'] }}), /* Validate the request data and return validation errors */ {% endif %}
         {% if path['x-cache'] %}apiCaching({{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}), /* Lastly, if x-cache is found, call the api cache middleware */ {% endif %}
         async (req: any, res: express.Response) => {
           {% if not path.produces or path.produces and arrayContains('application/json', path.produces) %}
