@@ -10,6 +10,8 @@
     - [CLI](#cli)
     - [Input/ouput filters (validation)](#inputouput-filters-validation)
     - [Async route validation](#async-route-validation)
+        - [A standard setup:](#a-standard-setup)
+        - [Inject parameters to the async function:](#inject-parameters-to-the-async-function)
     - [Permission helper](#permission-helper)
     - [NodegenRC Helpers](#nodegenrc-helpers)
     - [Access validation service](#access-validation-service)
@@ -66,17 +68,49 @@ This means that once in the domain layer you can be safe to think that there is 
 Conversely as the output is reduced, should a domain accidentally return attributes it shouldn't they will never be passed back out to the client.
 
 #### Async route validation 
-Celebrate will cover 90% of the validation needs of an API, but there is always a % of use cases wherein you need to perform an async action to before permitting the user to hit a domain layer. The most common use case is when you want to validate incoming data against a database record, for example, a registration form checking that a given email is not already registered in you app. Futhermore, these types of validators do no always fit the Joi style of validation that is under the hood of celebrate.
+Celebrate will cover 90% of the validation needs of an API, but there is always a % of use cases wherein you need to perform an async action to before permitting the user to hit a domain layer. The most common use case is when you want to validate incoming data against a database record, for example, a registration form checking that a given email/username is not already registered. These types of validators do no always fit the Joi style of validation that is under the hood of celebrate.
 
-Setting up an async validation for any given route:
+Any async validator will be executed before the domain layer is hit. 
+Any error thrown in an async validator will stop the request reaching the domain layer.
 
-Add to your path object the async attribute:
+###### A standard setup:
+Setting up an async validation for any given route, add to your path object the `x-async-validators` attribute containing and array of method names:
 ```yaml
-x-async-validator:
+x-async-validators:
   - uniqueUsername
 ```
+Regenerate your API and create a method in the `AsyncValidationService` class by that name.. and that is about it. Fill in the method to do as you need and be on your merry way, eg:
+```typescript
+class AsyncValidationService {
+  async uniqueEntry (req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
+    // Run the async function and throw the required error when needed
+    const user = await db.user.findOne({ username: req.body.username })
+    if(user){
+      throw http422()
+    }
+  }
+}
+```
 
-Regenerate your API and create a method in the `AsyncValidationService` class by that name.. and that is about it. Fill in the method to do as you need and be on your merry way.
+###### Inject parameters to the async function:
+You can pass in additional fixed params to the validator via a ; separator:
+```yaml
+x-async-validators:
+  - uniqueEntry:user:username
+```
+The function called will find these params given to it, eg:
+```typescript
+class AsyncValidationService {
+  async uniqueEntry (req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
+    // Run the async function and throw the required error when needed
+    const user = await db[asyncValidatorParams[0]].findOne({ username: req.body[asyncValidatorParams[1]] })
+    if(user){
+      throw http422()
+    }
+  }
+}
+```
+
 
 
 #### Permission helper
