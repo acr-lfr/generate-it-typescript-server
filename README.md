@@ -118,7 +118,9 @@ The function called will find these params given to it, eg:
 class AsyncValidationService {
   async uniqueEntry (req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
     // Run the async function and throw the required error when needed
-    const user = await db[asyncValidatorParams[0]].findOne({ username: req.body[asyncValidatorParams[1]] })
+    const user = await db[asyncValidatorParams[0]].findOne({ 
+      [asyncValidatorParams[1]]: req.body[asyncValidatorParams[1]] 
+    })
     if(user){
       throw http422()
     }
