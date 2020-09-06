@@ -10,7 +10,26 @@ import AsyncValidationService from '@/services/AsyncValidationService';
  * @returns {Function}
  */
 export default (asyncValidators: string[]) => {
+
+  const parseValidators = async (req: NodegenRequest, asyncValidators: string[]) => {
+    for (let i = 0; i < asyncValidators.length; ++i) {
+      const asyncValidatorParts = asyncValidators[i].split(':');
+      const methodToCall = String(asyncValidatorParts.shift());
+      // It is expected the custom async validation method will throw its own http errors
+      // @ts-ignore
+      if (!AsyncValidationService[methodToCall]) {
+        throw new Error('Unknown async function called: ' + methodToCall);
+      }
+      // @ts-ignore
+      await AsyncValidationService[methodToCall](req, asyncValidatorParts);
+    }
+  };
+
   return (req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
-    AsyncValidationService.middleware(req, res, next, asyncValidators);
+    parseValidators(req, asyncValidators).then(() => {
+      next();
+    }).catch((e) => {
+      throw next(e);
+    });
   };
 }
