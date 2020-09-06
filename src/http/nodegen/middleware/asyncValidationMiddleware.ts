@@ -18,7 +18,7 @@ export default (asyncValidators: string[]) => {
       // It is expected the custom async validation method will throw its own http errors
       // @ts-ignore
       if (!AsyncValidationService[methodToCall]) {
-        throw new Error('Unknown async function called: ' + methodToCall);
+        throw new Error(`Unknown AsyncValidationService method function received from the openapi file: ` + methodToCall);
       }
       // @ts-ignore
       await AsyncValidationService[methodToCall](req, asyncValidatorParts);
