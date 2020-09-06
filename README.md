@@ -75,14 +75,29 @@ Any error thrown in an async validator will stop the request reaching the domain
 
 ###### A standard setup:
 Setting up an async validation for any given route, add to your path object the `x-async-validators` attribute containing and array of method names:
+
+`src/paths/register/post.yml`
 ```yaml
+tags:
+  - {{ autoTag() }}
+summary: Register
+description: Register a new user account
+operationId: {{ uniqueOpId() }}
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: {{ uniqueOpId() }}
+    required: true
+    schema:
+      $ref: ../../../definitions/register/email/post.yml
 x-async-validators:
   - uniqueUsername
 ```
 Regenerate your API and create a method in the `src/services/AsyncValidationService.ts` class by that name, and that is about it. Fill in the method to do as you need and be on your merry way, eg:
 ```typescript
 class AsyncValidationService {
-  async uniqueEntry (req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
+  async uniqueUsername (req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
     // Run the async function and throw the required error when needed
     const user = await db.user.findOne({ username: req.body.username })
     if(user){
