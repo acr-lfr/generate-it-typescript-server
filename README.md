@@ -79,7 +79,7 @@ Setting up an async validation for any given route, add to your path object the 
 x-async-validators:
   - uniqueUsername
 ```
-Regenerate your API and create a method in the `AsyncValidationService` class by that name.. and that is about it. Fill in the method to do as you need and be on your merry way, eg:
+Regenerate your API and create a method in the `src/services/AsyncValidationService.ts` class by that name, and that is about it. Fill in the method to do as you need and be on your merry way, eg:
 ```typescript
 class AsyncValidationService {
   async uniqueEntry (req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
