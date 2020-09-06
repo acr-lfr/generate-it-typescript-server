@@ -108,7 +108,7 @@ class AsyncValidationService {
 ```
 
 ###### Inject parameters to the async function:
-You can pass in additional fixed params to the validator via a ; separator:
+You can pass in additional fixed params to the validator via a `:` separator:
 ```yaml
 x-async-validators:
   - uniqueEntry:user:username
