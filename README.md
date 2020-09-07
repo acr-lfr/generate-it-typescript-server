@@ -78,16 +78,14 @@ Setting up an async validation for any given route, add to your path object the 
 
 `src/paths/register/post.yml`
 ```yaml
-tags:
-  - {{ autoTag() }}
 summary: Register
 description: Register a new user account
-operationId: {{ uniqueOpId() }}
+operationId: RegisterPost
 produces:
   - application/json
 parameters:
   - in: body
-    name: {{ uniqueOpId() }}
+    name: RegisterPost
     required: true
     schema:
       $ref: ../../../definitions/register/email/post.yml
