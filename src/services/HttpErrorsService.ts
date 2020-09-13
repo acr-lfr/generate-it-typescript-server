@@ -10,6 +10,6 @@ export class HttpErrorsService {
    * eg: return `${exception.status} ${exception.message}: ${exception.stack}`;
    */
   public static formatException(exception: HttpException): string | Record<string, any> {
-    return exception.body;
+    return exception;
   }
 }

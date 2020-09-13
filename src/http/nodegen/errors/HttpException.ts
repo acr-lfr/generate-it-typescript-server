@@ -1,4 +1,4 @@
-import { HttpStatusMessage } from './http-status.enum';
+import { HttpStatusMessage } from '@/http/nodegen/errors';
 import { HttpErrorsService } from '@/services/HttpErrorsService';
 
 export class HttpException extends Error {
@@ -17,14 +17,27 @@ export class HttpException extends Error {
   }
 
   get body(): string | Record<string, any> {
-    return HttpErrorsService.formatException(this);
+    return this.rawBody;
   }
 
   set body(body: string | Record<string, any>) {
     this.rawBody = body;
+    const fmt = HttpErrorsService.formatException(this);
+    if (fmt === this) {
+      this.rawBody = this.toJSON();
+    }
   }
 
   isJson() {
     return typeof this.body !== 'string';
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      status: this.status,
+      message: this.message,
+      body: this.rawBody,
+    }
   }
 }
