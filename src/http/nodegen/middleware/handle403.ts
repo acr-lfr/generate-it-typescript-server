@@ -4,7 +4,7 @@ import http403 from '../errors/403';
 import NodegenRequest from '../../interfaces/NodegenRequest';
 
 /**
- * Required for if an unauthorised response should be thrown from a domain or controller
+ * Required for if an forbidden response should be thrown from a domain or controller
  * Read: ../errors/403.ts
  * @returns {Function}
  */
