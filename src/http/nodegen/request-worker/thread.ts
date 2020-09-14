@@ -1,5 +1,5 @@
 import { parentPort } from 'worker_threads';
-import 'openapi-nodegen-logger';
+import 'generate-it-logger';
 import config from '@/config';
 import requestWorkerThreadLoader from '@/utils/requestWorkerThreadLoader';
 import * as Domains from './domainsImporter';
