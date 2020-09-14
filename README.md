@@ -7,13 +7,18 @@
 - [API Spec file helpers/features](#api-spec-file-helpersfeatures)
     - [Access full request in domain](#access-full-request-in-domain)
     - [Allow non authenticated request to access domain](#allow-non-authenticated-request-to-access-domain)
-    - [Input/ouput filters](#inputouput-filters)
+    - [CLI](#cli)
+    - [Input/ouput filters (validation)](#inputouput-filters-validation)
+    - [Async route validation](#async-route-validation)
+        - [A standard setup:](#a-standard-setup)
+        - [Inject parameters to the async function:](#inject-parameters-to-the-async-function)
     - [Permission helper](#permission-helper)
     - [NodegenRC Helpers](#nodegenrc-helpers)
     - [Access validation service](#access-validation-service)
     - [Caching](#caching)
     - [Errors](#errors)
 - [Setup](#setup)
+    - [Specifying basePath in OA3](#specifying-basepath-in-oa3)
     - [Tip 1 local api file pointer](#tip-1-local-api-file-pointer)
     - [Tip 2 for older versions of openapi-nodegen](#tip-2-for-older-versions-of-openapi-nodegen)
 
@@ -51,7 +56,7 @@ If the runner cannot find the provided script within the cli folder an error is 
 
 By default `src/cli/run.ts` will not run on production.
 
-#### Input/ouput filters
+#### Input/ouput filters (validation)
 The [**input**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by the npm package [celebrate](https://www.npmjs.com/package/celebrate). Anything not declared in the request by the swagger file will simply result in a 422 error being passed back to the client and will not hit the domain layer.
 
 The [**output**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L33) is protected by the npm package [object-reduce-by-map](https://www.npmjs.com/package/object-reduce-by-map) which strips out any content from an object or array, or array of objects that should not be there.
@@ -61,6 +66,67 @@ Both the input and output are provided the request and response object, respecti
 This means that once in the domain layer you can be safe to think that there is no additional content in the request object than that specified in the swagger file.
 
 Conversely as the output is reduced, should a domain accidentally return attributes it shouldn't they will never be passed back out to the client.
+
+#### Async route validation 
+Celebrate will cover 90% of the validation needs of an API, but there is always a % of use cases wherein you need to perform an async action to before permitting the user to hit a domain layer. The most common use case is when you want to validate incoming data against a database record, for example, a registration form checking that a given email/username is not already registered. These types of validators do no always fit the Joi style of validation that is under the hood of celebrate.
+
+Any async validator will be executed before the domain layer is hit. 
+Any error thrown in an async validator will stop the request reaching the domain layer.
+
+###### A standard setup:
+Setting up an async validation for any given route, add to your path object the `x-async-validators` attribute containing and array of method names:
+
+`src/paths/register/post.yml`
+```yaml
+summary: Register
+description: Register a new user account
+operationId: RegisterPost
+produces:
+  - application/json
+parameters:
+  - in: body
+    name: RegisterPost
+    required: true
+    schema:
+      $ref: ../../../definitions/register/email/post.yml
+x-async-validators:
+  - uniqueUsername
+```
+Regenerate your API and create a method in the `src/services/AsyncValidationService.ts` class by that name, and that is about it. Fill in the method to do as you need and be on your merry way, eg:
+```typescript
+class AsyncValidationService {
+  async uniqueUsername (req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
+    // Run the async function and throw the required error when needed
+    const user = await db.user.findOne({ username: req.body.username })
+    if(user){
+      throw http422()
+    }
+  }
+}
+```
+
+###### Inject parameters to the async function:
+You can pass in additional fixed params to the validator via a `:` separator:
+```yaml
+x-async-validators:
+  - uniqueEntry:user:username
+```
+The function called will find these params given to it, eg:
+```typescript
+class AsyncValidationService {
+  async uniqueEntry (req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
+    // Run the async function and throw the required error when needed
+    const user = await db[asyncValidatorParams[0]].findOne({ 
+      [asyncValidatorParams[1]]: req.body[asyncValidatorParams[1]] 
+    })
+    if(user){
+      throw http422()
+    }
+  }
+}
+```
+
+
 
 #### Permission helper
 `src/http/nodegen/routes/___op.ts.njk` will look for the `x-permission` attribute within a path object eg:

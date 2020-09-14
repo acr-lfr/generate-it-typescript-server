@@ -16,10 +16,12 @@ const initStaticPool = () => {
     new Worker(
       `${process.cwd()}/build/src/http/nodegen/request-worker/thread.js`
     )
-      .once('error', () => {
+      .once('error', (e: any) => {
+        console.trace('worker error', e);
         workers[index] = startWorker(index);
       })
-      .once('exit', () => {
+      .once('exit', (e: any) => {
+        console.trace('worker exit', e);
         workers[index] = startWorker(index);
       })
   );
