@@ -1,9 +1,9 @@
 import { IncomingMessage } from 'http';
-import { WorkerData } from './types';
 import { pick } from 'lodash';
 import workerFarm from 'worker-farm';
 import config from '@/config';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
+import { HttpException } from '@/http/nodegen/errors';
 import http401 from '@/http/nodegen/errors/401';
 import http403 from '@/http/nodegen/errors/403';
 import http404 from '@/http/nodegen/errors/404';
@@ -12,11 +12,12 @@ import http410 from '@/http/nodegen/errors/410';
 import http422 from '@/http/nodegen/errors/422';
 import http423 from '@/http/nodegen/errors/423';
 import http429 from '@/http/nodegen/errors/429';
+import { WorkerData } from './types';
 
 interface SerializedError {
-  message?: string,
-  stack?: string,
-  name?: string
+  message?: string;
+  stack?: string;
+  name?: string;
 }
 
 const REQUEST_SERIALIZED_KEYS: string[] = [
@@ -33,7 +34,7 @@ const REQUEST_SERIALIZED_KEYS: string[] = [
   'body',
 ];
 
-const HTTP_ERROR_CONSTRUCTORS: { [key: string]: typeof Error } = {
+const HTTP_ERROR_CONSTRUCTORS: Record<string, (message?: string) => HttpException> = {
   http401,
   http403,
   http404,
@@ -41,7 +42,8 @@ const HTTP_ERROR_CONSTRUCTORS: { [key: string]: typeof Error } = {
   http410,
   http422,
   http423,
-  http429
+  http429,
+  HttpException: HttpException.bind(HttpException, 500),
 };
 
 // Check the config default config to ensure you have the
@@ -55,7 +57,7 @@ const execWorker = workerFarm(
     maxRetries: 1,
     autoStart: true,
   },
-  `${process.cwd()}/build/src/http/nodegen/request-worker/process.js`,
+  `${process.cwd()}/build/src/http/nodegen/request-worker/process.js`
 );
 
 class WorkerService {
@@ -67,7 +69,12 @@ class WorkerService {
    * @param domainFunction
    * @param domainFunctionArgs
    */
-  public handleRequestWithWorker (req: NodegenRequest, domainName: string, domainFunction: string, domainFunctionArgs: any[]): Promise<any> {
+  public handleRequestWithWorker(
+    req: NodegenRequest,
+    domainName: string,
+    domainFunction: string,
+    domainFunctionArgs: any[]
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       const workerData: WorkerData = {
         domainName,
@@ -92,7 +99,7 @@ class WorkerService {
         const ErrorConstructor = HTTP_ERROR_CONSTRUCTORS[error.name] || Error;
 
         try {
-          throw new ErrorConstructor(error.message);
+          throw ErrorConstructor(error.message);
         } catch (err) {
           err.stack = error.stack;
           return reject(err);

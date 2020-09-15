@@ -1,5 +1,4 @@
-import express = require('express');
-
+import express from 'express';
 import NodegenRequest from '../../interfaces/NodegenRequest';
 
 /**

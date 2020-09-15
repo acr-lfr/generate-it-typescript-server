@@ -9,6 +9,10 @@ import NodegenRequest from '../../interfaces/NodegenRequest';
  * @returns {Function}
  */
 export default () => {
+console.warn(
+    `Deprecation warning: handle410() and the 410.ts error will be removed from the codebase in the future.
+Please use GoneException and allow it to be caught by the handleHttpException.ts
+`)
   return (err: any, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
     if (err instanceof http410) {
       res.status(410).send()

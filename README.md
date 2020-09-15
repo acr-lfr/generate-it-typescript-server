@@ -163,7 +163,7 @@ Within the nodegen folder there is a middlware `accessTokenMiddleware.ts` inject
 
 This middleware passes the details onto the provided AccessTokenService: `AccessTokenService.validateRequest(req, res, next, headerNames)`
 
-The entry method is given an array of strings, eg for a route requiring either jwt or api key it might be: `['authorisation','api-key']'`. This is enough information to then validate the values of the said header thus validating the request.
+The entry method is given an array of strings, eg for a route requiring either jwt or api key it might be: `['authorization','api-key']'`. This is enough information to then validate the values of the said header thus validating the request.
 
 Out of the box it is quite simple and it is expected that you inspect and update this service to fit the needs of your app.
 
@@ -173,7 +173,11 @@ The middleware `src/http/nodegen/middleware/headersCaching.ts` is a proxy functi
 This allows you to control the cache headers returned. Alternatively you may wish to inject your own caching service logic here as you have full access to the request and response object.
 
 #### Errors
-However nice all the automated layer is, once in the domain method it is common to want to throw some http error codes from the domain. Each of the error [helpers here](https://github.com/acrontum/openapi-nodegen-typescript-server/tree/master/src/http/nodegen/errors) have their own handle [middleware](https://github.com/acrontum/openapi-nodegen-typescript-server/tree/master/src/http/nodegen/middleware). For more info on each take a read of the comments within the files.
+However nice all the automated layer is, once in the domain method it is common to want to throw some http error codes from the domain. Each of the error [helpers here](https://github.com/acrontum/openapi-nodegen-typescript-server/tree/master/src/http/nodegen/errors) have their own handle [middleware](https://github.com/acrontum/openapi-nodegen-typescript-server/tree/master/src/http/nodegen/middleware). For more info on each take a read of the comments within the files.  
+
+It's recommended you use the `Exception.ts` classes when throwing errors - the `4xx.ts` files are deprecated and exist for backwards compatibility reasons.  
+
+Additionally, using the exception classes allows for control over the error response format by passing all errors through the error pre-formatter [HttpErrorsService.ts](src/services/HttpErrorsService.ts). This way, you can define custom error responses for all errors.
 
 ## Setup
 In a new directory run: `npm init`
