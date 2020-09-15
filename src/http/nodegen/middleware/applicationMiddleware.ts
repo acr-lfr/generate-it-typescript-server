@@ -1,6 +1,7 @@
 // http/nodegen/middleware/applicationMiddleware.ts
 import {
   corsMiddleware,
+  handleCustomErrors,
   handleExpress404,
   handleHttpException,
   handleValidationErrors,
@@ -72,6 +73,7 @@ export const requestMiddleware = (app: express.Application): void => {
  */
 export const responseMiddleware = (app: express.Application): void => {
   app.use(handleExpress404());
+  app.use(handleCustomErrors());
 
   // Validation requests
   app.use(handleValidationErrors());
