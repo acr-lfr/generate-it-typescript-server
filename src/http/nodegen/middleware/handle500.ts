@@ -1,14 +1,9 @@
-import express = require('express');
+import { handleHttpException } from './';
 
-import NodegenRequest from '../../interfaces/NodegenRequest'
-
-/**
- * This will catch any error that is not first caught by any of the other error handlers
- */
 export default () => {
-  return (err: any, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
-    if (err) return res.status(500).send(JSON.stringify({ message: err.message }));
-    next(err)
-  }
+console.warn(
+`Deprecation warning: handle500() and the 500.ts error will be removed from the codebase in the future.
+Please use handleHttpException.ts to catch all unhandled errors
+`)
+  return handleHttpException();
 }

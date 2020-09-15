@@ -1,7 +1,6 @@
-import express from 'express'
-import middlewareErrorHandling from './http/middlewareErrorHandling'
-import middlewaresImporter from './http/middlewaresImporter'
-import routesImporter from './http/nodegen/routesImporter'
+import { requestMiddleware, responseMiddleware } from '@/http/nodegen/middleware';
+import routesImporter from '@/http/nodegen/routesImporter';
+import express from 'express';
 
 /**
  * Returns a promise allowing the server or cli script to know
@@ -11,10 +10,11 @@ export default (): Promise<express.Express> => {
   return new Promise((resolve, reject) => {
     // Here is a good place to connect to databases if required,
     // resolve once connected else reject
-    const app = express()
-    middlewaresImporter(app)
-    routesImporter(app)
-    middlewareErrorHandling(app)
-    return resolve(app)
-  })
-}
+    const app = express();
+
+    requestMiddleware(app);
+    routesImporter(app);
+    responseMiddleware(app);
+    return resolve(app);
+  });
+};
