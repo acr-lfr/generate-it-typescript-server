@@ -13,8 +13,8 @@ import express from 'express';
 import expressFormData from 'express-form-data';
 import morgan from 'morgan';
 import { tmpdir } from 'os';
-import packageJson from 'package.json';
 import requestIp from 'request-ip';
+import packageJson from '../../../../package.json';
 
 export const responseHeaders = (app: express.Application): void => {
   app.use(corsMiddleware());
