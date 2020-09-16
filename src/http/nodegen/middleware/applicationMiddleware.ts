@@ -5,16 +5,16 @@ import {
   handleExpress404,
   handleHttpException,
   handleValidationErrors,
-  headersCaching,
+  headersCaching
 } from '@/http/nodegen/middleware';
 import queryArrayParserMiddleware from '@/http/nodegen/middleware/queryArrayParserMiddleware';
+import packageJson from '@root/package.json';
 import bodyParser from 'body-parser';
 import express from 'express';
 import expressFormData from 'express-form-data';
 import morgan from 'morgan';
 import { tmpdir } from 'os';
 import requestIp from 'request-ip';
-import packageJson from '../../../../package.json';
 
 export const responseHeaders = (app: express.Application): void => {
   app.use(corsMiddleware());
