@@ -1,1 +1,1 @@
-export { responseMiddleware } from '@/http/nodegen/middleware';
+export { responseMiddleware as default } from '@/http/nodegen/middleware';
