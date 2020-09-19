@@ -2,8 +2,6 @@ import { requestMiddleware, responseMiddleware } from '@/http/nodegen/middleware
 import routesImporter from '@/http/nodegen/routesImporter';
 import express from 'express';
 
-export const baseUrl = '{{swagger.basePath}}';
-
 /**
  * Returns a promise allowing the server or cli script to know
  * when the app is ready; eg database connections established

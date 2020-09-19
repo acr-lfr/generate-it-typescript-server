@@ -1,12 +1,13 @@
-import { baseUrl } from '@/app';
 import config from '@/config';
 import express from 'express';
 {%- for groupName, firstUrlSegment in groupNamesWithFirstUrlSegment %}
 import {{prettifyRouteName(groupName)}}Routes from './routes/{{prettifyRouteName(groupName)}}Routes';
 {%- endfor %}
 
+export const baseUrl = '{{swagger.basePath}}';
+
 export default function (app: express.Application, basePath = baseUrl) {
-  basePath = basePath.replace(/\/+$/, '');
+  basePath = (basePath || '').replace(/\/+$/, '');
 
   {% for groupName, firstUrlSegment in groupNamesWithFirstUrlSegment -%}
   app.use(basePath + '/{{firstUrlSegment}}', {{prettifyRouteName(groupName)}}Routes());
