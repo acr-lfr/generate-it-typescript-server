@@ -1,23 +1,20 @@
-import express = require('express')
-import config from '../../config'
-{% for groupName, firstUrlSegment in groupNamesWithFirstUrlSegment -%}
-import {{prettifyRouteName(groupName)}}Routes from './routes/{{prettifyRouteName(groupName)}}Routes'
-{% endfor -%}
+import config from '@/config';
+import express from 'express';
+{%- for groupName, firstUrlSegment in groupNamesWithFirstUrlSegment %}
+import {{prettifyRouteName(groupName)}}Routes from './routes/{{prettifyRouteName(groupName)}}Routes';
+{%- endfor %}
 
-export default function (app: express.Application, basePath = '') {
+export const baseUrl = '{{swagger.basePath}}';
+
+export default function (app: express.Application, basePath = baseUrl) {
+  basePath = (basePath || '').replace(/\/+$/, '');
+
   {% for groupName, firstUrlSegment in groupNamesWithFirstUrlSegment -%}
-    {% if(endsWith(swagger.basePath, '/')) %}
-  app.use(basePath + '{{swagger.basePath}}{{firstUrlSegment}}', {{prettifyRouteName(groupName)}}Routes())
-    {% else %}
-  app.use(basePath + '{{swagger.basePath}}/{{firstUrlSegment}}', {{prettifyRouteName(groupName)}}Routes())
-    {% endif %}
-  {%- endfor %}
+  app.use(basePath + '/{{firstUrlSegment}}', {{prettifyRouteName(groupName)}}Routes());
+
+  {% endfor -%}
 
   if (config.loadSwaggerUIRoute) {
-    {% if(endsWith(swagger.basePath, '/')) %}
-    app.use(basePath + '{{ swagger.basePath }}swagger', require('./routes/swaggerRoutes').default())
-    {% else %}
-    app.use(basePath + '{{ swagger.basePath }}/swagger', require('./routes/swaggerRoutes').default())
-    {% endif %}
+    app.use(basePath + '/swagger', require('./routes/swaggerRoutes').default());
   }
 }

@@ -1,26 +1,12 @@
-import http404 from '../errors/404';
+import { HttpException } from '@/http/nodegen/errors';
+import express from 'express';
 
-import NodegenRequest from '../../interfaces/NodegenRequest';
-import express = require('express');
+export default () => (err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (/^http4\d\d$/.test(err?.name)) {
+    const statusCode = parseInt(err.name.replace('http', ''));
 
-/**
- * Required for if an unauthorised response should be thrown from a domain or controller
- * Read: ../errors/404.ts
- * @returns {Function}
- */
-export default () => {
-  return (err: any, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
-    if (err instanceof http404) {
-      res.status(404);
+    return next(new HttpException(statusCode));
+  }
 
-      // respond with json
-      if (`${req.headers.accept || ''}`.match('json')) {
-        return res.send({error: 'Not found'});
-      }
-      // default to plain-text. send()
-      return res.type('txt').send('Not found');
-    } else {
-      next(err);
-    }
-  };
-}
+  return next(err);
+};

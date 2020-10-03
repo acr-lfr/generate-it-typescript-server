@@ -1,9 +1,10 @@
+import express = require('express');
+import { IncomingHttpHeaders } from 'http';
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 import config from '../config';
+import { UnauthorizedException } from '@/http/nodegen/errors';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
-import express = require('express');
-import { IncomingHttpHeaders } from 'http';
 
 interface JwtDetails {
   maxAge: number;
@@ -132,10 +133,10 @@ class AccessTokenService {
    * @param token
    */
   public verifyJWT (token: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       jwt.verify(token, config.jwtAccessSecret, (err: any, data: any) => {
         if (err) {
-          return reject(err);
+          throw new UnauthorizedException();
         }
         return resolve(data.data);
       });
