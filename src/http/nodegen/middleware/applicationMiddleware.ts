@@ -66,6 +66,7 @@ export const requestMiddleware = (app: express.Application): void => {
   accessLogger(app);
   requestParser(app);
   responseHeaders(app);
+  app.use(inferResponseType());
 };
 
 /**
@@ -73,7 +74,6 @@ export const requestMiddleware = (app: express.Application): void => {
  * @param app
  */
 export const responseMiddleware = (app: express.Application): void => {
-  app.use(inferResponseType());
   app.use(handleExpress404());
   app.use(handleDomain404());
   app.use(handleValidationErrors());
