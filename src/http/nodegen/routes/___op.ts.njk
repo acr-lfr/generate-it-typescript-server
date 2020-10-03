@@ -37,8 +37,8 @@ export default function() {
             await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
             {% endif -%}
             {{ getSingleSuccessResponse(path.responses) or 200 }},
-            {{ path.produces }},
-              {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
+            {% if path.produces -%}'{{ path.produces }}'{% else %}undefined{% endif %},
+            {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
           )
         }
       );
