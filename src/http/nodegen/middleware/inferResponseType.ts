@@ -2,16 +2,17 @@ import express from 'express';
 import objectReduceByMap from 'object-reduce-by-map';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
 import getPreferredResponseFormat from '@/http/nodegen/utils/getPreferredResponseFormat';
+import GenerateItExpressResponse from '@/http/nodegen/interfaces/GenerateItExpressResponse';
 
 export default () => {
 
-  return (req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
+  return (req: NodegenRequest, res: GenerateItExpressResponse, next: express.NextFunction) => {
 
     res.inferResponseType = (
-      dataOrPath: any = undefined,
-      status: number = 200,
-      permittedTypes: string[] = [],
-      outputMap?: any
+      dataOrPath = undefined,
+      status = 200,
+      permittedTypes,
+      outputMap?
     ) => {
       // Send only a status when data is undefined
       if (dataOrPath === undefined) {
@@ -22,7 +23,7 @@ export default () => {
       // When the accept header is not provided then we fallback to the 1st permittedType
       // The last fallback is then application/json
       const calculatedAcceptHeader = req.headers['accept'] ?
-        getPreferredResponseFormat(req.headers['accept'], permittedTypes) :
+        getPreferredResponseFormat(req.headers['accept'], Array.isArray(permittedTypes) ? permittedTypes : [permittedTypes]) :
         permittedTypes[0] || 'application/json';
 
       if (calculatedAcceptHeader) {

@@ -10,6 +10,7 @@ import Router from 'express-promise-router'
 import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
 import {{ucFirst(operation_name)}}Domain from '../../../domains/{{ucFirst(operation_name)}}Domain'
 import {{_.camelCase(operation_name)}}TransformOutputs from '../transformOutputs/{{operation_name}}TransformOutput'
+import GenerateItExpressResponse from '@/http/nodegen/interfaces/GenerateItExpressResponse';
 
 export default function() {
   const router = Router();
@@ -29,7 +30,7 @@ export default function() {
         {% if pathsHasParamsToValidate(path) %}celebrate({{ _.camelCase(operation_name) }}Validators.{{path.operationId}}), /* Validate the request data and return validation errors */ {% endif %}
         {% if path['x-async-validators'] %}asyncValidationMiddleware({{ path['x-async-validators'] | dump }}), /* Call an async validator function and throw an appropriate error */ {% endif %}
         {% if path['x-cache'] %}apiCaching({{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}), /* Lastly, if x-cache is found, call the api cache middleware */ {% endif %}
-        async (req: any, res: express.Response) => {
+        async (req: any, res: GenerateItExpressResponse) => {
           res.inferResponseType(
             {% if path['x-worker'] -%}
             await WorkerService.handleRequestWithWorker(req, '{{ucFirst(operation_name)}}Domain', '{{path.operationId}}', [{{pathParamsToDomainParams(method, path, false, true, 'params')}}]),
