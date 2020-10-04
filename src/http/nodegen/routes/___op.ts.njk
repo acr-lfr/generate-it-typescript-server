@@ -1,6 +1,5 @@
 import express from 'express'
 import Router from 'express-promise-router'
-import objectReduceByMap from 'object-reduce-by-map'
 
 {% if operationsPathsHasParamsToValidate(operations) %}import {celebrate} from 'celebrate'{% endif %}
 {% if pathMethodsHaveAttr(operations, 'security') %}import accessTokenMiddleware from '../middleware/accessTokenMiddleware'{% endif %}
@@ -11,6 +10,7 @@ import objectReduceByMap from 'object-reduce-by-map'
 import {{ _.camelCase(operation_name) }}Validators from'../validators/{{ prettifyRouteName(operation_name) }}Validators'
 import {{ucFirst(operation_name)}}Domain from '../../../domains/{{ucFirst(operation_name)}}Domain'
 import {{_.camelCase(operation_name)}}TransformOutputs from '../transformOutputs/{{operation_name}}TransformOutput'
+import GenerateItExpressResponse from '@/http/nodegen/interfaces/GenerateItExpressResponse';
 
 export default function() {
   const router = Router();
@@ -30,47 +30,17 @@ export default function() {
         {% if pathsHasParamsToValidate(path) %}celebrate({{ _.camelCase(operation_name) }}Validators.{{path.operationId}}), /* Validate the request data and return validation errors */ {% endif %}
         {% if path['x-async-validators'] %}asyncValidationMiddleware({{ path['x-async-validators'] | dump }}), /* Call an async validator function and throw an appropriate error */ {% endif %}
         {% if path['x-cache'] %}apiCaching({{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}), /* Lastly, if x-cache is found, call the api cache middleware */ {% endif %}
-        async (req: any, res: express.Response) => {
-          {% if not path.produces or path.produces and arrayContains('application/json', path.produces) %}
-            {% if path['x-worker'] %}
-                {% if getSingleSuccessResponse(path.responses) %}
-              return res.status({{ getSingleSuccessResponse(path.responses) }}).json(
-                {% else %}
-              return res.json(
-                {% endif %}
-                objectReduceByMap(
-                  await WorkerService.handleRequestWithWorker(
-                    req,
-                    '{{ucFirst(operation_name)}}Domain',
-                    '{{path.operationId}}',
-                    [{{pathParamsToDomainParams(method, path, false, true, 'params')}}]
-                  ),
-                  {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
-                )
-              );
-            {% else %}
-              {% set successCode = getSingleSuccessResponse(path.responses) or 200 -%}
-              {% if path.responses[successCode].schema or (path.responses[successCode] and path.responses[successCode].content and path.responses[successCode].content["application/json"]) -%}
-                return res.status({{ successCode }}).json(
-                  objectReduceByMap(
-                    await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
-                      {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
-                  )
-                );
-              {% else %}
-                await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}})
-                return res.sendStatus({{ successCode }});
-              {% endif %}
-            {% endif %}
-          {% elseif not path.produces or path.produces and arrayContains('image/', path.produces)%}
-            return res.sendFile(
-              await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(metod, path, false, true, 'params')}})
-            );
-          {% else %}
-            return res.download(
-              await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}})
-            );
-          {% endif %}
+        async (req: any, res: GenerateItExpressResponse) => {
+          res.inferResponseType(
+            {% if path['x-worker'] -%}
+            await WorkerService.handleRequestWithWorker(req, '{{ucFirst(operation_name)}}Domain', '{{path.operationId}}', [{{pathParamsToDomainParams(method, path, false, true, 'params')}}]),
+            {% else -%}
+            await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
+            {% endif -%}
+            {{ getSingleSuccessResponse(path.responses) or 200 }},
+            {% if path.produces -%}'{{ path.produces }}'{% else %}undefined{% endif %},
+            {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
+          )
         }
       );
       {% endif %}
