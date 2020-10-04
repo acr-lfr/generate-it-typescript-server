@@ -3,7 +3,7 @@
     {
       "templateVersion": "2.0.0",
       "minCoreVersion": "5.20.0",
-      "description": "The http layer is now fully managed, future advancement will be configurable customisation of the http layer.",
+      "description": "The http layer is now fully managed with custom middleware injectable, additionally all output content-type is now inferred.",
       "changes": [
         "[manual change required] nodegenDir in the .nodegenrc file now has value 'src/http'",
         "[manual change required] app.ts now only calls @/src/http, see the latest in github for how it should now look",
