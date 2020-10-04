@@ -24,13 +24,13 @@ export default () => {
       // Calculate the calculatedAcceptHeader based on the provided accept header
       // When the accept header is not provided then we fallback to the 1st permittedType
       // The last fallback is then application/json
-      const calculatedAcceptHeader = req.headers['accept'] ?
+      const calculatedContentType = req.headers['accept'] ?
         getPreferredResponseFormat(req.headers['accept'], permittedTypes) :
         permittedTypes.length > 0 ? permittedTypes[0] : 'application/json';
 
-      if (calculatedAcceptHeader) {
+      if (calculatedContentType) {
         // The most typical is json so lets catch it 1st
-        if (calculatedAcceptHeader === 'application/json') {
+        if (calculatedContentType === 'application/json') {
           return res
             .status(status)
             .json(
@@ -42,14 +42,14 @@ export default () => {
         }
 
         // All images use with sendFile
-        if (calculatedAcceptHeader.includes('image/') || calculatedAcceptHeader.includes('font/')) {
+        if (calculatedContentType.includes('image/') || calculatedContentType.includes('font/')) {
           return res.sendFile(dataOrPath);
         }
 
         // Simple pass for text/* let the consumer handle the rest
-        if (calculatedAcceptHeader.includes('text/')) {
+        if (calculatedContentType.includes('text/')) {
           return res
-            .set('Content-Type', calculatedAcceptHeader)
+            .set('Content-Type', calculatedContentType)
             .status(status)
             .send(dataOrPath);
         }
@@ -59,7 +59,7 @@ export default () => {
         // is not included
         return res.download(dataOrPath);
 
-      } else if (req.headers['accept'] && !calculatedAcceptHeader) {
+      } else if (req.headers['accept'] && !calculatedContentType) {
         console.error(`Accept Header ${req.headers['accept']} requested but not permitted`);
         return res
           .status(406)
