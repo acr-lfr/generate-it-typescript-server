@@ -4,16 +4,19 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+- [High level design](#high-level-design)
 - [API Spec file helpers/features](#api-spec-file-helpersfeatures)
     - [Access full request in domain](#access-full-request-in-domain)
     - [Allow non authenticated request to access domain](#allow-non-authenticated-request-to-access-domain)
     - [CLI](#cli)
+    - [Inferring output content-type](#inferring-output-content-type)
     - [Input/ouput filters (validation)](#inputouput-filters-validation)
     - [Async route validation](#async-route-validation)
         - [A standard setup:](#a-standard-setup)
         - [Inject parameters to the async function:](#inject-parameters-to-the-async-function)
     - [Permission helper](#permission-helper)
     - [NodegenRC Helpers](#nodegenrc-helpers)
+      - [Jwt Definition](#jwt-definition)
     - [Access validation service](#access-validation-service)
     - [Caching](#caching)
     - [Errors](#errors)
@@ -23,6 +26,28 @@
     - [Tip 2 for older versions of openapi-nodegen](#tip-2-for-older-versions-of-openapi-nodegen)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## High level design
+All HTTP code is generated and managed; the generated and managed code lives in `src/http/nodegen`. No custom code should live here as the directory is reset on re-generate.
+
+The domain layer is where all business logic should live, the domain layer is initially generated from [___stub](https://acrontum.github.io/generate-it/#/_pages/templates?id=stub) templates from generate-it. 
+
+**The overall design pattern** for the architecture is influenced by traditional [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) but also the popular frameworks like [laravel](https://laravel.com/) and [symfony](https://symfony.com/); 
+- The `app.ts` loads database connections and the express framework, including the middlewares and routes.
+- The generated routes, imported from the generated `src/http/nodegen/routesImporter.ts`, handle all incoming HTTP traffic and validation (both input and output).
+- Each route will lead to a domain method (`src/domains`) which houses the business logic, eg your custom code.
+- Data returned from a domain method is captured by the same route function it is was called from, the router sends the output to the `inferResponseType.ts` response middleware which outputs data in the format requested from the client in conjunction with the permitted types defined by the openapi file.
+
+**Accessing your API via CLI**; similar to the Symfony framework CLI commands should be written and stored; in this case in the `src/cli` directory. The sequence is:
+- Write and store a script in `src/cli`, no special format required, just a simple script and you have full access to your apps code.
+  - Could be as simple as `console.log('hello world')`
+- Lets say the script was named `seedUsers.ts`; call it like this `npm run cli-script -- seedUsers`
+  - The `server.ts` loads the app as normal.
+  - After initializing the `app.ts` it will simply call your script opposed to starting another instance of your API.
+  - With the business logic completely extracted into the domain layer, you can easily access this layer without mocking any of http content. 
+
+**Testing the API**; as the http layer is now managed, testing becomes less time-consuming. As the app's business logic all sits in the domain layer, as long as you ensure a very high % coverage of unit tests for the domain layer you can think of these as your API integration tests and consider your API reasonably well tested. Testing is of course up to you. To actually mock test the API you can include into your API the API Test rig (see [known-templates](https://acrontum.github.io/generate-it/#/_pages/known-templates))
+
 
 ## API Spec file helpers/features
 These templates inject into the code helpful elements depending on the provided api file.
@@ -55,6 +80,13 @@ This will pass "user-seeder" to `src/cli/run.ts` which will attempt to execute t
 If the runner cannot find the provided script within the cli folder an error is thrown.
 
 By default `src/cli/run.ts` will not run on production.
+
+#### Inferring output content-type
+The `inferResponseType` middleware will infer which `content-type` to return based on the requests `Access` header and what you provide the API on generation via openapi. The fallback is always `application/json`.
+
+To output a file, for example a PDF, the domain layer should return the absolute path in a simple string. Assuming the openapi states it can produce the desired format, in this case `application/pdf`, then the `inferResponseType` will call the express `res.download` method.
+
+See `src/http/nodegen/middleware/inferResponseType.ts`
 
 #### Input/ouput filters (validation)
 The [**input**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by the npm package [celebrate](https://www.npmjs.com/package/celebrate). Anything not declared in the request by the swagger file will simply result in a 422 error being passed back to the client and will not hit the domain layer.
@@ -154,6 +186,7 @@ The stub helpers will mean the domain method types will be `JwtAccess` or `Nodeg
 
 The `NodegenRequest` interface is [provided by these templates](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/interfaces/NodegenRequest.ts) out of the box so nothing extra required (a domain gets a full req object based on the [core feature](https://acrontum.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)). This interface extends the express request interface with the additional attributes added by this setup.
 
+##### Jwt Definition 
 The `JwtAccess` interface is not provided, it expects that you have in your api file a definition by this name. You can see an example in the core: [example JwtAccess interface](https://github.com/acrontum/openapi-nodegen/blob/develop/test_swagger.yml#L176). If you want to use a different interface name, change the value of "jwtType", if you don't want it at all, just delete it from your `.nodegenrc` file.
 
 It also expects that you name it "jwtToken" in the yaml file.
