@@ -19,12 +19,14 @@ export default () => {
         return res.sendStatus(status);
       }
 
+      permittedTypes = Array.isArray(permittedTypes) ? permittedTypes : [permittedTypes];
+
       // Calculate the calculatedAcceptHeader based on the provided accept header
       // When the accept header is not provided then we fallback to the 1st permittedType
       // The last fallback is then application/json
       const calculatedAcceptHeader = req.headers['accept'] ?
-        getPreferredResponseFormat(req.headers['accept'], Array.isArray(permittedTypes) ? permittedTypes : [permittedTypes]) :
-        permittedTypes[0] || 'application/json';
+        getPreferredResponseFormat(req.headers['accept'], permittedTypes) :
+        permittedTypes.length > 0 ? permittedTypes[0] : 'application/json';
 
       if (calculatedAcceptHeader) {
         // The most typical is json so lets catch it 1st
