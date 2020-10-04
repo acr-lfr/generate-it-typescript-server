@@ -10,7 +10,7 @@ export default function (app: express.Application, basePath = baseUrl) {
   basePath = (basePath || '').replace(/\/+$/, '');
 
   {% for groupName, firstUrlSegment in groupNamesWithFirstUrlSegment -%}
-  app.use(basePath + '/{{firstUrlSegment}}', {{prettifyRouteName(groupName)}}Routes());
+  app.use(basePath + '/{{firstUrlSegment if firstUrlSegment != 'root' else ''}}', {{prettifyRouteName(groupName)}}Routes());
 
   {% endfor -%}
 
