@@ -1,5 +1,5 @@
 {
-  "nodegenDir": "src/http/nodegen",
+  "nodegenDir": "src/http",
   "nodegenMockDir": "src/domains/__mocks__",
   "nodegenType": "server",
   "segmentFirstGrouping": 2,

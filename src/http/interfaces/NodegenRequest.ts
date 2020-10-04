@@ -1,9 +1,8 @@
 import express from 'express';
-import { JwtAccess } from '@/http/nodegen/interfaces';
+{% if nodegenRc.helpers.stub.jwtType %}import { {{ nodegenRc.helpers.stub.jwtType }} } from '@/http/nodegen/interfaces';{% endif %}
 
 export default interface NodegenRequest extends express.Request {
-  jwtData: JwtAccess;
+  jwtData: {{ nodegenRc.helpers.stub.jwtType if nodegenRc.helpers.stub.jwtType else 'any' }};
   originalToken: string;
   clientIp: string;
 }
-

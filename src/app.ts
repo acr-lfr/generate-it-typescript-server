@@ -1,20 +1,15 @@
-import { requestMiddleware, responseMiddleware } from '@/http/nodegen/middleware';
-import routesImporter from '@/http/nodegen/routesImporter';
-import express from 'express';
+import http, { Http } from '@/http';
 
 /**
  * Returns a promise allowing the server or cli script to know
  * when the app is ready; eg database connections established
  */
-export default (): Promise<express.Express> => {
-  return new Promise((resolve, reject) => {
-    // Here is a good place to connect to databases if required,
-    // resolve once connected else reject
-    const app = express();
+export default async (port: number): Promise<Http> => {
+  // Here is a good place to connect to databases if required or setup
+  // filesystems or any other async action required before starting:
+  // ...
 
-    requestMiddleware(app);
-    routesImporter(app);
-    responseMiddleware(app);
-    return resolve(app);
-  });
+  // Return the http layer, to inject custom middleware pass the HttpOptions
+  // argument. See the @/http/index.ts
+  return http(port);
 };

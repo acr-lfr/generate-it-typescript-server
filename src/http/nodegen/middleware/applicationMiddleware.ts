@@ -6,6 +6,7 @@ import {
   handleHttpException,
   handleValidationErrors,
   headersCaching,
+  inferResponseType,
 } from '@/http/nodegen/middleware';
 import queryArrayParserMiddleware from '@/http/nodegen/middleware/queryArrayParserMiddleware';
 import bodyParser from 'body-parser';
@@ -65,6 +66,7 @@ export const requestMiddleware = (app: express.Application): void => {
   accessLogger(app);
   requestParser(app);
   responseHeaders(app);
+  app.use(inferResponseType());
 };
 
 /**
@@ -74,10 +76,6 @@ export const requestMiddleware = (app: express.Application): void => {
 export const responseMiddleware = (app: express.Application): void => {
   app.use(handleExpress404());
   app.use(handleDomain404());
-
-  // Validation requests
   app.use(handleValidationErrors());
-
-  // Handle HTTP errors
   app.use(handleHttpException());
 };
