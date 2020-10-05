@@ -4,7 +4,7 @@ import routesImporter from '@/http/nodegen/routesImporter';
 import packageJson from '../../package.json';
 
 export interface Http {
-  express: express.Express,
+  expressApp: express.Application,
   start: () => void
 }
 
@@ -31,7 +31,7 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
     });
   }
   return {
-    express: app,
+    expressApp: app,
     start: (): void => {
       app.listen(port, () => {
         console.log(`${packageJson.name}:${packageJson.version} server listening on port, ${port}`);
