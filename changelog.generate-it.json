@@ -9,6 +9,14 @@
         "[manual change required] app.ts now only calls @/src/http, see the latest src/app.ts in github for how it should now look",
         "[manual change required] server.ts now must call the http.start() function returned, see the latest server.ts in github for how it should now look"
       ]
+    },
+    {
+      "templateVersion": "2.0.1",
+      "minCoreVersion": "5.20.0",
+      "description": "Giving the express app back to the developer in app.ts",
+      "changes": [
+        "[feat] The express app is returned in the http module"
+      ]
     }
   ]
 }
