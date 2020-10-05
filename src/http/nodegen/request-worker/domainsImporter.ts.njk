@@ -1,11 +1,11 @@
 {% for key, value in groupNamesWithFirstUrlSegment -%}
-{% set domainClassName = ucFirst(key) + 'Domain' -%}
+{% set domainClassName = ucFirst(prettifyRouteName(key)) + 'Domain' -%}
 import {{ domainClassName }} from '@/domains/{{ domainClassName }}';
 {% endfor -%}
 
 export {
   {% for key, value in groupNamesWithFirstUrlSegment -%}
-  {% set domainClassName = ucFirst(key) + 'Domain' -%}
+  {% set domainClassName = ucFirst(prettifyRouteName(key)) + 'Domain' -%}
   {{ domainClassName }},
   {% endfor %}
 };
