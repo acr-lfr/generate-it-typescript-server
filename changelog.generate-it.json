@@ -17,6 +17,14 @@
       "changes": [
         "[feat] The express app is returned in the http module"
       ]
+    },
+    {
+      "templateVersion": "2.0.2",
+      "minCoreVersion": "5.20.0",
+      "description": "Fixes domainsImporter for grouped domain URLs",
+      "changes": [
+        "[fix] src/http/nodegen/request-worker/domainsImporter.ts.njk iterates the new groupNamesWithFirstUrlSegment opposed to the old endpoints"
+      ]
     }
   ]
 }
