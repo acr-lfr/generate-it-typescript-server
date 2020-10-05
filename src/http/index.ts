@@ -1,3 +1,4 @@
+import { AddressInfo } from 'net';
 import express from 'express';
 import { requestMiddleware, responseMiddleware } from '@/http/nodegen/middleware';
 import routesImporter from '@/http/nodegen/routesImporter';
@@ -33,8 +34,8 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
   return {
     expressApp: app,
     start: (): void => {
-      app.listen(port, () => {
-        console.log(`${packageJson.name}:${packageJson.version} server listening on port, ${port} with process ID (pid): ${process.pid}`);
+      const server = app.listen(port, () => {
+        console.log(`${packageJson.name}:${packageJson.version} server listening on port, ${(server.address() as AddressInfo).port}`);
       });
     }
   };
