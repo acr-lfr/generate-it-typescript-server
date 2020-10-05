@@ -34,7 +34,7 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
     expressApp: app,
     start: (): void => {
       app.listen(port, () => {
-        console.log(`${packageJson.name}:${packageJson.version} server listening on port, ${port}`);
+        console.log(`${packageJson.name}:${packageJson.version} server listening on port, ${port} with process ID (pid): ${process.pid}`);
       });
     }
   };
