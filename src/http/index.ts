@@ -4,6 +4,7 @@ import routesImporter from '@/http/nodegen/routesImporter';
 import packageJson from '../../package.json';
 
 export interface Http {
+  express: express.Express,
   start: () => void
 }
 
@@ -17,19 +18,20 @@ export interface HttpOptions {
 export default async (port: number, options?: HttpOptions): Promise<Http> => {
   const app = express();
   requestMiddleware(app);
-  if(options?.preRouteApplicationRequestHandlers){
+  if (options?.preRouteApplicationRequestHandlers) {
     options?.preRouteApplicationRequestHandlers.forEach((applicationRequestHandler) => {
-      app.use(applicationRequestHandler)
-    })
+      app.use(applicationRequestHandler);
+    });
   }
   routesImporter(app);
   responseMiddleware(app);
-  if(options?.postRouteApplicationRequestHandlers){
+  if (options?.postRouteApplicationRequestHandlers) {
     options?.postRouteApplicationRequestHandlers.forEach((applicationRequestHandler) => {
-      app.use(applicationRequestHandler)
-    })
+      app.use(applicationRequestHandler);
+    });
   }
   return {
+    express: app,
     start: (): void => {
       app.listen(port, () => {
         console.log(`${packageJson.name}:${packageJson.version} server listening on port, ${port}`);
