@@ -5,7 +5,7 @@ export default interface GenerateItExpressResponse extends express.Response {
   inferResponseType: (
     dataOrPath: any,
     status: number,
-    permittedTypes: string | string[],
-    outputMap?: any
+    produces: string,
+    outputMap?: Record<string, any>
   ) => any
 }
