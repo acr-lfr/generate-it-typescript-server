@@ -37,17 +37,11 @@ export default (accept: string, mimes: string[]): string => {
   const willAccept = new RegExp(parts.join('|'));
   const matchingAccept = priority.find((mimeTypes) => mimeTypes.find((mime) => willAccept.test(mime)))?.[0];
 
-  let matchRegex: string | RegExp = 'NOPE';
-
-  if (matchingAccept) {
-    matchRegex = new RegExp(matchingAccept.replace(/\*/g, '[^/]*'));
-  }
-
   if (!matchingAccept) {
     return;
   }
 
-  const contentType = mimes.find((mime) => (matchRegex as RegExp).test(mime));
+  const matchRegex = new RegExp(matchingAccept.replace(/\*/g, '[^/]*'));
 
-  return contentType;
+  return mimes.find((mime) => matchRegex.test(mime));
 };
