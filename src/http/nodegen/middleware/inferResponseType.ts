@@ -29,7 +29,9 @@ export default () => {
         throw new NotAcceptableException(`Requested content-type "${accept}" not supported`);
       }
 
-      // No "produces" in the openapi file
+      res.set('Content-Type', responseContentType);
+
+      // No "produces", or json in the openapi file
       if (responseContentType === 'application/json') {
         return res.status(status).json(objectReduceByMap(dataOrPath, outputMap));
       }
@@ -41,7 +43,7 @@ export default () => {
 
       // Simple pass for text/* let the consumer handle the rest
       if (responseContentType.startsWith('text/')) {
-        return res.set('Content-Type', responseContentType).status(status).send(dataOrPath);
+        return res.status(status).send(dataOrPath);
       }
 
       // Everything else we assume the input is a path to a file and should be downloaded
