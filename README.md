@@ -88,6 +88,30 @@ To output a file, for example a PDF, the domain layer should return the absolute
 
 See `src/http/nodegen/middleware/inferResponseType.ts`
 
+##### application/vnd.api+json
+For the most typical use case no additional work is required, however in some cases you may find that the consumer sends for application/json something like: `application/vnd.api+json` or similar.
+
+In this case you can extend the default produces types using a top level produces attribute in your openapi file eg if you are using BOATS:
+```
+swagger: "2.0"
+
+info:
+  description: {{ packageJson('description') }}
+  version: {{ packageJson('version') }}
+  title: {{ packageJson('name') }}
+  contact:
+    email: bob@generate-it.com
+
+schemes:
+  - "http"
+  - "https"
+
+host: {{ host if host else 'localhost:8000' }}
+
+produces:
+ - application/vnd.api+json
+```
+
 #### Input/ouput filters (validation)
 The [**input**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by the npm package [celebrate](https://www.npmjs.com/package/celebrate). Anything not declared in the request by the swagger file will simply result in a 422 error being passed back to the client and will not hit the domain layer.
 

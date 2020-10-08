@@ -41,7 +41,7 @@ export default (accept: string, mimes: string[]): string => {
     return;
   }
 
-  const matchRegex = new RegExp(matchingAccept.replace(/\*/g, '[^/]*'));
+  const matchRegex = new RegExp(matchingAccept.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*'));
 
   return mimes.find((mime) => matchRegex.test(mime));
 };
