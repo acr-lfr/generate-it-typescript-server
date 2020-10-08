@@ -19,7 +19,12 @@ export default () => {
       }
 
       const accept = req.headers['accept'] || '*/*';
-      let possibleResponseTypes: string[] = produces ? [...produces.split(',')] : ['application/json'];
+      const possibleResponseTypes: string[] = produces ? [...produces.split(',')] : ['application/json'];
+
+      const apiProduces = '{{ swagger.produces }}'.split(';').map((s: string) => s.replace(/,.*/, '').trim());
+      if (apiProduces?.length) {
+        possibleResponseTypes.push(...apiProduces);
+      }
 
       // Calculate the responseContentType based on the provided accept header
       let responseContentType = getPreferredResponseFormat(accept, possibleResponseTypes);
