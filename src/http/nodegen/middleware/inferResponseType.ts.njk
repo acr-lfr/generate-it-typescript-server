@@ -24,7 +24,6 @@ export default () => {
 
       const accept = req.headers['accept'] || '*/*';
 
-
       const possibleResponseTypes: string[] = produces
         ? [...produces.split(',')]
         : ['application/json', ...apiProduces];
