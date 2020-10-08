@@ -13,6 +13,9 @@ export default (accept: string, mimes: string[]): string => {
     throw new Error('Should not be hit');
   }
 
+  // escape all special chars except *
+  const formatRegex = (s: string) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+
   const priority: string[][] = accept.split(/\s*,\s*/).reduce((acc, val) => {
     const [mime, prio] = val.split(';');
     const prioValue = (prio || '1').replace(/.*=\s*/, '');
@@ -26,7 +29,7 @@ export default (accept: string, mimes: string[]): string => {
     if (!mime) {
       return acc;
     }
-    const [type, subtype] = mime.split('/');
+    const [type, subtype] = mime.split('/').map(formatRegex);
     if (!subtype) {
       return acc.concat(type.replace(/\*/g, '\\*'));
     }
@@ -40,6 +43,7 @@ export default (accept: string, mimes: string[]): string => {
   if (!matchingAccept) {
     return;
   }
+
 
   const matchRegex = new RegExp(matchingAccept.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*'));
 

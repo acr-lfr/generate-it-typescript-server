@@ -39,7 +39,7 @@ export default () => {
       res.set('Content-Type', responseContentType);
 
       // No "produces", or json in the openapi file
-      if (responseContentType === 'application/json') {
+      if (responseContentType === 'application/json' || responseContentType === 'application/vnd.api+json') {
         return res.status(status).json(objectReduceByMap(dataOrPath, outputMap));
       }
 
