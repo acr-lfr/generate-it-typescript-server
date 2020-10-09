@@ -12,8 +12,9 @@ class {{ domainClassName }} implements {{ domainInterfaceName }} {
       {% if isValidMethod(method) %}
   /**
    * Operation ID: {{ path.operationId }}
-   * {% if path.summary %}Summary: {{ path.summary }}{% endif %}
-   * {% if path.description %}Description: {{ path.description | trim }}{% endif %}
+   * Summary: {{ path.summary if path.summary else 'No summary provided' }}
+   * Description: {{ path.description | trim if path.description else 'No description provided' }}
+   * Pre-domain Async Validators used: {{ path['x-async-validators'] | dump if path['x-async-validators'] else 'None used' }}
    */
   {%- set singleSuccessResponse = getSingleSuccessResponse(path['x-response-definitions']) %}
   public async {{ path.operationId }} ({{ pathParamsToDomainParams(method, path, true, false, 'params') }}): Promise<{{ path['x-response-definitions'][singleSuccessResponse] if singleSuccessResponse else 'any' }}> {
