@@ -11,14 +11,30 @@ class {{ domainClassName }} implements {{ domainInterfaceName }} {
     {% for method, path in op.path -%}
       {% if isValidMethod(method) %}
         {% set securityNames = getSecurityNames(path, swagger) -%}
+        {% set description = path.description | trim if path.description else 'No description written' %}
+        {% set docBlock = '
   /**
-   * Operation ID: {{ path.operationId }}
-   * Summary: {{ path.summary if path.summary else 'No summary provided' }}
-   * Description: {{ path.description | trim if path.description else 'No description provided' }}
-   * Security header(s): {{ securityNames if securityNames else 'None used' }}
-   * Permission string: {{ path['x-permission'] if path['x-permission'] else 'None used' }}
-   * Pre-domain async-validators: {{ path['x-async-validators'] | dump if path['x-async-validators'] else 'None used' }}
-   */
+   * Operation ID: ' + path.operationId + '
+   * Summary: ' + path.summary %}
+      {% set docBlock = docBlock + '
+   * Description: ' + description %}
+
+{% if securityNames %}
+  {% set docBlock = docBlock + '
+   * Security header(s): ' + securityNames %}
+{% endif %}
+{% if path['x-permission'] %}
+  {% set docBlock = docBlock + '
+   * Permission string: ' + path['x-permission'] %}
+{% endif %}
+{% if path['x-async-validators'] %}
+  {% set docBlock = docBlock + '
+   * Pre-domain async-validators: ' + path['x-async-validators'] %}
+{% endif %}
+  {% set docBlock = docBlock + '
+  **/' %}
+
+  {{ docBlock }}
   {%- set singleSuccessResponse = getSingleSuccessResponse(path['x-response-definitions']) %}
   public async {{ path.operationId }} ({{ pathParamsToDomainParams(method, path, true, false, 'params') }}): Promise<{{ path['x-response-definitions'][singleSuccessResponse] if singleSuccessResponse else 'any' }}> {
     {% if mockServer %}
