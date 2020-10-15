@@ -25,15 +25,7 @@ export default (asyncValidators: string[]) => {
     }
   };
 
-  return async (req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
-    let error = null
-
-    try {
-      await parseValidators(req, asyncValidators);
-    } catch (e) {
-      error = e;
-    }
-
-    return error ? next(error) : next();
+  return (req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
+    return parseValidators(req, asyncValidators).then(() => next()).catch(e => next(e));
   };
 }
