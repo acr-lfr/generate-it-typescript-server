@@ -23,9 +23,7 @@ export class HttpException extends Error {
   set body(body: string | Record<string, any>) {
     this.rawBody = body;
     const fmt = HttpErrorsService.formatException(this);
-    if (fmt === this) {
-      this.rawBody = this.toJSON();
-    }
+    this.rawBody = fmt === this ? this.toJSON() : fmt;
   }
 
   isJson() {
