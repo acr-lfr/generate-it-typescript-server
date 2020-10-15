@@ -17,6 +17,7 @@
     - [Permission helper](#permission-helper)
     - [NodegenRC Helpers](#nodegenrc-helpers)
       - [Jwt Definition](#jwt-definition)
+      - [Extending the request object](#extending-the-request-object)
     - [Access validation service](#access-validation-service)
     - [Caching](#caching)
     - [Errors](#errors)
@@ -201,7 +202,8 @@ The default `.nodegenrc` will contain:
   "helpers": {
     "stub": {
       "jwtType": "JwtAccess",
-      "requestType": "NodegenRequest"
+      "requestType": "NodegenRequest",
+      "requestTypeExtensionPath": "@/interfaces/NodegenRequest"
     }
   }
 }
@@ -214,6 +216,19 @@ The `NodegenRequest` interface is [provided by these templates](https://github.c
 The `JwtAccess` interface is not provided, it expects that you have in your api file a definition by this name. You can see an example in the core: [example JwtAccess interface](https://github.com/acrontum/openapi-nodegen/blob/develop/test_swagger.yml#L176). If you want to use a different interface name, change the value of "jwtType", if you don't want it at all, just delete it from your `.nodegenrc` file.
 
 It also expects that you name it "jwtToken" in the yaml file.
+
+##### Extending the request object
+By default, the request object received in the domain is extended with the interface `NodegenRequest`. By setting the optional parameter
+`helpers.stub.requestTypeExtensionPath` in the `.nodegenrc`, you can provide an interface from which `NodegenRequest` will also extend.
+
+For example, to extend the request with a user, set `helpers.stub.requestTypeExtensionPath: "src/interfaces/RequestExtension"`
+
+`src/interfaces/RequestExtension.ts`
+```typescript
+export default interface RequestExtension {
+  user: User
+}
+```
 
 #### Access validation service
 Within the nodegen folder there is a middlware `accessTokenMiddleware.ts` injected into the routes when a security attribute is found in the api path.
