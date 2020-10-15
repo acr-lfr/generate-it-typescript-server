@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# if any errors occur, abort with erorr code
+# this will prevent restart loops if any command fails
+set -e
+
 echo "Command: $@"
 
 command="${1:-prod}"
