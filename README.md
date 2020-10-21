@@ -97,9 +97,9 @@ In this case you can extend the default produces types using a top level produce
 swagger: "2.0"
 
 info:
-  description: {{ packageJson('description') }}
-  version: {{ packageJson('version') }}
-  title: {{ packageJson('name') }}
+  description: [[ packageJson('description') ]]
+  version: [[ packageJson('version') ]]
+  title: [[ packageJson('name') ]]
   contact:
     email: bob@generate-it.com
 
@@ -107,7 +107,7 @@ schemes:
   - "http"
   - "https"
 
-host: {{ host if host else 'localhost:8000' }}
+host: [[ host if host else 'localhost:8000' ]]
 
 produces:
  - application/vnd.api+json
