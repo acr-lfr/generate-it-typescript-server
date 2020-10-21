@@ -21,6 +21,8 @@ export default () => {
       let query = queries[key];
       if (query && query.includes(',')) {
         queries[key] = query.split(',').map((s: any) => decodeURIComponent((s)));
+      } else {
+        queries[key] = req.query[key];
       }
     }
     req.query = queries;
