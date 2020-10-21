@@ -22,7 +22,7 @@ export default () => {
       if (query && query.includes(',')) {
         queries[key] = query.split(',').map((s: any) => decodeURIComponent((s)));
       } else {
-        queries[key] = decodeURIComponent(queries[key]);
+        queries[key] = req.query[key];
       }
     }
     req.query = queries;
