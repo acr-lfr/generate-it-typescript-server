@@ -22,7 +22,7 @@ export default (accept: string, mimes: string[]): string => {
     // extension might look like { q: '0.1', charset: 'utf-8' }
     // https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.1
     const extension = extra.reduce((acc: Record<string, string>, val) => {
-      const [key, value] = val.split(/\s*=\s*/);
+      const [key, value] = val.split('=').map(s => s.trim());
       acc[key] = value;
 
       return acc;
