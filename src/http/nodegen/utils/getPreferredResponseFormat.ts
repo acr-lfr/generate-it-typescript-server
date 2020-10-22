@@ -17,7 +17,7 @@ export default (accept: string, mimes: string[]): string => {
   const formatRegex = (s: string) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
 
   const priority: string[][] = accept.split(/\s*,\s*/).reduce((acc, val) => {
-    const [mime, ...extra] = val.split(';');
+    const [mime, ...extra] = val.split(/\s*;\s*/);
 
     // extension might look like { q: '0.1', charset: 'utf-8' }
     // https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.1
