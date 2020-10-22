@@ -10,15 +10,25 @@
  */
 export default (accept: string, mimes: string[]): string => {
   if (!accept || !mimes?.length) {
-    throw new Error('Should not be hit');
+    return null;
   }
 
   // escape all special chars except *
   const formatRegex = (s: string) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
 
   const priority: string[][] = accept.split(/\s*,\s*/).reduce((acc, val) => {
-    const [mime, prio] = val.split(';');
-    const prioValue = (prio || '1').replace(/.*=\s*/, '');
+    const [mime, ...extra] = val.split(';');
+
+    // extension might look like { q: '0.1', charset: 'utf-8' }
+    // https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.1
+    const extension = extra.reduce((acc: Record<string, string>, val) => {
+      const [key, value] = val.split('=').map(s => s.trim());
+      acc[key] = value;
+
+      return acc;
+    }, {});
+
+    const prioValue = (extension.p || '1').replace(/.*=\s*/, '');
     const index = 10 - Math.round(parseFloat(prioValue) * 10);
     acc[index] = (acc[index] || []).concat(mime);
 

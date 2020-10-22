@@ -9,7 +9,7 @@ export default () => {
   return (req: NodegenRequest, res: GenerateItExpressResponse, next: express.NextFunction) => {
     const apiProduces = '{{ swagger.produces }}'
       .split(',')
-      .map((s: string) => s.replace(/;.*/, '').trim());
+      .reduce((a: string[], s: string) => a.concat(s, s.replace(/;.*/, '').trim()), []);
 
     res.inferResponseType = (
       dataOrPath = undefined,
