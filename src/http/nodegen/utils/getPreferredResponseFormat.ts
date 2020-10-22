@@ -10,7 +10,7 @@
  */
 export default (accept: string, mimes: string[]): string => {
   if (!accept || !mimes?.length) {
-    throw new Error('Should not be hit');
+    return null;
   }
 
   // escape all special chars except *
