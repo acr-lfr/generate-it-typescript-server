@@ -1,7 +1,7 @@
 import { AddressInfo } from 'net';
 import express from 'express';
 import { requestMiddleware, responseMiddleware } from '@/http/nodegen/middleware';
-import routesImporter from '@/http/nodegen/routesImporter';
+import routesImporter, { RoutesImporter } from '@/http/nodegen/routesImporter';
 import packageJson from '../../package.json';
 
 export interface Http {
@@ -10,27 +10,38 @@ export interface Http {
 }
 
 export interface HttpOptions {
-  // an array of valid express ApplicationRequestHandlers (middlewares) injected BEFORE loading routes
-  preRouteApplicationRequestHandlers?: any[]
+  // Options injectable into the routes importer
+  routesImporter?: RoutesImporter,
+
+  // An array of valid express ApplicationRequestHandlers (middlewares) injected BEFORE loading routes
+  preRouteApplicationRequestHandlers?: [any | [string, any]]
+
   // an array of valid express ApplicationRequestHandlers (middlewares) injected AFTER loading routes
-  postRouteApplicationRequestHandlers?: any[]
+  postRouteApplicationRequestHandlers?: [any | [string, any]]
 }
 
 export default async (port: number, options?: HttpOptions): Promise<Http> => {
   const app = express();
+
+  const useRequestHandlers = (requestHandlers: [(...args: any) => any | [string, any]]) => {
+    requestHandlers.forEach((handler: any) => app.use(...handler));
+  };
+
+  // Generally middlewares that should parse the request before hitting a route
   requestMiddleware(app);
   if (options?.preRouteApplicationRequestHandlers) {
-    options?.preRouteApplicationRequestHandlers.forEach((applicationRequestHandler) => {
-      app.use(applicationRequestHandler);
-    });
+    useRequestHandlers(options?.preRouteApplicationRequestHandlers);
   }
-  routesImporter(app);
+
+  // The actual API routes
+  routesImporter(app, options?.routesImporter);
+
+  // Generally middlewares that should parse the request if no route was hit
   responseMiddleware(app);
   if (options?.postRouteApplicationRequestHandlers) {
-    options?.postRouteApplicationRequestHandlers.forEach((applicationRequestHandler) => {
-      app.use(applicationRequestHandler);
-    });
+    useRequestHandlers(options?.postRouteApplicationRequestHandlers);
   }
+
   return {
     expressApp: app,
     start: (): void => {
