@@ -29,7 +29,9 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## High level design
-All HTTP code is generated and managed; the generated and managed code lives in `src/http/nodegen`. No custom code should live here as the directory is reset on re-generate.
+The http layer is completely managed, uses expressjs & lives at `src/http/` as defined in the `.nodegenrc` file (all files here are overwritten). 
+
+The `app.ts` calls the `src/http/index.ts` which returns the initialized express app. You can inject middleware and other options, see the `HttpOptions` interface in the `src/http/index.ts`.
 
 The domain layer is where all business logic should live, the domain layer is initially generated from [___stub](https://acrontum.github.io/generate-it/#/_pages/templates?id=stub) templates from generate-it. 
 
@@ -49,6 +51,38 @@ The domain layer is where all business logic should live, the domain layer is in
 
 **Testing the API**; as the http layer is now managed, testing becomes less time-consuming. As the app's business logic all sits in the domain layer, as long as you ensure a very high % coverage of unit tests for the domain layer you can think of these as your API integration tests and consider your API reasonably well tested. Testing is of course up to you. To actually mock test the API you can include into your API the API Test rig (see [known-templates](https://acrontum.github.io/generate-it/#/_pages/known-templates))
 
+## Injecting into the http layer
+You can inject some customisations into the http layer from the app.ts file.
+
+Here is an example, injecting a static route to be loaded before the http routes:
+````typescript
+import express from 'express';
+import path from 'path';
+import config from '@/config';
+import RabbitMQService from '@/events/rabbitMQ/RabbitMQService';
+import http, { Http } from '@/http';
+
+/**
+ * Returns a promise allowing the server or cli script to know
+ * when the app is ready; eg database connections established
+ */
+export default async (port: number): Promise<Http> => {
+  // Here is a good place to connect to databases if required or setup
+  // filesystems or any other async action required before starting:
+  await RabbitMQService.setup(config.rabbitMQ);
+
+  // Milliseconds for 1 year
+  const oneYearMS = 1000 * 60 * 60 * 24 * 365;
+
+  // Return the http layer, to inject custom middleware pass the HttpOptions
+  // argument. See the @/http/index.ts
+  return http(port, {
+    preRouteApplicationRequestHandlers: [
+      ['/image', express.static(path.join(config.file.baseFolderPath, config.file.resizedMount,), { maxAge: oneYearMS })]
+    ]
+  });
+};
+````
 
 ## API Spec file helpers/features
 These templates inject into the code helpful elements depending on the provided api file.

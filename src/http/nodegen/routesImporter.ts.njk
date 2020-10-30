@@ -4,10 +4,14 @@ import express from 'express';
 import {{prettifyRouteName(groupName)}}Routes from './routes/{{prettifyRouteName(groupName)}}Routes';
 {%- endfor %}
 
+export interface RoutesImporter {
+  basePath?: string
+}
+
 export const baseUrl = '{{swagger.basePath}}';
 
-export default function (app: express.Application, basePath = baseUrl) {
-  basePath = (basePath || '').replace(/\/+$/, '');
+export default function (app: express.Application, options: RoutesImporter = {basePath: baseUrl}) {
+  const basePath = (options.basePath || '').replace(/\/+$/, '');
 
   {% for groupName, firstUrlSegment in groupNamesWithFirstUrlSegment -%}
   app.use(basePath + '/{{firstUrlSegment if firstUrlSegment != 'root' else ''}}', {{prettifyRouteName(groupName)}}Routes());
