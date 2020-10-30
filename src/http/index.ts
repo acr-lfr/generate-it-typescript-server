@@ -23,14 +23,8 @@ export interface HttpOptions {
 export default async (port: number, options?: HttpOptions): Promise<Http> => {
   const app = express();
 
-  const useRequestHandlers = (requestHandlers: [any | [string, any]]) => {
-    requestHandlers.forEach((applicationRequestHandler) => {
-      if (Array.isArray(applicationRequestHandler)) {
-        app.use(applicationRequestHandler[0], applicationRequestHandler[1]);
-      } else {
-        app.use(applicationRequestHandler);
-      }
-    });
+  const useRequestHandlers = (requestHandlers: [(...args: any) => any | [string, any]]) => {
+    requestHandlers.forEach((handler: any) => app.use(...handler));
   };
 
   // Generally middlewares that should parse the request before hitting a route
