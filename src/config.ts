@@ -3,7 +3,6 @@ import ConfigHelper from 'openapi-nodegen-config-helper';
 
 dotenv.config();
 
-/* tslint:disable */
 /**
  * Add and remove config that you need.
  */
@@ -42,4 +41,3 @@ export default {
     )
   }
 };
-/* tslint:enable */
