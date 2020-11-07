@@ -33,9 +33,6 @@ export const requestParser = (app: express.Application): void => {
   );
   app.use(bodyParser.json({ limit: '50mb' }));
 
-  // parse query params
-  app.use(queryArrayParserMiddleware());
-
   // clear all empty files (size == 0)
   app.use(expressFormData.format());
 
