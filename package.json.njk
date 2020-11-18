@@ -6,7 +6,7 @@
   "author": "<add your company or personal name here>",
   "scripts": {
     "build": "ttsc -p .",
-    "cli-script": "VERBOSE=true && node ./build/server.js -r ",
+    "cli-script": "VERBOSE=true && ts-node ./server.ts -r ",
     "dev:setup": "git config core.hooksPath githooks && cp -n .env.example .env",
     "dev:build-watch": "ttsc --watch -p .",
     "dev:start-watch": "nodemon ./build/server.js",
@@ -74,7 +74,7 @@
     "jest": "^26.6.3",
     "nodemon": "^2.0.6",
     "ts-jest": "^26.4.3",
-    "ts-node": "^8.10.2",
+    "ts-node": "^9.0.0",
     "ttypescript": "^1.5.12",
     "typescript": "^4.0.5"
   }
