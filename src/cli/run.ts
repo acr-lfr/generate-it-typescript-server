@@ -16,5 +16,5 @@ export default (script: string, cliArgs: Record<string, any>): void => {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require(`./${script}`)(cliArgs);
+  require(`./${script}`).default(cliArgs);
 }
