@@ -8,5 +8,5 @@ const cliInput = appCli();
 const PORT = cliInput.port || config.port;
 
 app(PORT)
-  .then((http) => cliInput['run-script'] ? run(cliInput['run-script']) : http.start())
+  .then((http) => cliInput['run-script'] ? run(cliInput['run-script'])(cliInput) : http.start())
   .catch((e) => { throw e; });
