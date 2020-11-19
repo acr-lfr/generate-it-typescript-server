@@ -6,7 +6,7 @@ import path from 'path';
  * Will run a script relative to this file.
  * It is expected the script called will exit by itself.
  */
-export default (script: string): void => {
+export default (script: string, cliArgs: Record<string, any>): void => {
   if (config.env === 'production') {
     throw new Error('Do not run scripts on production.');
   }
@@ -16,5 +16,5 @@ export default (script: string): void => {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require(`./${script}`);
+  require(`./${script}`).default(cliArgs);
 }
