@@ -6,7 +6,6 @@ export { default as inferResponseType } from './inferResponseType';
 export { default as handleDomain404 } from './handleDomain404';
 export { default as handleExpress404 } from './handleExpress404';
 export { default as handleHttpException } from './handleHttpException';
-export { default as handleValidationErrors } from './handleValidationErrors';
 export { default as headersCaching } from './headersCaching';
 export { default as permissionMiddleware } from './permissionMiddleware';
 export { default as queryArrayParserMiddleware } from './queryArrayParserMiddleware';
