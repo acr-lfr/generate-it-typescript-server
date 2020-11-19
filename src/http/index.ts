@@ -5,25 +5,25 @@ import routesImporter, { RoutesImporter } from '@/http/nodegen/routesImporter';
 import packageJson from '../../package.json';
 
 export interface Http {
-  expressApp: express.Application,
-  start: () => void
+  expressApp: express.Application;
+  start: () => void;
 }
 
 export interface HttpOptions {
   // Options injectable into the routes importer
-  routesImporter?: RoutesImporter,
+  routesImporter?: RoutesImporter;
 
   // An array of valid express ApplicationRequestHandlers (middlewares) injected BEFORE loading routes
-  preRouteApplicationRequestHandlers?: [any | [string, any]]
+  preRouteApplicationRequestHandlers?: [any | [string, any]];
 
   // an array of valid express ApplicationRequestHandlers (middlewares) injected AFTER loading routes
-  postRouteApplicationRequestHandlers?: [any | [string, any]]
+  postRouteApplicationRequestHandlers?: [any | [string, any]];
 }
 
 export default async (port: number, options?: HttpOptions): Promise<Http> => {
   const app = express();
 
-  const useRequestHandlers = (requestHandlers: [(...args: any) => any | [string, any]]) => {
+  const useRequestHandlers = (requestHandlers: Array<(...args: any) => any> | Array<[string, any]>) => {
     requestHandlers.forEach((handler: any) => app.use(...handler));
   };
 
