@@ -3,10 +3,11 @@ import express from 'express';
 import { requestMiddleware, responseMiddleware } from '@/http/nodegen/middleware';
 import routesImporter, { RoutesImporter } from '@/http/nodegen/routesImporter';
 import packageJson from '../../package.json';
+import http from 'http';
 
 export interface Http {
   expressApp: express.Application;
-  start: () => void;
+  start: () => void | Promise<http.Server>;
 }
 
 export interface HttpOptions {
@@ -44,9 +45,12 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
 
   return {
     expressApp: app,
-    start: (): void => {
-      const server = app.listen(port, () => {
-        console.log(`${packageJson.name}:${packageJson.version} server listening on port, ${(server.address() as AddressInfo).port}`);
+    start: (): Promise<http.Server> => {
+      return new Promise<http.Server>((resolve) => {
+        const server = app.listen(port, () => {
+          console.log(`${packageJson.name}:${packageJson.version} server listening on port, ${(server.address() as AddressInfo).port}`);
+          return resolve(server);
+        });
       });
     }
   };
