@@ -25,6 +25,14 @@
       "changes": [
         "[fix] src/http/nodegen/request-worker/domainsImporter.ts.njk iterates the new groupNamesWithFirstUrlSegment opposed to the old endpoints"
       ]
+    },
+    {
+      "templateVersion": "2.1.0",
+      "minCoreVersion": "5.20.0",
+      "description": "The src/http/index > start now returns a promise",
+      "changes": [
+        "[manual change required] Ensure you handle the promise returned from http.start() in the server.ts"
+      ]
     }
   ]
 }
