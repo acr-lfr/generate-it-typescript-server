@@ -7,7 +7,7 @@ import packageJson from '../../package.json';
 
 export interface Http {
   expressApp: express.Application;
-  start: () => void | Promise<http.Server>;
+  start: () => Promise<http.Server>;
 }
 
 export interface HttpOptions {
