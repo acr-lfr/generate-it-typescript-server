@@ -1,9 +1,9 @@
-import { AddressInfo } from 'net';
 import express from 'express';
+import http from 'http';
+import { AddressInfo } from 'net';
 import { requestMiddleware, responseMiddleware } from '@/http/nodegen/middleware';
 import routesImporter, { RoutesImporter } from '@/http/nodegen/routesImporter';
 import packageJson from '../../package.json';
-import http from 'http';
 
 export interface Http {
   expressApp: express.Application;
