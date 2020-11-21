@@ -24,7 +24,13 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
   const app = express();
 
   const useRequestHandlers = (requestHandlers: Array<(...args: any) => any> | Array<[string, any]>) => {
-    requestHandlers.forEach((handler: any) => app.use(...handler));
+    requestHandlers.forEach((handler: any) => {
+      if (Array.isArray(handler)) {
+        app.use(handler[0], handler[1]);
+      } else {
+        app.use(handler);
+      }
+    });
   };
 
   // Generally middlewares that should parse the request before hitting a route
