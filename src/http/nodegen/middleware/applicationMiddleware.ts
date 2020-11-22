@@ -45,12 +45,24 @@ export const requestParser = (app: express.Application): void => {
 };
 
 export const accessLogger = (app: express.Application): void => {
-  // Log all requests
-  app.use(
-    morgan(
-      `[${packageJson.name}] :remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]`
-    )
-  );
+  // A bug in the morgan logger results in IPs being dropped when the node instance is running behind a proxy.
+  // The following pattern uses the requestIp middleware "req.client" and adds the response time.
+  // `[${packageJson.name}] :remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]`
+  app.use(morgan(function (tokens, req, res) {
+    return [
+      '[' + packageJson.name + ']',
+      req.clientIp,
+      '[' + new Date().toISOString() + ']',
+      '"' + tokens.method(req, res),
+      tokens.url(req, res),
+      'HTTP/' + tokens['http-version'](req, res) + '"',
+      tokens.status(req, res),
+      tokens.res(req, res, 'content-length'),
+      '-',
+      tokens['response-time'](req, res),
+      'ms'
+    ].join(' ');
+  }));
 };
 
 /**
