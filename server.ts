@@ -10,7 +10,7 @@ const PORT = cliInput.port || config.port;
 app(PORT)
   .then(async (http) => {
     if (cliInput['run-script']) {
-      return run(cliInput['run-script'])(cliInput);
+      return run(cliInput['run-script'], cliInput);
     } else {
       await http.start();
     }
