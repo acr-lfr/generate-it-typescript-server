@@ -1,14 +1,14 @@
-import { HttpErrorsService } from '@/services/HttpErrorsService';
 import * as express from 'express';
 import { HttpException } from '../errors';
 import { NodegenRequest } from '../interfaces';
+import { createHttpExceptionFromErr } from '@/http/nodegen/utils/createHttpExceptionFromErr';
 
 /**
  * Http Exception handler
  */
 export default () => (err: any, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
   if (!(err instanceof HttpException)) {
-    err = HttpErrorsService.fromError(err);
+    err = createHttpExceptionFromErr(err);
   }
 
   if (err.status === 500) {

@@ -1,5 +1,5 @@
 import { HttpStatusMessage } from '@/http/nodegen/errors';
-import { HttpErrorsService } from '@/services/HttpErrorsService';
+import { formatException } from '@/http/nodegen/utils/formatException';
 
 export class HttpException extends Error {
   public status: number;
@@ -22,8 +22,8 @@ export class HttpException extends Error {
 
   set body(body: string | Record<string, any>) {
     this.rawBody = body;
-    const fmt = HttpErrorsService.formatException(this);
-    this.rawBody = fmt === this ? this.toJSON() : fmt;
+    const format = formatException(this);
+    this.rawBody = format === this ? this.toJSON() : format;
   }
 
   isJson() {
