@@ -34,6 +34,12 @@ module.exports = {
   ],
   testEnvironment: 'node',
   moduleNameMapper: {
+    '^@constants$': '<rootDir>/src/constants',
+    '^@database$': '<rootDir>/src/database',
+    '^@domains$': '<rootDir>/src/domains',
+    '^@http$': '<rootDir>/src/http',
+    '^@services$': '<rootDir>/src/services',
+    '^@utils': '<rootDir>/src/utils',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   setupFilesAfterEnv: [
