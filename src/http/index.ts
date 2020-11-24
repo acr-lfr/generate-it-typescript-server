@@ -15,10 +15,10 @@ export interface HttpOptions {
   routesImporter?: RoutesImporter;
 
   // An array of valid express ApplicationRequestHandlers (middlewares) injected BEFORE loading routes
-  preRouteApplicationRequestHandlers?: [any | [string, any]];
+  preRouteApplicationRequestHandlers?: any | [string, any][];
 
   // an array of valid express ApplicationRequestHandlers (middlewares) injected AFTER loading routes
-  postRouteApplicationRequestHandlers?: [any | [string, any]];
+  postRouteApplicationRequestHandlers?: any | [string, any][];
 }
 
 export default async (port: number, options?: HttpOptions): Promise<Http> => {
