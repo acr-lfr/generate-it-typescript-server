@@ -31,16 +31,16 @@ export default function() {
         {% if path['x-async-validators'] %}asyncValidationMiddleware({{ path['x-async-validators'] | dump }}), /* Call an async validator function and throw an appropriate error */ {% endif %}
         {% if path['x-cache'] %}apiCaching({{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}), /* Lastly, if x-cache is found, call the api cache middleware */ {% endif %}
         async (req: any, res: GenerateItExpressResponse) => {
-          res.inferResponseType(
+          {% if not path['x-passResponse'] -%}res.inferResponseType( {% endif %}
             {% if path['x-worker'] -%}
             await WorkerService.handleRequestWithWorker(req, '{{ucFirst(operation_name)}}Domain', '{{path.operationId}}', [{{pathParamsToDomainParams(method, path, false, true, 'params')}}]),
             {% else -%}
-            await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}),
+            await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}){% if not path['x-passResponse'] -%},{% endif %}
             {% endif -%}
-            {{ getSingleSuccessResponse(path.responses) or 200 }},
+          {% if not path['x-passResponse'] -%}{{ getSingleSuccessResponse(path.responses) or 200 }},
             {% if path.produces -%}'{{ path.produces }}'{% else %}undefined{% endif %},
             {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
-          )
+          ){% endif %}
         }
       );
       {% endif %}
