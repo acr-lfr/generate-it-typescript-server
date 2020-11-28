@@ -15,22 +15,10 @@ class {{ domainClassName }} implements {{ domainInterfaceName }} {
         {% set docBlock = '
   /**
    * Operation ID: ' + path.operationId + '
+   * Path middleware: ' + domainInterfaceName + '.' + path.operationId +'  
    * Summary: ' + path.summary %}
       {% set docBlock = docBlock + '
    * Description: ' + description %}
-
-{% if securityNames %}
-  {% set docBlock = docBlock + '
-   * Security header(s): ' + securityNames %}
-{% endif %}
-{% if path['x-permission'] %}
-  {% set docBlock = docBlock + '
-   * Permission string: ' + path['x-permission'] %}
-{% endif %}
-{% if path['x-async-validators'] %}
-  {% set docBlock = docBlock + '
-   * Pre-domain async-validators: ' + path['x-async-validators'] %}
-{% endif %}
   {% set docBlock = docBlock + '
   **/' %}
 
