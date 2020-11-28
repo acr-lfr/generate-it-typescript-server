@@ -33,6 +33,14 @@
       "changes": [
         "[manual change required] Ensure you handle the promise returned from http.start() in the server.ts"
       ]
+    },
+    {
+      "templateVersion": "2.2.0",
+      "minCoreVersion": "5.22.0",
+      "description": "Path middleware used updated in the domain middleware & if x-passResponse the domain should handle the response",
+      "changes": [
+        "[docs] path middleware used updated in the domain middleware"
+      ]
     }
   ]
 }
