@@ -27,6 +27,10 @@ export interface {{ ucFirst(operation_name) }}DomainInterface {
   {% set docBlock = docBlock + '
    * Pre-domain async-validators: ' + path['x-async-validators'] %}
   {% endif %}
+  {% if not securityNames and not path['x-permission'] and not path['x-async-validators'] %}
+  {% set docBlock = docBlock + '
+   * No additional middleware used' %}
+  {% endif %}
   {% set docBlock = docBlock + '
   **/' %}
 

@@ -15,7 +15,7 @@ class {{ domainClassName }} implements {{ domainInterfaceName }} {
         {% set docBlock = '
   /**
    * Operation ID: ' + path.operationId + '
-   * Path middleware: ' + domainInterfaceName + '.' + path.operationId +'  
+   * Path middleware used see: ' + domainInterfaceName + '.' + path.operationId +'
    * Summary: ' + path.summary %}
       {% set docBlock = docBlock + '
    * Description: ' + description %}
