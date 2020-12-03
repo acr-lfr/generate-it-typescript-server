@@ -1,7 +1,7 @@
 {
-  "name": "{{ package.name }}",
+  "name": "enter-your-package-name-here",
   "description": "{{ inline( swagger.info.description) }}",
-  "version": "{{ swagger.info.version }}",
+  "version": "0.0.1",
   "private": true,
   "author": "<add your company or personal name here>",
   "scripts": {
