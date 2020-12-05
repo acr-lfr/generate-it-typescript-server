@@ -41,6 +41,14 @@
       "changes": [
         "[docs] path middleware used updated in the domain middleware"
       ]
+    },
+    {
+      "templateVersion": "2.3.0",
+      "minCoreVersion": "5.22.0",
+      "description": "Ability to inject an express app allow for things like a templating engine like nujucks",
+      "changes": [
+        "[docs] Inject express app to http(port, { app }) allowing server side rendered content from nunjucks"
+      ]
     }
   ]
 }
