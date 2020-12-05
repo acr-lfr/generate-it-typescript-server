@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import http from 'http';
 import { AddressInfo } from 'net';
 import { requestMiddleware, responseMiddleware } from '@/http/nodegen/middleware';
@@ -11,6 +11,9 @@ export interface Http {
 }
 
 export interface HttpOptions {
+  // a preconfigured express app, if present the api will use this express app opposed to generating a new one.
+  app?: Express
+
   // Options injectable into the routes importer
   routesImporter?: RoutesImporter;
 
@@ -22,7 +25,7 @@ export interface HttpOptions {
 }
 
 export default async (port: number, options?: HttpOptions): Promise<Http> => {
-  const app = express();
+  const app = options.app || express();
 
   const useRequestHandlers = (requestHandlers: Array<(...args: any) => any> | Array<[string, any]>) => {
     requestHandlers.forEach((handler: any) => {
