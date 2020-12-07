@@ -25,7 +25,7 @@ export interface HttpOptions {
 }
 
 export default async (port: number, options?: HttpOptions): Promise<Http> => {
-  const app = options.app || express();
+  const app = options?.app || express();
 
   const useRequestHandlers = (requestHandlers: Array<(...args: any) => any> | Array<[string, any]>) => {
     requestHandlers.forEach((handler: any) => {
