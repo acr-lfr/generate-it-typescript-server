@@ -45,4 +45,12 @@ module.exports = {
       { vars: 'all', args: 'none', ignoreRestSiblings: false },
     ],
   },
+  overrides: [
+    {
+      files: ['**/*.spec.ts'],
+      rules: {
+        'max-lines-per-function': 'off',
+      },
+    },
+  ],
 };
