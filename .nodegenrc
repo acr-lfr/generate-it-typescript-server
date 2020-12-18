@@ -12,7 +12,8 @@
     "objectReduceByMapOptions": {
       "allowNullish": false,
       "keepKeys": false,
-      "throwErrorOnAlien": false
+      "throwErrorOnAlien": false,
+      "allowNullishKeys": false
     }
   }
 }
