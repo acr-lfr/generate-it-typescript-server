@@ -1,0 +1,41 @@
+{%- set mockedPayloads = generateMockPayload(operations) -%}
+import { baseUrl, defaultSetupTeardown, request, ResponseCodes } from '@/http/nodegen/tests';
+{{ mockedPayloads.imports }}
+
+defaultSetupTeardown();
+
+describe('{{ ucFirst(operation_name) }}Domain', () => {
+  beforeAll(async () => {
+    // setup - run before suite (one time)
+  });
+
+  beforeEach(async () => {
+    // setup - run before every test
+  });
+
+  afterEach(async () => {
+    // teardown - run after every tests
+  });
+
+  afterAll(async () => {
+    // teardown - run once after suite succeeds
+  });
+  {%- for op in operations -%}
+      {%- for method, path in op.path -%}
+        {%- if isValidMethod(method) %}
+        {%- set payload = mockedPayloads[op.pathname][method] -%}
+
+  it('can {{ method | upper }} {{ op.path_name }}', async () => {
+    await request
+      .{{ method }}(`${baseUrl}{{ op.path_name }}`)
+      {%- if payload %} .send({{ payload }}) {% endif %}
+      .expect(({ status, body }) => {
+        expect(status).toBe({{ getSingleSuccessResponse(path.responses) }});
+        expect(body).toBeDefined();
+      });
+  });
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endfor %}
+});
+

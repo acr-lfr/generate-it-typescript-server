@@ -1,0 +1,18 @@
+{
+  "name": "helpers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generateMockPayload.js",
+  "scripts": {
+    "build": "tsc *.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/swagger-schema-official": "^2.0.21",
+    "generate-it-mockers": "^1.0.3",
+    "swagger-schema-official": "^2.0.0-bab6bed",
+    "typescript": "^4.1.3"
+  }
+}

@@ -9,6 +9,7 @@ export const createHttpExceptionFromErr = (
   if ((error as unknown as CelebrateInternalError).joi) {
     return new HttpException(422, error);
   }
+
   const body = {
     body: 'Internal server error',
     message: error?.name || error?.message,
