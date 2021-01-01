@@ -7,7 +7,11 @@ import { createHttpExceptionFromErr } from '@/http/nodegen/utils/createHttpExcep
  * Http Exception handler
  */
 export default () => (err: any, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
-  console.error(err);
+  if (err.stack) {
+    console.error(err.stack);
+  } else {
+    console.error(err);
+  }
 
   if (!(err instanceof HttpException)) {
     err = createHttpExceptionFromErr(err);
