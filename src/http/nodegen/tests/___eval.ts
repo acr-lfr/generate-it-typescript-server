@@ -136,8 +136,6 @@ const parseAllPaths = (paths: Record<string, Path>): Domains => {
     };
   });
 
-  require('fs').writeFileSync('/tmp/data.json', JSON.stringify(domains, null, 2));
-
   return domains;
 };
 
