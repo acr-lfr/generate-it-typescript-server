@@ -77,7 +77,6 @@
     "generate-it-mockers": "^1.0.3",
     "jest": "^26.6.3",
     "nodemon": "^2.0.6",
-    "supertest": "^6.0.1",
     "supertest": "^6.1.1",
     "ts-jest": "^26.4.4",
     "ts-node": "^9.1.1",
