@@ -26,6 +26,7 @@ interface ExtractedContent {
     [method: string]: {
       reqParams?: ReqParams;
       responses?: Variables;
+      security?: Record<string, string[]>[];
     };
   };
 }
@@ -34,6 +35,7 @@ interface DomainSpec {
   className: string;
   domainName: string;
   exports: Map<string, string>;
+  securityDefinitions: Record<string, Schema.Security>;
   paths: {
     [fullPath: string]: ExtractedContent;
   };
@@ -103,17 +105,18 @@ const parsePathData = (pathData: Path, exportData: Map<string, string>): Extract
     params[method] = {
       reqParams: extractReqParams(reqData.parameters as Schema.Parameter[], exportData),
       responses: extractResponses(reqData.responses as Schema.Spec['responses']),
+      security: reqData.security,
     };
   });
 
   return params;
 };
 
-const parseAllPaths = (paths: Record<string, Path>): Domains => {
+const parseAllPaths = (spec: Schema.Spec): Domains => {
   let opName = '';
   const domains: Domains = {};
 
-  Object.entries(paths).forEach(([fullReqPath, pathData]) => {
+  Object.entries(spec.paths as Record<string, Path>).forEach(([fullReqPath, pathData]) => {
     if (opName != pathData.groupName) {
       opName = pathData.groupName;
 
@@ -123,13 +126,17 @@ const parseAllPaths = (paths: Record<string, Path>): Domains => {
         domainName: `${className}Domain`,
         paths: {},
         exports: new Map<string, string>(),
+        securityDefinitions: spec.securityDefinitions,
       };
     }
 
     const params = parsePathData(pathData, domains[opName].exports);
 
     domains[opName].paths[fullReqPath] = {
-      templateFullPath: fullReqPath.replace(/[\$\{:]+([^\/\}:]+)\}?/, (_, s) => `\${testParams?.path?.${s} ?? path${ucFirst(s)}\}`),
+      templateFullPath: fullReqPath.replace(
+        /[\$\{:]+([^\/\}:]+)\}?/,
+        (_, s) => `\${testParams?.path?.${s} ?? path${ucFirst(s)}\}`
+      ),
       pathName: fullReqPath.replace(/[^a-zA-Z0-9]+(.?)/g, (_, s, i) => (i ? s.toUpperCase() : s)),
       params,
       methods: Object.keys(params),
@@ -140,35 +147,74 @@ const parseAllPaths = (paths: Record<string, Path>): Domains => {
 };
 
 const getResponseExport = (method: string, name: string, schema: ParamResponse): string => {
-  const validationText = SwaggerUtils.createJoiValidation(method, {
-    parameters: [{ in: 'body', name, schema: (schema as Schema.Response).schema }],
-  });
+  if (!(schema as Schema.Response).schema) {
+    return 'Joi.object({}),';
+  }
 
-  return validationText.slice(validationText.indexOf(' ') + 1);
+  return SwaggerUtils.pathParamsToJoi(schema, { paramTypeKey: 'body' as any });
 };
 
 const getValidator = (validatorSchemas: string[]) => `\
-export const validationSchemas: Record<string, Joi.ObjectSchema> = {
+export const validationSchemas: Record<string, Joi.AnySchema> = {
 ${validatorSchemas.join('\n')}
 }
 
-export const responseValidator = (responseKey: string, schema: Record<string, any>): Joi.ValidationResult => {
+export const responseValidator = (responseKey: string, schema: any): Joi.ValidationResult => {
 return validationSchemas[responseKey].validate(schema);
 }`;
 
-const buildMethodDataFile = (testData: TestData): { dataTemplate: string; stubTemplate: string; validatorSchema: string[] } => {
+const buildMethodDataFile = (
+  testData: TestData
+): { dataTemplate: string; stubTemplate: string; validatorSchema: string[] } => {
   const { method, data, domainSpec } = testData;
   const requestParts: string[] = [`.${method}(\`\${root}${data.templateFullPath}\`)`];
   const methodParams = data.params[method];
+  const queryVars: string[] = [];
 
   if (methodParams.reqParams?.query) {
-    const vars: string[] = Object.entries(methodParams.reqParams.query).map(([key, value]) => `${(value as Schema.Parameter).name}: ${key}`);
-    requestParts.push(`.query(testParams?.query ?? { ${vars.join(', ')} })`);
+    queryVars.push(
+      ...Object.entries(methodParams.reqParams.query).map(
+        ([key, value]) => `${(value as Schema.Parameter).name}: ${key}`
+      )
+    );
   }
 
   if (methodParams.reqParams?.body) {
     const [name] = Object.keys(methodParams.reqParams.body);
     requestParts.push(`.send(testParams?.body ?? ${name})`);
+  }
+
+  methodParams.security?.forEach?.((security) => {
+    Object.entries(security).forEach(([name]) => {
+      const def = domainSpec.securityDefinitions?.[name];
+      if (def) {
+        switch (def.type) {
+          case 'basic':
+            requestParts.push(`.set('Authorization', 'Basic base64string')`);
+            break;
+          case 'apiKey':
+            if (def.in === 'query') {
+              queryVars.push(`${def.name}: 'apiKey'`);
+            } else {
+              requestParts.push(`.set('${def.name}', 'apiKey')`);
+            }
+            break;
+          case 'oauth2': // TODO
+            if ((def as Schema.OAuth2AccessCodeSecurity).tokenUrl) {
+              queryVars.push(`tokenUrl: '${(def as Schema.OAuth2AccessCodeSecurity).tokenUrl}'`);
+            }
+            if ((def as Schema.OAuth2AccessCodeSecurity).authorizationUrl) {
+              queryVars.push(`authorizationUrl: '${(def as Schema.OAuth2AccessCodeSecurity).authorizationUrl}'`);
+            }
+            queryVars.push(`scope: '${Object.keys(def.scopes || {}).join(',')}'`);
+            break;
+        }
+      }
+    });
+  });
+
+  if (queryVars?.length) {
+    requestParts.push(`.query(testParams?.query ?? { ${queryVars.join(', ')} })`);
   }
 
   const successCode = methodParams?.responses?.success as string;
@@ -177,15 +223,22 @@ const buildMethodDataFile = (testData: TestData): { dataTemplate: string; stubTe
 
   const responseName = `${data.pathName}${ucFirst(method)}`;
   const validatorSchema: string[] = [];
+  let responseKey = 'body';
 
   Object.entries(methodParams.responses).forEach(([name, schema]) => {
     if (name === 'success') {
       return;
     }
     const varName = `${responseName}${name}`;
-    validatorSchema.push(`  ${varName}: ${getResponseExport(method, varName, schema)}`);
+    const responseValidator = getResponseExport(method, varName, schema);
+
+    validatorSchema.push(`  ${varName}: ${responseValidator}`);
     if (name === successCode) {
-      validatorSchema.push(`  ${responseName}Success: ${getResponseExport(method, varName, schema)}`);
+      validatorSchema.push(`  ${responseName}Success: ${responseValidator}`);
+    }
+
+    if (['string', 'number', 'integer', 'boolean'].includes((schema as Schema.Response)?.schema?.type)) {
+      responseKey = 'text';
     }
   });
 
@@ -204,15 +257,14 @@ export const ${testName}: TestRequest = {
   request: (testParams?: TestParams, root = baseUrl): supertest.Test =>
     request
       ${requestParts.join('\n      ')}
-      .expect(({ status, body }) => {
-        process.stderr.write(\`\n${testName}\n\${JSON.stringify({status, body}, null, 2)}\n\`);
+      .expect(({ status, ${responseKey} }) => {
         expect(status).toBe(${statusCode});
-        expect(body).toBeDefined();${
-          successSchema
-            ? `
-        expect(!responseValidator('${testName}${statusCode}', body).error).toBe(true);`
-            : ''
-        }
+        expect(${responseKey}).toBeDefined();${
+    successSchema
+      ? `
+        expect(!responseValidator('${testName}${statusCode}', ${responseKey}).error).toBe(true);`
+      : ''
+  }
       }),
 };`;
 
@@ -246,10 +298,9 @@ import { HttpStatusCode } from '@/http/nodegen/errors';
 import { NodegenRequest } from '@/http/nodegen/interfaces';
 import { baseUrl as root } from '@/http/nodegen/routesImporter';
 import { default as AccessTokenService } from '@/services/AccessTokenService';
-import { NextFunction, Response } from 'express';
+import { NextFunction, RequestHandler, Response } from 'express';
 import { default as supertest } from 'supertest';
 ${toImport?.length ? toImport.sort().join('\n') : ''}
-${importOrDefineJwt()}
 
 export interface TestParams {
   query?: Record<string, any>;
@@ -295,35 +346,36 @@ export const setupTeardown = {
     jest.clearAllMocks();
     jest.resetAllMocks();
   },
-  beforeEach: () => {
-    mockAuth();
-  },
 };
 
 export const defaultSetupTeardown = () => {
   beforeAll(setupTeardown.beforeAll);
   afterEach(setupTeardown.afterEach);
-  beforeEach(setupTeardown.beforeEach);
 };
 
-export const mockAuth = (jwtData?: JwtAccess): JwtAccess => {
-  const jwt: JwtAccess = jwtData ?? { subject: 'qxtest', dealerCode: '99999', userId: 1 };
-
+/**
+ * Auth middleware mocker
+ *
+ * By default, a simple pass-through middleware is used (req, res, next) => next()
+ *
+ * If your auth flow requires side-effects (eg setting req.user = 'something') then
+ * you will want to pass in a custom middleware mocker to handle that case
+ *
+ * @param {RequestHandler}  middleware  Replaces AccessTokenService.validateRequest
+ */
+export const mockAuth = (middleware?: RequestHandler) => {
   jest
     .spyOn(AccessTokenService, 'validateRequest')
-    .mockImplementation((req: NodegenRequest, res: Response, next: NextFunction) => {
-      req.jwtData = jwt;
-      req.originalToken = 'gobledygoop';
-      return next();
-    });
-
-  return jwt;
+    .mockImplementation(
+      middleware ||
+        ((req: NodegenRequest, res: Response, next: NextFunction) => next())
+    );
 };
 
-${toExport?.length ? toExport.join('\n') : ''}
+${toExport?.length ? toExport.join('\n\n') : ''}
 `;
 
-const generateTestStub = (domainSpec: DomainSpec, tests: string[]): boolean => {
+const generateTestStub = (domainSpec: DomainSpec, tests: string[], useAuth?: boolean): boolean => {
   const outputPath = `src/domains/__tests__/${domainSpec.domainName}.api.spec.ts`;
   if (fs.existsSync(outputPath)) {
     return false;
@@ -331,53 +383,58 @@ const generateTestStub = (domainSpec: DomainSpec, tests: string[]): boolean => {
   fs.mkdirSync('src/domains/__tests__/', { recursive: true });
 
   const template = `\
-import { defaultSetupTeardown, TestData, Test${domainSpec.domainName} } from '@/http/nodegen/tests';
+import { defaultSetupTeardown,${useAuth ? 'mockAuth,' : ''} TestData, Test${
+    domainSpec.domainName
+  } } from '@/http/nodegen/tests';
 
 defaultSetupTeardown();
 
 describe('${domainSpec.domainName}', () => {
-  beforeAll(async () => {
-    // setup - run before suite (one time)
-  });
+  // setup - run before suite (one time)
+  beforeAll(async () => {});
 
-  beforeEach(async () => {
-    // setup - run before every test
-  });
+  // setup - run before every test
+  beforeEach(async () => {${
+    useAuth
+      ? `
 
-  afterEach(async () => {
-    // teardown - run after every tests
-  });
+    mockAuth();  // Disable auth middleware
+  `
+      : ''
+  }});
 
-  afterAll(async () => {
-    // teardown - run once after suite succeeds
-  });
+  // teardown - run after every tests
+  afterEach(async () => {});
+
+  // teardown - run once after suite succeeds
+  afterAll(async () => {});
 
   ${tests.join('\n\n')}
 });
 `;
 
-  createFile(outputPath, template);
+  createFormattedFile(outputPath, template);
 
   return true;
-}
+};
 
 const mapKeys = (map: Map<any, any>) => Array.from(map, ([key]) => key);
 
 const mapValues = (map: Map<any, any>) => Array.from(map, ([_, value]) => value);
 
-const createFile = (path: string, data: string) => fs.writeFileSync(path, prettier(data, '.ts'));
+const createFormattedFile = (path: string, data: string) => fs.writeFileSync(path, prettier(data, '.ts'));
 
 const writeTestDataFile = (path: string, domainSpec: DomainSpec, validatorSchemas: string[]) => {
-  const dataExports: string[] = mapValues(domainSpec.exports);
+  const dataExports: string[] = mapValues(domainSpec.exports).filter((key) => key !== 'true');
   if (validatorSchemas?.length) {
     dataExports.unshift(`import * as Joi from 'joi';`);
     dataExports.push(getValidator(validatorSchemas));
   }
-  createFile(path, dataExports.join('\n\n'));
+  createFormattedFile(path, dataExports.join('\n\n'));
 };
 
 const buildSpecFiles = (ctx: Context): void => {
-  const domains = parseAllPaths(ctx.swagger.paths);
+  const domains = parseAllPaths(ctx.swagger);
 
   const indexImports: string[] = [];
   const indexExports: string[] = [];
@@ -388,13 +445,20 @@ const buildSpecFiles = (ctx: Context): void => {
     const dataTemplates: string[] = [];
     const stubTemplates: string[] = [];
     const validatorSchemas: string[] = [];
+    let useAuth: boolean = false;
 
     Object.entries(domainSpec.paths).forEach(([fullPath, data]) => {
       data.methods.forEach((method) => {
-        const { dataTemplate, stubTemplate, validatorSchema } = buildMethodDataFile({ fullPath, method, data, domainSpec });
+        const { dataTemplate, stubTemplate, validatorSchema } = buildMethodDataFile({
+          fullPath,
+          method,
+          data,
+          domainSpec,
+        });
         dataTemplates.push(dataTemplate);
         stubTemplates.push(stubTemplate);
         validatorSchemas.push(...validatorSchema);
+        useAuth = useAuth || !!data.params[method]?.security?.length;
       });
     });
 
@@ -411,12 +475,15 @@ const buildSpecFiles = (ctx: Context): void => {
     const importString = domainSpec.exports.size
       ? `import { ${mapKeys(domainSpec.exports).sort().join(', ')} } from './${specFileName}.data';`
       : null;
-    createFile(`${ctx.dest}/${specFileName}.ts`, generateTestFile(domainSpec.domainName, dataTemplates, importString));
+    createFormattedFile(
+      `${ctx.dest}/${specFileName}.ts`,
+      generateTestFile(domainSpec.domainName, dataTemplates, importString)
+    );
 
-    generateTestStub(domainSpec, stubTemplates);
+    generateTestStub(domainSpec, stubTemplates, useAuth);
   });
 
-  createFile(`${ctx.dest}/index.ts`, generateIndexFile(indexImports, indexExports));
+  createFormattedFile(`${ctx.dest}/index.ts`, generateIndexFile(indexImports, indexExports));
 };
 
 export default buildSpecFiles;
