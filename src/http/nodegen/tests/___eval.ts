@@ -262,7 +262,9 @@ export const ${testName}: TestRequest = {
         expect(${responseKey}).toBeDefined();${
     successSchema
       ? `
-        expect(!responseValidator('${testName}${statusCode}', ${responseKey}).error).toBe(true);`
+        const validated = responseValidator('${testName}${statusCode}', ${responseKey});
+        if (validated.error) { process.stderr.write(\`\\n\${JSON.stringify({validated}, null, 2)}\\n\`); }
+        expect(!!validated.error).toBe(false);`
       : ''
   }
       }),
@@ -375,12 +377,14 @@ export const mockAuth = (middleware?: RequestHandler) => {
 ${toExport?.length ? toExport.join('\n\n') : ''}
 `;
 
-const generateTestStub = (domainSpec: DomainSpec, tests: string[], useAuth?: boolean): boolean => {
-  const outputPath = `src/domains/__tests__/${domainSpec.domainName}.api.spec.ts`;
+const generateTestStub = (basePath: string, domainSpec: DomainSpec, tests: string[], useAuth?: boolean): boolean => {
+  basePath = (basePath || 'src/domains/__tests__').replace(/\/|$/, '');
+
+  const outputPath = `${basePath}/${domainSpec.domainName}.api.spec.ts`;
   if (fs.existsSync(outputPath)) {
     return false;
   }
-  fs.mkdirSync('src/domains/__tests__/', { recursive: true });
+  fs.mkdirSync(basePath, { recursive: true });
 
   const template = `\
 import { defaultSetupTeardown,${useAuth ? 'mockAuth,' : ''} TestData, Test${
@@ -434,6 +438,10 @@ const writeTestDataFile = (path: string, domainSpec: DomainSpec, validatorSchema
 };
 
 const buildSpecFiles = (ctx: Context): void => {
+  if (!ctx.nodegenRc?.helpers?.tests) {
+    return;
+  }
+
   const domains = parseAllPaths(ctx.swagger);
 
   const indexImports: string[] = [];
@@ -479,8 +487,7 @@ const buildSpecFiles = (ctx: Context): void => {
       `${ctx.dest}/${specFileName}.ts`,
       generateTestFile(domainSpec.domainName, dataTemplates, importString)
     );
-
-    generateTestStub(domainSpec, stubTemplates, useAuth);
+    generateTestStub(ctx.nodegenRc?.helpers?.tests.outDir, domainSpec, stubTemplates, useAuth);
   });
 
   createFormattedFile(`${ctx.dest}/index.ts`, generateIndexFile(indexImports, indexExports));
