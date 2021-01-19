@@ -112,6 +112,18 @@ const parsePathData = (pathData: Path, exportData: Map<string, string>): Extract
   return params;
 };
 
+// auth            => Auth
+// admin           => Admin
+// b2d             => B2D
+// usersDealers    => UsersDealers
+// b2dDomain       => B2DDomain
+// this-is-kebab   => ThisIsKebab
+// this_is_snake   => ThisIsSnake
+// path/to/file.ts => PathToFileTs
+const getClassName = (input: string) => {
+  return input.replace(/(^.|([^a-zA-Z])+[a-zA-Z])/g, (_, s, q) => s.replace(/[^a-zA-Z0-9]/g, '').toUpperCase());
+};
+
 const parseAllPaths = (spec: Schema.Spec): Domains => {
   let opName = '';
   const domains: Domains = {};
@@ -120,7 +132,7 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
     if (opName != pathData.groupName) {
       opName = pathData.groupName;
 
-      const className = opName.replace(/(^.|[^a-zA-Z0-9]+(.))/g, (_, s, q) => (q || s).toUpperCase());
+      const className = getClassName(opName);
       domains[opName] = domains[opName] || {
         className,
         domainName: `${className}Domain`,
