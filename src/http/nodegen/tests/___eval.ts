@@ -81,7 +81,7 @@ const extractResponses = (responses: Schema.Spec['responses']): Variables => {
   const variables: Variables = {};
 
   Object.entries(responses || {}).forEach(([code, schema]) => {
-    if (!firstSuccess && /2../.test(code)) {
+    if ((!firstSuccess && /[23]../.test(code)) || (/^3/.test(firstSuccess) && /^2/.test(code))) {
       firstSuccess = code;
     }
     variables[code] = schema;
@@ -112,6 +112,18 @@ const parsePathData = (pathData: Path, exportData: Map<string, string>): Extract
   return params;
 };
 
+// auth            => Auth
+// admin           => Admin
+// b2d             => B2D
+// usersDealers    => UsersDealers
+// b2dDomain       => B2DDomain
+// this-is-kebab   => ThisIsKebab
+// this_is_snake   => ThisIsSnake
+// path/to/file.ts => PathToFileTs
+const getClassName = (input: string) => {
+  return input.replace(/(^.|([^a-zA-Z])+[a-zA-Z])/g, (_, s, q) => s.replace(/[^a-zA-Z0-9]/g, '').toUpperCase());
+};
+
 const parseAllPaths = (spec: Schema.Spec): Domains => {
   let opName = '';
   const domains: Domains = {};
@@ -120,7 +132,7 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
     if (opName != pathData.groupName) {
       opName = pathData.groupName;
 
-      const className = opName.replace(/(^.|[^a-zA-Z0-9]+(.))/g, (_, s, q) => (q || s).toUpperCase());
+      const className = getClassName(opName);
       domains[opName] = domains[opName] || {
         className,
         domainName: `${className}Domain`,
@@ -258,11 +270,11 @@ export const ${testName}: TestRequest = {
     request
       ${requestParts.join('\n      ')}
       .expect(({ status, ${responseKey} }) => {
-        expect(status).toBe(${statusCode});
+        expect(status).toBe(testParams?.statusCode ?? ${statusCode});
         expect(${responseKey}).toBeDefined();${
     successSchema
       ? `
-        const validated = responseValidator('${testName}${statusCode}', ${responseKey});
+        const validated = responseValidator(\`${testName}\${testParams?.statusCode ?? ${statusCode}}\`, ${responseKey});
         if (validated.error) { process.stderr.write(\`\\n\${JSON.stringify({validated}, null, 2)}\\n\`); }
         expect(!!validated.error).toBe(false);`
       : ''
@@ -309,6 +321,7 @@ export interface TestParams {
   body?: Record<string, any>;
   path?: Record<string, any>;
   headers?: Record<string, any>;
+  statusCode?: number;
   // form, other supertest stuff
 }
 
