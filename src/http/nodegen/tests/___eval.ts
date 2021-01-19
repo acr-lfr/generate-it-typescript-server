@@ -81,7 +81,7 @@ const extractResponses = (responses: Schema.Spec['responses']): Variables => {
   const variables: Variables = {};
 
   Object.entries(responses || {}).forEach(([code, schema]) => {
-    if (!firstSuccess && /2../.test(code)) {
+    if ((!firstSuccess && /[23]../.test(code)) || (/^3/.test(firstSuccess) && /^2/.test(code))) {
       firstSuccess = code;
     }
     variables[code] = schema;
