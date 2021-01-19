@@ -258,11 +258,11 @@ export const ${testName}: TestRequest = {
     request
       ${requestParts.join('\n      ')}
       .expect(({ status, ${responseKey} }) => {
-        expect(status).toBe(${statusCode});
+        expect(status).toBe(testParams?.statusCode ?? ${statusCode});
         expect(${responseKey}).toBeDefined();${
     successSchema
       ? `
-        const validated = responseValidator('${testName}${statusCode}', ${responseKey});
+        const validated = responseValidator(\`${testName}\${testParams?.statusCode ?? ${statusCode}}\`, ${responseKey});
         if (validated.error) { process.stderr.write(\`\\n\${JSON.stringify({validated}, null, 2)}\\n\`); }
         expect(!!validated.error).toBe(false);`
       : ''
@@ -309,6 +309,7 @@ export interface TestParams {
   body?: Record<string, any>;
   path?: Record<string, any>;
   headers?: Record<string, any>;
+  statusCode?: number;
   // form, other supertest stuff
 }
 
