@@ -5,7 +5,6 @@
   "private": true,
   "author": "<add your company or personal name here>",
   "scripts": {
-    "gen": "generate-it --yes --mocked --template https://github.com/acrontum/generate-it-typescript-server ./api.yml",
     "build": "ttsc -p .",
     "cli-script": "VERBOSE=true && node ./build/server.js -r ",
     "dev:cli-script": "npm run build && VERBOSE=true && node ./build/server.js -r ",
@@ -58,7 +57,6 @@
     "@types/express-form-data": "^2.0.1",
     "@types/fs-extra": "^9.0.6",
     "@types/jest": "^26.0.20",
-    "@types/joi": "^17.2.3",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/lodash": "^4.14.158",
     "@types/morgan": "^1.9.1",
