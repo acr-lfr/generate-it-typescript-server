@@ -39,6 +39,7 @@ module.exports = {
     'max-lines-per-function': ['error', 40],
 
     // Typescript overrides
+    '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unused-vars': [
       'error',

@@ -275,7 +275,9 @@ export const ${testName}: TestRequest = {
     successSchema
       ? `
         const validated = responseValidator(\`${testName}\${testParams?.statusCode ?? ${statusCode}}\`, ${responseKey});
-        if (validated.error) { process.stderr.write(\`\\n\${JSON.stringify({validated}, null, 2)}\\n\`); }
+        if (validated.error) {
+          process.stderr.write(\`\\n\${JSON.stringify({validationError: validated?.error?.details})}\\n\`);
+        }
         expect(!!validated.error).toBe(false);`
       : ''
   }
@@ -310,6 +312,7 @@ const generateIndexFile = (toImport: string[], toExport: string[]): string => `\
 import app from '@/app';
 import { HttpStatusCode } from '@/http/nodegen/errors';
 import { NodegenRequest } from '@/http/nodegen/interfaces';
+import { default as WorkerService } from '@/http/nodegen/request-worker/WorkerService';
 import { baseUrl as root } from '@/http/nodegen/routesImporter';
 import { default as AccessTokenService } from '@/services/AccessTokenService';
 import { NextFunction, RequestHandler, Response } from 'express';
@@ -361,11 +364,15 @@ export const setupTeardown = {
     jest.clearAllMocks();
     jest.resetAllMocks();
   },
+  afterAll: async () => {
+    await WorkerService.close();
+  }
 };
 
 export const defaultSetupTeardown = () => {
   beforeAll(setupTeardown.beforeAll);
   afterEach(setupTeardown.afterEach);
+  afterAll(setupTeardown.afterAll);
 };
 
 /**

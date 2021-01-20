@@ -65,7 +65,9 @@ const initStaticPool = () => {
 
 const workerPool = initStaticPool();
 
-console.log('[request worker] process ready');
+if (!(config.requestWorker as any).silent) {
+  console.debug('[request worker] process ready');
+}
 
 module.exports = async (workerData: WorkerData, callback: any) => {
   try {
@@ -75,4 +77,3 @@ module.exports = async (workerData: WorkerData, callback: any) => {
     callback(error);
   }
 };
-

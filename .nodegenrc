@@ -9,6 +9,9 @@
       "jwtType": "JwtAccess",
       "requestType": "NodegenRequest"
     },
+    "tests": {
+      "outDir": "src/domains/__tests__"
+    },
     "objectReduceByMapOptions": {
       "allowNullish": false,
       "keepKeys": false,
