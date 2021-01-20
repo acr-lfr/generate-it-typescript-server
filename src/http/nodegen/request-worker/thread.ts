@@ -12,7 +12,9 @@ import { WorkerMessage, WorkerResult } from './types';
 
 (async () => {
   await requestWorkerThreadLoader();
-  console.warn(`[request worker] thread ready`);
+  if (!(config.requestWorker as any).silent) {
+    console.debug(`[request worker] thread ready`);
+  }
   parentPort.on('message', async ({ callId, data }: WorkerMessage) => {
     const { domainName, domainFunction, domainFunctionArgs } = data;
 

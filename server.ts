@@ -1,8 +1,8 @@
-import 'generate-it-logger';
+import app from '@/app';
+import appCli from '@/app.cli';
 import run from '@/cli/run';
-import app from './src/app';
-import appCli from './src/app.cli';
-import config from './src/config';
+import config from '@/config';
+import 'generate-it-logger';
 
 const cliInput = appCli();
 const PORT = cliInput.port || config.port;

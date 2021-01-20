@@ -38,6 +38,7 @@ export default {
     timeoutMs: Number.parseInt(
       ConfigHelper.withDefault('REQUEST_WORKER_TIMEOUT_MS', 300000), // 5 minutes
       10
-    )
+    ),
+    silent: true, // disable thread / proc start logs
   }
 };

@@ -43,7 +43,9 @@
       }
     ]
   },
-  "exclude": [
-    "package.json"
+  "include": [
+    "src",
+    "server.ts",
+    "global.d.ts"
   ]
 }

@@ -1,6 +1,6 @@
 import { IncomingMessage } from 'http';
 import { pick } from 'lodash';
-import workerFarm from 'worker-farm';
+import { default as workerFarm, end } from 'worker-farm';
 import config from '@/config';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
 import { HttpException } from '@/http/nodegen/errors';
@@ -106,6 +106,12 @@ class WorkerService {
         }
       });
     });
+  }
+
+  public close(): Promise<void> {
+    return new Promise((resolve, reject) =>
+      end(execWorker, (err: Error, data: any) => (err ? reject(err) : resolve(data)))
+    );
   }
 }
 

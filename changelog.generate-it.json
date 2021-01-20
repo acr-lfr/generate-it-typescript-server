@@ -49,6 +49,15 @@
       "changes": [
         "[feat] Inject express app to http(port, { app }) allowing server side rendered content from nunjucks"
       ]
+    },
+    {
+      "templateVersion": "2.4.0",
+      "minCoreVersion": "5.25.0",
+      "description": "Auto gen tests",
+      "changes": [
+        "[feat] Generate tests automatically (opt-in). See https://acrontum.github.io/generate-it/#/_pages/templates?id=nodegenrc.",
+        "[fix] Edge case with odd path names causing inconsistent naming patterns"
+      ]
     }
   ]
 }
