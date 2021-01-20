@@ -5,6 +5,7 @@
   "private": true,
   "author": "<add your company or personal name here>",
   "scripts": {
+    "gen": "generate-it --yes --mocked --template https://github.com/acrontum/generate-it-typescript-server ./api.yml",
     "build": "ttsc -p .",
     "cli-script": "VERBOSE=true && node ./build/server.js -r ",
     "dev:cli-script": "npm run build && VERBOSE=true && node ./build/server.js -r ",
