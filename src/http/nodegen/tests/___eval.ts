@@ -52,7 +52,13 @@ interface TestData {
   domainSpec: DomainSpec;
 }
 
-const ucFirst = (s: string): string => `${s.charAt(0).toUpperCase()}${s.slice(1)}`;
+const ucFirst = (input: string): string => `${input.charAt(0).toUpperCase()}${input.slice(1)}`;
+
+const pascalCase = (input: string): string =>
+  input.replace(/([0-9].|^[a-z])|[^a-zA-Z0-9]+(.)?/g, (_, s = '', q = '') => (s || q).toUpperCase());
+
+const camelCase = (input: string): string =>
+  input.replace(/([0-9].)|[^a-zA-Z0-9]+(.)?/g, (_, s = '', q = '', i) => (i ? (s || q).toUpperCase() : s || q));
 
 const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, string>): ReqParams => {
   if (!params?.length) {
@@ -62,7 +68,7 @@ const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, st
   const variables = {} as ReqParams;
 
   for (const schema of params || []) {
-    const varName = `${schema.in}${ucFirst(schema.name)}`;
+    const varName = camelCase(`${schema.in}-${schema.name}`);
     const paramDef = ((schema as Schema.BodyParameter).schema || schema) as Schema.Schema;
 
     variables[schema.in] = {
@@ -112,18 +118,6 @@ const parsePathData = (pathData: Path, exportData: Map<string, string>): Extract
   return params;
 };
 
-// auth            => Auth
-// admin           => Admin
-// b2d             => B2D
-// usersDealers    => UsersDealers
-// b2dDomain       => B2DDomain
-// this-is-kebab   => ThisIsKebab
-// this_is_snake   => ThisIsSnake
-// path/to/file.ts => PathToFileTs
-const getClassName = (input: string) => {
-  return input.replace(/(^.|([^a-zA-Z])+[a-zA-Z])/g, (_, s, q) => s.replace(/[^a-zA-Z0-9]/g, '').toUpperCase());
-};
-
 const parseAllPaths = (spec: Schema.Spec): Domains => {
   let opName = '';
   const domains: Domains = {};
@@ -132,7 +126,8 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
     if (opName != pathData.groupName) {
       opName = pathData.groupName;
 
-      const className = getClassName(opName);
+      const className = pascalCase(opName);
+
       domains[opName] = domains[opName] || {
         className,
         domainName: `${className}Domain`,
@@ -149,7 +144,7 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
         /[\$\{:]+([^\/\}:]+)\}?/,
         (_, s) => `\${testParams?.path?.${s} ?? path${ucFirst(s)}\}`
       ),
-      pathName: fullReqPath.replace(/[^a-zA-Z0-9]+(.?)/g, (_, s, i) => (i ? s.toUpperCase() : s)),
+      pathName: camelCase(fullReqPath),
       params,
       methods: Object.keys(params),
     };
