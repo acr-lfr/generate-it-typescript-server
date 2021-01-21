@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import { ConfigExtendedBase, Path, Schema, TemplateRenderer } from 'generate-it';
 import { mockItGenerator } from 'generate-it-mockers';
 import prettier from 'generate-it/build/lib/helpers/prettyfyRenderedContent';
@@ -393,7 +394,7 @@ ${toExport?.length ? toExport.join('\n\n') : ''}
 `;
 
 const generateTestStub = (basePath: string, domainSpec: DomainSpec, tests: string[], useAuth?: boolean): boolean => {
-  basePath = (basePath || 'src/domains/__tests__').replace(/\/+$/, '');
+  basePath = basePath.replace(/\/+$/, '');
 
   const outputPath = `${basePath}/${domainSpec.domainName}.api.spec.ts`;
   if (fs.existsSync(outputPath)) {
@@ -457,6 +458,8 @@ const buildSpecFiles = (ctx: Context): void => {
     return;
   }
 
+  const testOutput = path.join(ctx.targetDir, ctx.nodegenRc?.helpers?.tests?.outDir || 'src/domains/__tests__');
+
   const domains = parseAllPaths(ctx.swagger);
 
   const indexImports: string[] = [];
@@ -502,7 +505,7 @@ const buildSpecFiles = (ctx: Context): void => {
       `${ctx.dest}/${specFileName}.ts`,
       generateTestFile(domainSpec.domainName, dataTemplates, importString)
     );
-    generateTestStub(ctx.nodegenRc?.helpers?.tests?.outDir, domainSpec, stubTemplates, useAuth);
+    generateTestStub(testOutput, domainSpec, stubTemplates, useAuth);
   });
 
   createFormattedFile(`${ctx.dest}/index.ts`, generateIndexFile(indexImports, indexExports));
