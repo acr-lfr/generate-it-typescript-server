@@ -52,8 +52,8 @@
     },
     {
       "templateVersion": "2.4.0",
-      "minCoreVersion": "5.25.0",
-      "description": "Auto gen tests",
+      "minCoreVersion": "5.25.4",
+      "description": "Auto gen tests, requires the latest generate-it core",
       "changes": [
         "[feat] Generate tests automatically (opt-in). See https://acrontum.github.io/generate-it/#/_pages/templates?id=nodegenrc.",
         "[fix] Edge case with odd path names causing inconsistent naming patterns"
