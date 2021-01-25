@@ -290,13 +290,12 @@ const buildMethodDataFile = (testData: TestData): DataFileParams => {
     domainSpec.exports.set('responseValidator', 'true');
   }
 
-  const testName = `${data.pathName}${ucFirst(method)}`;
   const statusCode = successCode || 200;
 
   const dataTemplate = `\
-export const ${testName}: TestRequest = {
+export const ${responseName}: TestRequest = {
   specName: 'can ${method.toUpperCase()} ${testData.fullPath}',
-  testKey: '${testName}',
+  testKey: '${responseName}',
   getPath: (testParams?: TestParams, root = baseUrl): string => \`\${root}${data.templateFullPath}\`,
   request: (testParams?: TestParams, root = baseUrl): supertest.Test =>
     request
@@ -306,10 +305,9 @@ export const ${testName}: TestRequest = {
         expect(${responseKey}).toBeDefined();${
     successSchema
       ? `
-        const validated = responseValidator(\`${testName}\${testParams?.statusCode ?? ${statusCode}}\`, ${responseKey});
+        const validated = responseValidator(\`${responseName}\${testParams?.statusCode ?? ${statusCode}}\`, ${responseKey});
         if (validated.error) {
           console.error(validated.error);
-          // process.stderr.write(\`\\n\${JSON.stringify({validated})}\\n\`);
         }
         expect(!!validated.error).toBe(false);`
       : ''
@@ -320,7 +318,7 @@ export const ${testName}: TestRequest = {
   const stubTemplate = `\
   it('can ${method.toUpperCase()} ${testData.fullPath}', async () => {
     const testData: TestData = {};
-    await Test${domainSpec.domainName}.tests.${testName}.request(testData);
+    await Test${domainSpec.domainName}.tests.${responseName}.request(testData);
   });`;
 
   return { dataTemplate, stubTemplate, validatorSchema };
