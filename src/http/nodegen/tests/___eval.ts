@@ -145,7 +145,9 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
   let opName = '';
   const domains: Domains = {};
 
-  Object.entries(spec.paths as Record<string, Path>).forEach(([fullReqPath, pathData]) => {
+  // TODO: channels
+  const paths = (spec.paths || {}) as Record<string, Path>;
+  Object.entries(paths).forEach(([fullReqPath, pathData]) => {
     if (opName != pathData.groupName) {
       opName = pathData.groupName;
 
