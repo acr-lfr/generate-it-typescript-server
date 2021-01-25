@@ -58,10 +58,13 @@ export default () => {
         return res.status(status).send(dataOrPath);
       }
 
-      // Everything else we assume the input is a path to a file and should be downloaded
-      // XML is typically sent not downloaded but fairly outdated today so the converter js2xmlparser
-      // is not included
-      return res.download(dataOrPath);
+      // If dataOrPath is a string, then it's probably a path to a file to download.
+      if (typeof dataOrPath === 'string') {
+        return res.download(dataOrPath);
+      }
+
+      // Otherwise, content-type is set and we just send the data (could be a buffer)
+      return res.send(dataOrPath);
     };
 
     next();

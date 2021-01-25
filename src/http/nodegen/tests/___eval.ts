@@ -1,9 +1,9 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import { ConfigExtendedBase, Path, Schema, TemplateRenderer } from 'generate-it';
 import { mockItGenerator } from 'generate-it-mockers';
 import prettier from 'generate-it/build/lib/helpers/prettyfyRenderedContent';
 import SwaggerUtils from 'generate-it/build/lib/helpers/SwaggerUtils';
+import * as path from 'path';
 
 interface Context extends ConfigExtendedBase {
   src: string;
@@ -19,16 +19,18 @@ type Variables = { [varname: string]: ParamResponse };
 
 type ReqParams = Record<Schema.Parameter['in'], Variables>;
 
+interface MethodParams {
+  reqParams?: ReqParams;
+  responses?: Variables;
+  security?: Record<string, string[]>[];
+}
+
 interface ExtractedContent {
   templateFullPath: string;
   pathName: string;
   methods: string[];
   params: {
-    [method: string]: {
-      reqParams?: ReqParams;
-      responses?: Variables;
-      security?: Record<string, string[]>[];
-    };
+    [method: string]: MethodParams;
   };
 }
 
@@ -53,6 +55,12 @@ interface TestData {
   domainSpec: DomainSpec;
 }
 
+interface DataFileParams {
+  dataTemplate: string;
+  stubTemplate: string;
+  validatorSchema: string[];
+}
+
 const ucFirst = (input: string): string => `${input.charAt(0).toUpperCase()}${input.slice(1)}`;
 
 const pascalCase = (input: string): string =>
@@ -70,14 +78,22 @@ const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, st
 
   for (const schema of params || []) {
     const varName = camelCase(`${schema.in}-${schema.name}`);
-    const paramDef = ((schema as Schema.BodyParameter).schema || schema) as Schema.Schema;
+    const paramDef = schema.in === 'body' ? (schema as Schema.BodyParameter).schema : schema;
 
     variables[schema.in] = {
       ...variables[schema.in],
       [varName]: paramDef,
     };
 
-    exportData.set(varName, `export const ${varName} = ${JSON.stringify(mockItGenerator(paramDef))};`);
+    // TODO: either mock a file or figure out what to do with it
+    if (schema.in === 'formData') {
+      exportData.set(varName, `export const ${varName} = Buffer.from('${varName}');`);
+    } else {
+      exportData.set(
+        varName,
+        `export const ${varName} = ${JSON.stringify(mockItGenerator(paramDef?.schema || paramDef))};`
+      );
+    }
   }
 
   return variables;
@@ -92,6 +108,12 @@ const extractResponses = (responses: Schema.Spec['responses']): Variables => {
       firstSuccess = code;
     }
     variables[code] = schema;
+
+    // handle oa3 content-type responses (by ignoring all but the first)
+    if ((schema as any).content) {
+      const contentSchema = (schema as any).content['application/json'] || Object.entries((schema as any).content)[0][1];
+      variables[code] = contentSchema;
+    }
   });
 
   if (firstSuccess) {
@@ -104,7 +126,7 @@ const extractResponses = (responses: Schema.Spec['responses']): Variables => {
 const parsePathData = (pathData: Path, exportData: Map<string, string>): ExtractedContent['params'] => {
   const params: ExtractedContent['params'] = {};
 
-  Object.entries(pathData || {}).forEach(([method, reqData]) => {
+  Object.entries(pathData || {}).forEach(([method, reqData]: [string, Schema.Response]) => {
     if (method === 'endpointName' || method === 'groupName') {
       return;
     }
@@ -123,7 +145,9 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
   let opName = '';
   const domains: Domains = {};
 
-  Object.entries(spec.paths as Record<string, Path>).forEach(([fullReqPath, pathData]) => {
+  // TODO: channels
+  const paths = (spec.paths || {}) as Record<string, Path>;
+  Object.entries(paths).forEach(([fullReqPath, pathData]) => {
     if (opName != pathData.groupName) {
       opName = pathData.groupName;
 
@@ -142,7 +166,7 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
 
     domains[opName].paths[fullReqPath] = {
       templateFullPath: fullReqPath.replace(
-        /[\$\{:]+([^\/\}:]+)\}?/,
+        /[\$\{:]+([^\/\}:]+)\}?/g,
         (_, s) => `\${testParams?.path?.${s} ?? path${ucFirst(s)}\}`
       ),
       pathName: camelCase(fullReqPath),
@@ -155,8 +179,12 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
 };
 
 const getResponseExport = (method: string, name: string, schema: ParamResponse): string => {
-  if (!(schema as Schema.Response).schema) {
+  if (!(schema as Schema.Response)?.schema) {
     return 'Joi.object({}),';
+  }
+
+  if (schema.schema.format === 'binary') {
+    return 'Joi.any(),';
   }
 
   return SwaggerUtils.pathParamsToJoi(schema, { paramTypeKey: 'body' as any });
@@ -171,27 +199,33 @@ export const responseValidator = (responseKey: string, schema: any): Joi.Validat
 return validationSchemas[responseKey].validate(schema);
 }`;
 
-const buildMethodDataFile = (
-  testData: TestData
-): { dataTemplate: string; stubTemplate: string; validatorSchema: string[] } => {
+const buildMethodDataFile = (testData: TestData): DataFileParams => {
   const { method, data, domainSpec } = testData;
   const requestParts: string[] = [`.${method}(\`\${root}${data.templateFullPath}\`)`];
   const methodParams = data.params[method];
   const queryVars: string[] = [];
 
+  // build query params
   if (methodParams.reqParams?.query) {
     queryVars.push(
-      ...Object.entries(methodParams.reqParams.query).map(
-        ([key, value]) => `${(value as Schema.Parameter).name}: ${key}`
-      )
+      ...Object.entries(methodParams.reqParams.query).map(([key, value]) => {
+        return `${(value as Schema.Parameter).name}: ${key}`;
+      })
     );
   }
 
+  // build body or form data
   if (methodParams.reqParams?.body) {
     const [name] = Object.keys(methodParams.reqParams.body);
     requestParts.push(`.send(testParams?.body ?? ${name})`);
+  } else if (methodParams.reqParams?.formData) {
+    const [name] = Object.keys(methodParams.reqParams.formData);
+    requestParts.push(
+      `.attach('${methodParams.reqParams.formData[name].name}', testParams?.formData?.file ?? ${name}, testParams?.formData?.name ?? '${name}.png')`
+    );
   }
 
+  // build auth header
   methodParams.security?.forEach?.((security) => {
     Object.entries(security).forEach(([name]) => {
       const def = domainSpec.securityDefinitions?.[name];
@@ -225,6 +259,7 @@ const buildMethodDataFile = (
     requestParts.push(`.query(testParams?.query ?? { ${queryVars.join(', ')} })`);
   }
 
+  // build responses
   const successCode = methodParams?.responses?.success as string;
   const successResponse = methodParams?.responses?.[successCode];
   const successSchema = (successResponse as Schema.Response)?.schema ?? successResponse;
@@ -233,19 +268,20 @@ const buildMethodDataFile = (
   const validatorSchema: string[] = [];
   let responseKey = 'body';
 
-  Object.entries(methodParams.responses).forEach(([name, schema]) => {
-    if (name === 'success') {
+  Object.entries(methodParams.responses).forEach(([code, schema]) => {
+    if (code === 'success') {
       return;
     }
-    const varName = `${responseName}${name}`;
+    const varName = `${responseName}${code}`;
     const responseValidator = getResponseExport(method, varName, schema);
 
     validatorSchema.push(`  ${varName}: ${responseValidator}`);
-    if (name === successCode) {
+    if (code === successCode) {
       validatorSchema.push(`  ${responseName}Success: ${responseValidator}`);
     }
 
-    if (['string', 'number', 'integer', 'boolean'].includes((schema as Schema.Response)?.schema?.type)) {
+    const schemaFmt = (schema as Schema.Response)?.schema;
+    if (['string', 'number', 'integer', 'boolean'].includes(schemaFmt?.type) && schemaFmt?.format !== 'binary') {
       responseKey = 'text';
     }
   });
@@ -254,13 +290,12 @@ const buildMethodDataFile = (
     domainSpec.exports.set('responseValidator', 'true');
   }
 
-  const testName = `${data.pathName}${ucFirst(method)}`;
   const statusCode = successCode || 200;
 
   const dataTemplate = `\
-export const ${testName}: TestRequest = {
+export const ${responseName}: TestRequest = {
   specName: 'can ${method.toUpperCase()} ${testData.fullPath}',
-  testKey: '${testName}',
+  testKey: '${responseName}',
   getPath: (testParams?: TestParams, root = baseUrl): string => \`\${root}${data.templateFullPath}\`,
   request: (testParams?: TestParams, root = baseUrl): supertest.Test =>
     request
@@ -270,9 +305,9 @@ export const ${testName}: TestRequest = {
         expect(${responseKey}).toBeDefined();${
     successSchema
       ? `
-        const validated = responseValidator(\`${testName}\${testParams?.statusCode ?? ${statusCode}}\`, ${responseKey});
+        const validated = responseValidator(\`${responseName}\${testParams?.statusCode ?? ${statusCode}}\`, ${responseKey});
         if (validated.error) {
-          process.stderr.write(\`\\n\${JSON.stringify({validationError: validated?.error?.details})}\\n\`);
+          console.error(validated.error);
         }
         expect(!!validated.error).toBe(false);`
       : ''
@@ -283,7 +318,7 @@ export const ${testName}: TestRequest = {
   const stubTemplate = `\
   it('can ${method.toUpperCase()} ${testData.fullPath}', async () => {
     const testData: TestData = {};
-    await Test${domainSpec.domainName}.tests.${testName}.request(testData);
+    await Test${domainSpec.domainName}.tests.${responseName}.request(testData);
   });`;
 
   return { dataTemplate, stubTemplate, validatorSchema };
@@ -313,6 +348,7 @@ import { baseUrl as root } from '@/http/nodegen/routesImporter';
 import { default as AccessTokenService } from '@/services/AccessTokenService';
 import { NextFunction, RequestHandler, Response } from 'express';
 import { default as supertest } from 'supertest';
+import { ReadStream } from 'fs';
 ${toImport?.length ? toImport.sort().join('\n') : ''}
 
 export interface TestParams {
@@ -320,8 +356,12 @@ export interface TestParams {
   body?: Record<string, any>;
   path?: Record<string, any>;
   headers?: Record<string, any>;
+  formData?: {
+    file: Blob | Buffer | ReadStream | string | boolean | number;
+    name?: string;
+  };
   statusCode?: number;
-  // form, other supertest stuff
+  // other supertest stuff
 }
 
 export interface TestRequest {
@@ -338,7 +378,9 @@ export interface GeneratedTestDomain {
   data?: Record<string, TestData>;
 }
 
+// sucks these can't be on-demand - jest needs to hoist them so that anything importing them gets the mock.
 jest.mock('morgan', () => () => (req: NodegenRequest, res: Response, next: NextFunction) => next());
+jest.mock('@/http/nodegen/middleware/asyncValidationMiddleware', () => () => (req: NodegenRequest, res: Response, next: NextFunction) => next());
 
 export const baseUrl = root.replace(/\\/*$/, '');
 export let request: supertest.SuperTest<supertest.Test>;
@@ -355,6 +397,7 @@ export const setupTeardown = {
   beforeAll: async () => {
     request = supertest((await app(0)).expressApp);
   },
+  beforeEach: () => {},
   afterEach: () => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
@@ -367,6 +410,7 @@ export const setupTeardown = {
 
 export const defaultSetupTeardown = () => {
   beforeAll(setupTeardown.beforeAll);
+  beforeEach(setupTeardown.beforeEach);
   afterEach(setupTeardown.afterEach);
   afterAll(setupTeardown.afterAll);
 };
