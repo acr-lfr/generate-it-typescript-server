@@ -289,6 +289,10 @@ export const ${responseName}: TestRequest = {
   specName: 'can ${method.toUpperCase()} ${testData.fullPath}',
   testKey: '${responseName}',
   getPath: (testParams?: TestParams, root = baseUrl): string => \`\${root}${data.templateFullPath}\`,
+  getRequest: (testParams?: TestParams, root = baseUrl): supertest.Test =>
+    request
+      ${requestParts.join('\n      ')}
+  ,
   request: (testParams?: TestParams, root = baseUrl): supertest.Test =>
     request
       ${requestParts.join('\n      ')}
@@ -360,9 +364,50 @@ export interface TestParams {
 }
 
 export interface TestRequest {
+  /**
+   * Send and test the default request
+   *
+   * @param {TestParams}  testParams  The test parameters (query, path, data, etc)
+   */
   request(testParams?: TestParams): supertest.Test;
+
+  /**
+   * Returns a supertest request method for building your own tests
+   *
+   * eg: await SomethingDomain
+   *   .tests
+   *   .somethingDomainIdPut
+   *   .getRequest({ query: 'hallo' })
+   *   .expect(({ status, body }) => ... your tests here ...
+   *
+   * @param {TestParams}  testParams  The test parameters
+   */
+  getRequest(testParams?: TestParams): supertest.Test;
+
+  /**
+   * Returns the full api path used to test against
+   *
+   * eg: '/v1/something-domain/10'
+   *
+   * @param  {TestParams}  testParams  The test parameters (only path is relevant)
+   * @param  {string}      baseUrl     The base url
+   *
+   * @return {string}      The path.
+   */
   getPath(testParams?: TestParams, baseUrl?: string): string;
+
+  /**
+   * A basic test name for something like "it(specName, () => {})"
+   *
+   * eg: 'can PUT /something-domain/{id}/',
+   */
   specName: string;
+
+  /**
+   * A unique key used to index things like the validator
+   *
+   * eg: 'somethingDomainIdPut'
+   */
   testKey: string;
 }
 
