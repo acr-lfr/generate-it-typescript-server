@@ -162,7 +162,6 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
       };
     }
 
-    pathData.operationId
     const params = parsePathData(pathData, domains[opName].exports);
 
     domains[opName].paths[fullReqPath] = {
