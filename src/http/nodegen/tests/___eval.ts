@@ -69,7 +69,7 @@ const pascalCase = (input: string): string =>
 const camelCase = (input: string): string =>
   input.replace(/([0-9].)|[^a-zA-Z0-9]+(.)?/g, (_, s = '', q = '', i) => (i ? (s || q).toUpperCase() : s || q));
 
-const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, string>): ReqParams => {
+const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, string>, opId: string): ReqParams => {
   if (!params?.length) {
     return null;
   }
@@ -77,7 +77,7 @@ const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, st
   const variables = {} as ReqParams;
 
   for (const schema of params || []) {
-    const varName = camelCase(`${schema.in}-${schema.name}`);
+    const varName = schema.in === 'path' ? camelCase(`${schema.in}-${schema.name}`) : camelCase(`${opId}-${schema.in}-${schema.name}`);
     const paramDef = schema.in === 'body' ? (schema as Schema.BodyParameter).schema : schema;
 
     variables[schema.in] = {
@@ -132,7 +132,7 @@ const parsePathData = (pathData: Path, exportData: Map<string, string>): Extract
     }
 
     params[method] = {
-      reqParams: extractReqParams(reqData.parameters as Schema.Parameter[], exportData),
+      reqParams: extractReqParams(reqData.parameters as Schema.Parameter[], exportData, reqData.operationId),
       responses: extractResponses(reqData.responses as Schema.Spec['responses']),
       security: reqData.security,
     };
@@ -162,6 +162,7 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
       };
     }
 
+    pathData.operationId
     const params = parsePathData(pathData, domains[opName].exports);
 
     domains[opName].paths[fullReqPath] = {
@@ -189,15 +190,6 @@ const getResponseExport = (method: string, name: string, schema: ParamResponse):
 
   return SwaggerUtils.pathParamsToJoi(schema, { paramTypeKey: 'body' as any });
 };
-
-const getValidator = (validatorSchemas: string[]) => `\
-export const validationSchemas: Record<string, Joi.AnySchema> = {
-${validatorSchemas.join('\n')}
-}
-
-export const responseValidator = (responseKey: string, schema: any): Joi.ValidationResult => {
-return validationSchemas[responseKey].validate(schema);
-}`;
 
 const buildMethodDataFile = (testData: TestData): DataFileParams => {
   const { method, data, domainSpec } = testData;
@@ -301,6 +293,9 @@ export const ${responseName}: TestRequest = {
     request
       ${requestParts.join('\n      ')}
       .expect(({ status, ${responseKey} }) => {
+        if (status !== (testParams?.statusCode ?? ${statusCode})) {
+          console.error(${responseKey});
+        }
         expect(status).toBe(testParams?.statusCode ?? ${statusCode});
         expect(${responseKey}).toBeDefined();${
     successSchema
@@ -317,8 +312,8 @@ export const ${responseName}: TestRequest = {
 
   const stubTemplate = `\
   it('can ${method.toUpperCase()} ${testData.fullPath}', async () => {
-    const testData: TestData = {};
-    await Test${domainSpec.domainName}.tests.${responseName}.request(testData);
+    const testParams: TestParams = {};
+    await Test${domainSpec.domainName}.tests.${responseName}.request(testParams);
   });`;
 
   return { dataTemplate, stubTemplate, validatorSchema };
@@ -447,7 +442,7 @@ const generateTestStub = (basePath: string, domainSpec: DomainSpec, tests: strin
   fs.mkdirSync(basePath, { recursive: true });
 
   const template = `\
-import { defaultSetupTeardown,${useAuth ? 'mockAuth,' : ''} TestData, Test${
+import { defaultSetupTeardown,${useAuth ? 'mockAuth,' : ''} TestParams, Test${
     domainSpec.domainName
   } } from '@/http/nodegen/tests';
 
@@ -487,6 +482,15 @@ const mapKeys = (map: Map<any, any>) => Array.from(map, ([key]) => key);
 const mapValues = (map: Map<any, any>) => Array.from(map, ([_, value]) => value);
 
 const createFormattedFile = (path: string, data: string) => fs.writeFileSync(path, prettier(data, '.ts'));
+
+const getValidator = (validatorSchemas: string[]) => `\
+export const validationSchemas: Record<string, Joi.AnySchema> = {
+${validatorSchemas.join('\n')}
+}
+
+export const responseValidator = (responseKey: string, schema: any): Joi.ValidationResult => {
+  return validationSchemas[responseKey].validate(schema);
+}`;
 
 const writeTestDataFile = (path: string, domainSpec: DomainSpec, validatorSchemas: string[]) => {
   const dataExports: string[] = mapValues(domainSpec.exports).filter((key) => key !== 'true');
