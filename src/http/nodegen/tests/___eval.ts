@@ -447,7 +447,14 @@ export const setupTeardown = {
   }
 };
 
+// don't call twice...
+let setupCalled = false;
+
 export const defaultSetupTeardown = () => {
+  if (setupCalled) {
+    return;
+  }
+  setupCalled = true;
   beforeAll(setupTeardown.beforeAll);
   beforeEach(setupTeardown.beforeEach);
   afterEach(setupTeardown.afterEach);
