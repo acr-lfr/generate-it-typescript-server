@@ -461,8 +461,6 @@ export const defaultSetupTeardown = () => {
   afterAll(setupTeardown.afterAll);
 };
 
-export type Async<T> = T extends (...args: infer T) => infer T ? Promise<T> : never;
-
 /**
  * Auth middleware mocker
  *
@@ -473,7 +471,7 @@ export type Async<T> = T extends (...args: infer T) => infer T ? Promise<T> : ne
  *
  * @param {RequestHandler}  middleware  Replaces AccessTokenService.validateRequest
  */
-export const mockAuth = (middleware?: Async<RequestHandler>) => {
+export const mockAuth = (middleware?: RequestHandler) => {
   jest
     .spyOn(AccessTokenService, 'validateRequest')
     .mockImplementation(
