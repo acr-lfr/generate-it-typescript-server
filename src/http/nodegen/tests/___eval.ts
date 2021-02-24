@@ -473,7 +473,7 @@ export type Async<T> = T extends (...args: infer T) => infer T ? Promise<T> : ne
  *
  * @param {RequestHandler}  middleware  Replaces AccessTokenService.validateRequest
  */
- export const mockAuth = (middleware?: Async<RequestHandler>) => {
+export const mockAuth = (middleware?: Async<RequestHandler>) => {
   jest
     .spyOn(AccessTokenService, 'validateRequest')
     .mockImplementation(
