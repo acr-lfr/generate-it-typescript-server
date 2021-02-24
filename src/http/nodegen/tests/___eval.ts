@@ -461,7 +461,7 @@ export const defaultSetupTeardown = () => {
   afterAll(setupTeardown.afterAll);
 };
 
-export type Async<T> = T extends (... args: infer T) => infer T ? Promise<T> : never;
+export type Async<T> = T extends (...args: infer T) => infer T ? Promise<T> : never;
 
 /**
  * Auth middleware mocker
