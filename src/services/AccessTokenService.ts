@@ -3,7 +3,7 @@ import { IncomingHttpHeaders } from 'http';
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 import config from '../config';
-import { UnauthorizedException } from '@/http/nodegen/errors';
+import { ForbiddenException, UnauthorizedException } from '@/http/nodegen/errors';
 import NodegenRequest from '@/http/interfaces/NodegenRequest';
 
 interface JwtDetails {
@@ -99,7 +99,7 @@ class AccessTokenService {
         });
     } else if (config.apiKey === apiKey) {
       // verify the access token
-      next();
+      return next(new ForbiddenException('ApiKey validation unimplemented'));
     } else {
       this.denyRequest(res);
     }
