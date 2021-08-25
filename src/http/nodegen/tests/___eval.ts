@@ -328,14 +328,11 @@ const buildMethodDataFile = (testData: TestData): DataFileParams => {
       ${requestParts.join('\n      ')}
       .expect(({ status, ${responseKey} }) => {
         expect(status).toBe(${statusCode});
-        expect(${responseKey}).toBeDefined();${
+        ${
     successSchema
       ? `
         const validated = responseValidator('${responseName}${statusCode}', ${responseKey});
-        if (validated.error) {
-          console.error(validated.error);
-        }
-        expect(!!validated.error).toBe(false);`
+        expect(validated.error).toBe(undefined);`
       : ''
   }
       });
