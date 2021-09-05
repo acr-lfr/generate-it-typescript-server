@@ -474,8 +474,8 @@ ${validatorSchemas.join('\n')}
 }
 
 /**
- * Default, basic validator which checks if the schema returned matches the schem defined
- * in the swagger.
+ * Default, basic validator which checks if the schema returned matches
+ * the schema defined in the API spec.
  * This is just a starting point for the tests, but this should be replaced by more specific,
  * targeted test cases.
  *
