@@ -24,6 +24,7 @@ interface MethodParams {
   responses?: Variables;
   security?: Record<string, string[]>[];
   pathInterface?: string;
+  usesWorkers?: boolean;
 }
 
 interface ExtractedContent {
@@ -152,6 +153,7 @@ const parsePathData = (pathData: Path, exportData: Map<string, string>): Extract
       responses: extractResponses(reqData.responses as Schema.Spec['responses']),
       security: reqData.security,
       pathInterface: reqData?.['x-request-definitions']?.path?.name,
+      usesWorkers: !!reqData?.['x-worker'],
     };
   });
 
@@ -176,7 +178,7 @@ const parseAllPaths = (spec: Schema.Spec): Domains => {
         paths: {},
         exports: new Map<string, string>(),
         imports: new Map<string, string>(),
-        securityDefinitions: spec.securityDefinitions,
+        securityDefinitions: spec.securityDefinitions || spec.components?.securitySchemes,
       };
     }
 
@@ -213,6 +215,7 @@ const buildMethodDataFile = (testData: TestData): DataFileParams => {
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(({ name }) => ({ name, type: `${methodParams?.pathInterface}['${name}']` }), []);
 
+  const setHeaders: string[] = [];
   const queryVars: string[] = [];
   const requestParts: string[] = [`.${method}(\`\${baseUrl}${data.templateFullPath}\`)`];
 
@@ -231,40 +234,45 @@ const buildMethodDataFile = (testData: TestData): DataFileParams => {
     requestParts.push(`.send(${name})`);
   } else if (methodParams.reqParams?.formData) {
     const [name] = Object.keys(methodParams.reqParams.formData);
-    requestParts.push(
-      `.attach('${methodParams.reqParams.formData[name].name}', ${name}, '${name}.png')`
-    );
+    requestParts.push(`.attach('${methodParams.reqParams.formData[name].name}', ${name}, '${name}.png')`);
+  }
+
+  if (methodParams.reqParams?.header) {
+    Object.entries(methodParams.reqParams?.header).forEach(([importVar, { name }]) => {
+      setHeaders.push(`'${name}': ${importVar}`);
+    });
   }
 
   // build auth header
   methodParams.security?.forEach?.((security) => {
     Object.entries(security).forEach(([name]) => {
       const def = domainSpec.securityDefinitions?.[name];
-      if (def) {
-        switch (def.type) {
-          case 'basic':
-            requestParts.push(`.set('Authorization', 'Basic base64string')`);
-            break;
-          case 'apiKey':
-            if (def.in === 'query') {
-              queryVars.push(`${def.name}: 'apiKey'`);
-            } else {
-              requestParts.push(`.set('${def.name}', 'apiKey')`);
-            }
-            break;
-          case 'oauth2': // TODO
-            if ((def as Schema.OAuth2AccessCodeSecurity).tokenUrl) {
-              queryVars.push(`tokenUrl: '${(def as Schema.OAuth2AccessCodeSecurity).tokenUrl}'`);
-            }
-            if ((def as Schema.OAuth2AccessCodeSecurity).authorizationUrl) {
-              queryVars.push(`authorizationUrl: '${(def as Schema.OAuth2AccessCodeSecurity).authorizationUrl}'`);
-            }
-            queryVars.push(`scope: '${Object.keys(def.scopes || {}).join(',')}'`);
-            break;
-        }
+
+      switch (def?.type) {
+        case 'http':
+          setHeaders.push(`'Authorization': '${ucFirst(def.scheme || 'basic')} base64string'`);
+          break;
+        case 'basic':
+          setHeaders.push(`'Authorization': 'Basic base64string'`);
+          break;
+        case 'apiKey':
+          if (def.in === 'query') {
+            queryVars.push(`'${def.name}': 'apiKey'`);
+          } else {
+            setHeaders.push(`'${def.name}': 'apiKey'`);
+          }
+          break;
+        case 'oauth2': // TODO
+        case 'openIdConnect':
+          queryVars.push(`${def.type}: 'TODO'`);
+          break;
       }
     });
   });
+
+  if (setHeaders.length) {
+    requestParts.push(`.set({${setHeaders.join(', ')}})`);
+  }
 
   if (queryVars?.length) {
     requestParts.push(`.query({ ${queryVars.join(', ')} })`);
@@ -329,12 +337,12 @@ const buildMethodDataFile = (testData: TestData): DataFileParams => {
       .expect(({ status, ${responseKey} }) => {
         expect(status).toBe(${statusCode});
         ${
-    successSchema
-      ? `
+          successSchema
+            ? `
         const validated = responseValidator('${responseName}${statusCode}', ${responseKey});
         expect(validated.error).toBe(undefined);`
-      : ''
-  }
+            : ''
+        }
       });
   });`;
 
@@ -354,16 +362,15 @@ ${classBody.join('\n\n')}
   createFormattedFile(filename, content);
 };
 
-const writeTestIndexFile = (filename: string, toImport: string[], toExport: string[]): void => {
+const writeTestIndexFile = (filename: string, toExport: string[], usesWorkers: boolean = false): void => {
   const content = `\
 import app from '@/app';
 import { NodegenRequest } from '@/http/nodegen/interfaces';
-import { default as WorkerService } from '@/http/nodegen/request-worker/WorkerService';
+${usesWorkers ? `import { default as WorkerService } from '@/http/nodegen/request-worker/WorkerService';\n` : ''}\
 import { baseUrl as root } from '@/http/nodegen/routesImporter';
 import { default as AccessTokenService } from '@/services/AccessTokenService';
 import { NextFunction, RequestHandler, Response } from 'express';
 import { default as supertest } from 'supertest';
-${toImport?.length ? toImport.sort().join('\n') : ''}\
 
 // sucks these can't be on-demand - jest needs to hoist them so that anything importing them gets the mock.
 jest.mock('morgan', () => () => (req: NodegenRequest, res: Response, next: NextFunction) => next());
@@ -391,9 +398,13 @@ export const defaultSetupTeardown = () => {
     jest.resetAllMocks();
   });
 
-  afterAll(async () => {
+  ${
+    usesWorkers
+      ? `afterAll(async () => {
     await WorkerService.close();
-  });
+  });\n`
+      : ''
+  }\
 };
 
 export type Async<T> = T extends (...args: infer T) => infer T ? Promise<T> : never;
@@ -462,6 +473,15 @@ export const validationSchemas: Record<string, Joi.AnySchema> = {
 ${validatorSchemas.join('\n')}
 }
 
+/**
+ * Default, basic validator which checks if the schema returned matches the schem defined
+ * in the swagger.
+ * This is just a starting point for the tests, but this should be replaced by more specific,
+ * targeted test cases.
+ *
+ * @param {string}  responseKey  The response key
+ * @param {any}     schema       The schema
+ */
 export const responseValidator = (responseKey: string, schema: any): { error?: Joi.ValidationError } => {
   return validationSchemas[responseKey].validate(schema);
 }`;
@@ -505,6 +525,7 @@ const buildSpecFiles = (ctx: Context): void => {
 
   const indexExports: string[] = [];
   const domains = parseAllPaths(ctx.swagger);
+  let domainUsesWorkers = false;
 
   Object.entries(domains).forEach(([opName, domainSpec]) => {
     const specFileName = `${domainSpec.domainName}`;
@@ -528,6 +549,7 @@ const buildSpecFiles = (ctx: Context): void => {
         stubTemplates.push(stubTemplate);
         validatorSchemas.push(...validatorSchema);
         useAuth = useAuth || !!data.params[method]?.security?.length;
+        domainUsesWorkers = domainUsesWorkers || !!data.params[method]?.usesWorkers;
       });
     });
 
@@ -542,7 +564,7 @@ const buildSpecFiles = (ctx: Context): void => {
     writeTestStubFile(testOutput, domainSpec, stubTemplates, useAuth, domainImports.stub);
   });
 
-  writeTestIndexFile(`${ctx.dest}/index.ts`, [], indexExports);
+  writeTestIndexFile(`${ctx.dest}/index.ts`, indexExports, domainUsesWorkers);
 };
 
 export default buildSpecFiles;
