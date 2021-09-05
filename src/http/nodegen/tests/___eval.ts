@@ -271,7 +271,7 @@ const buildMethodDataFile = (testData: TestData): DataFileParams => {
   });
 
   if (setHeaders.length) {
-    requestParts.push(`.set({${setHeaders.join(', ')}})`);
+    requestParts.push(`.set({ ${setHeaders.join(', ')} })`);
   }
 
   if (queryVars?.length) {
