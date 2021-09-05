@@ -51,7 +51,7 @@ The overall design pattern for the architecture is influenced by traditional [MV
 - Data returned from a domain method is captured by the same route function it is was called from, the router sends the output to the `inferResponseType.ts` response middleware which outputs data in the format requested from the client in conjunction with the permitted types defined by the openapi file.
 
 #### Accessing your API via CLI
-Similar to the Symfony framework CLI commands should be written and stored; in this case in the `src/cli` directory. The sequence is:
+Similar to the Symfony framework CLI, commands should be written and stored - in this case in the `src/cli` directory. The sequence is:
 - Write and store a script in `src/cli`, no special format required, just a simple script and you have full access to your apps code.
   - Could be as simple as `console.log('hello world')`
 - Lets say the script was named `seedUsers.ts`; call it like this `npm run cli-script -- seedUsers`
@@ -60,7 +60,7 @@ Similar to the Symfony framework CLI commands should be written and stored; in t
   - With the business logic completely extracted into the domain layer, you can easily access this layer without mocking any of http content. 
 
 #### Testing
-With the http layer is now managed, that frees up some time for writing tests. Additionally, you can auto-generate some basic tests for your domains specifying a test output directory in the nodegenrc file:
+With the http layer is now managed, that frees up some time for writing tests. Additionally, you can auto-generate some basic tests for your domains by specifying a test output directory in the nodegenrc file:
 ```json
 {
   "nodegenDir": "src/http",
