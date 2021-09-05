@@ -1,15 +1,22 @@
 # openapi-nodegen typescript server template files
 
+<!-- npx doctoc --github README.md  -->
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [High level design](#high-level-design)
+  - [Design Philosophy](#design-philosophy)
+  - [Accessing your API via CLI](#accessing-your-api-via-cli)
+  - [Testing](#testing)
+- [Injecting into the http layer](#injecting-into-the-http-layer)
 - [API Spec file helpers/features](#api-spec-file-helpersfeatures)
     - [Access full request in domain](#access-full-request-in-domain)
     - [Allow non authenticated request to access domain](#allow-non-authenticated-request-to-access-domain)
     - [CLI](#cli)
     - [Inferring output content-type](#inferring-output-content-type)
+      - [application/vnd.api+json](#applicationvndapijson)
     - [Input/ouput filters (validation)](#inputouput-filters-validation)
     - [Async route validation](#async-route-validation)
         - [A standard setup:](#a-standard-setup)
@@ -29,19 +36,22 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## High level design
-The http layer is completely managed, uses expressjs & lives at `src/http/` as defined in the `.nodegenrc` file (all files here are overwritten). 
+The http layer is completely managed, uses expressjs & lives at the location specified by `.nodegenrc` `nodegenDir` key (default is `src/http/`). All files in the `nodegenDir` folder are overwritten each time you regenrate.  
 
 The `app.ts` calls the `src/http/index.ts` which returns the initialized express app. You can inject middleware and other options, see the `HttpOptions` interface in the `src/http/index.ts`.
 
-The domain layer is where all business logic should live, the domain layer is initially generated from [___stub](https://acrontum.github.io/generate-it/#/_pages/templates?id=stub) templates from generate-it. 
+The domain layer is where all business logic should live, the domain layer is initially generated from [\_\_\_stub](https://acr-lfr.github.io/generate-it/#/_pages/templates?id=stub) templates from generate-it.  
+**NOTE**: Stub files are created if they do not exist, but not overwritten each generation.  
 
-**The overall design pattern** for the architecture is influenced by traditional [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) but also the popular frameworks like [laravel](https://laravel.com/) and [symfony](https://symfony.com/); 
+#### Design Philosophy
+The overall design pattern for the architecture is influenced by traditional [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) but also the popular frameworks like [laravel](https://laravel.com/) and [symfony](https://symfony.com/):  
 - The `app.ts` loads database connections and the express framework, including the middlewares and routes.
 - The generated routes, imported from the generated `src/http/nodegen/routesImporter.ts`, handle all incoming HTTP traffic and validation (both input and output).
 - Each route will lead to a domain method (`src/domains`) which houses the business logic, eg your custom code.
 - Data returned from a domain method is captured by the same route function it is was called from, the router sends the output to the `inferResponseType.ts` response middleware which outputs data in the format requested from the client in conjunction with the permitted types defined by the openapi file.
 
-**Accessing your API via CLI**; similar to the Symfony framework CLI commands should be written and stored; in this case in the `src/cli` directory. The sequence is:
+#### Accessing your API via CLI
+Similar to the Symfony framework CLI commands should be written and stored; in this case in the `src/cli` directory. The sequence is:
 - Write and store a script in `src/cli`, no special format required, just a simple script and you have full access to your apps code.
   - Could be as simple as `console.log('hello world')`
 - Lets say the script was named `seedUsers.ts`; call it like this `npm run cli-script -- seedUsers`
@@ -49,10 +59,25 @@ The domain layer is where all business logic should live, the domain layer is in
   - After initializing the `app.ts` it will simply call your script opposed to starting another instance of your API.
   - With the business logic completely extracted into the domain layer, you can easily access this layer without mocking any of http content. 
 
-**Testing the API**; as the http layer is now managed, testing becomes less time-consuming. As the app's business logic all sits in the domain layer, as long as you ensure a very high % coverage of unit tests for the domain layer you can think of these as your API integration tests and consider your API reasonably well tested. Testing is of course up to you. To actually mock test the API you can include into your API the API Test rig (see [known-templates](https://acrontum.github.io/generate-it/#/_pages/known-templates))
+#### Testing
+With the http layer is now managed, that frees up some time for writing tests. Additionally, you can auto-generate some basic tests for your domains specifying a test output directory in the nodegenrc file:
+```json
+{
+  "nodegenDir": "src/http",
+  "helpers": {
+    "tests": {
+      "outDir": "src/domains/__tests__"
+    }
+  }
+}
+```
+This will generate some basic test helper files in `<nodegenDir>/tests/` as well as integration tests for your domains in `helpers.tests.outDir`. These should serve as a starting point and guide, but it's very likely your API will outgrow these basic tests.  
+The integration tests are stubfiles - meaning they are not overwritten during generation - so you can modify them as you like. When you make changes to the API spec, you will likely want to update them the same way as other stubfiles (eg domains) so that all routes are covered.  
+
+Alternatively (or additionally) see the [known-templates](https://acr-lfr.github.io/generate-it/#/_pages/known-templates) page for the API test rig which allows you to test your API using mocks.
 
 ## Injecting into the http layer
-You can inject some customisations into the http layer from the app.ts file.
+You can inject some customization into the http layer from the app.ts file.
 
 Here is an example, injecting a static route to be loaded before the http routes:
 ````typescript
@@ -88,12 +113,12 @@ export default async (port: number): Promise<Http> => {
 These templates inject into the code helpful elements depending on the provided api file.
 
 #### Access full request in domain
-Accessing the full request object is handled by the core feature: [pass-full-request-object-to-___stub-method](https://acrontum.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)
+Accessing the full request object is handled by the core feature: [pass-full-request-object-to-\_\_\_stub-method](https://acr-lfr.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)
 
 #### Allow non authenticated request to access domain
 With some API designs there is the need to offer 1 API route which returns content for authenticated users and non-authenticated users. The content could be a newsfeed for example with authenticated users getting a extra attributes in the new objects returned compared to non-authenticated users.
 
-This can be acheived by marking a route with an additional attribute: `x-passThruWithoutJWT`
+This can be achieved by marking a route with an additional attribute: `x-passThruWithoutJWT`
 
 This will pass the request through to the domain with or without a jwt, but it also allows the domain to check if a decoded token has been passed or not. Invalid tokens will result in an unauthenticated response from the route and not hit the domain. The output will also pass the JwtAccess to the domain with `| undefined` making it very clear within the domain that the decoded jwt may or may not be there:
 ```typescript
@@ -148,9 +173,9 @@ produces:
 ```
 
 #### Input/ouput filters (validation)
-The [**input**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by the npm package [celebrate](https://www.npmjs.com/package/celebrate). Anything not declared in the request by the swagger file will simply result in a 422 error being passed back to the client and will not hit the domain layer.
+The [**input**](https://github.com/acr-lfr/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L29) is protected by the npm package [celebrate](https://www.npmjs.com/package/celebrate). Anything not declared in the request by the swagger file will simply result in a 422 error being passed back to the client and will not hit the domain layer.
 
-The [**output**](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L33) is protected by the npm package [object-reduce-by-map](https://www.npmjs.com/package/object-reduce-by-map) which strips out any content from an object or array, or array of objects that should not be there.
+The [**output**](https://github.com/acr-lfr/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L33) is protected by the npm package [object-reduce-by-map](https://www.npmjs.com/package/object-reduce-by-map) which strips out any content from an object or array, or array of objects that should not be there.
 
 Both the input and output are provided the request and response object, respectively, from the api file.
 
@@ -224,7 +249,7 @@ class AsyncValidationService {
 ```
 x-permission: adminUsersDelete
 ```
-It will then [inject the permission middleware](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L28) to the give path and pass the said middleware the provided permission string. In the above case, "adminUserDelete" will be passed.
+It will then [inject the permission middleware](https://github.com/acr-lfr/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/routes/___op.ts.njk#L28) to the give path and pass the said middleware the provided permission string. In the above case, "adminUserDelete" will be passed.
 
 #### NodegenRC Helpers
 The default `.nodegenrc` will contain:
@@ -244,10 +269,10 @@ The default `.nodegenrc` will contain:
 ```
 The stub helpers will mean the domain method types will be `JwtAccess` or `NodegenRequest` opposed to `any`.
 
-The `NodegenRequest` interface is [provided by these templates](https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/interfaces/NodegenRequest.ts) out of the box so nothing extra required (a domain gets a full req object based on the [core feature](https://acrontum.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)). This interface extends the express request interface with the additional attributes added by this setup.
+The `NodegenRequest` interface is [provided by these templates](https://github.com/acr-lfr/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/interfaces/NodegenRequest.ts) out of the box so nothing extra required (a domain gets a full req object based on the [core feature](https://acr-lfr.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)). This interface extends the express request interface with the additional attributes added by this setup.
 
 ##### Jwt Definition 
-The `JwtAccess` interface is not provided, it expects that you have in your api file a definition by this name. You can see an example in the core: [example JwtAccess interface](https://github.com/acrontum/openapi-nodegen/blob/develop/test_swagger.yml#L176). If you want to use a different interface name, change the value of "jwtType", if you don't want it at all, just delete it from your `.nodegenrc` file.
+The `JwtAccess` interface is not provided, it expects that you have in your api file a definition by this name. You can see an example in the core: [example JwtAccess interface](https://github.com/acr-lfr/openapi-nodegen/blob/develop/test_swagger.yml#L176). If you want to use a different interface name, change the value of "jwtType", if you don't want it at all, just delete it from your `.nodegenrc` file.
 
 It also expects that you name it "jwtToken" in the yaml file.
 
@@ -279,7 +304,7 @@ The middleware `src/http/nodegen/middleware/headersCaching.ts` is a proxy functi
 This allows you to control the cache headers returned. Alternatively you may wish to inject your own caching service logic here as you have full access to the request and response object.
 
 #### Errors
-However nice all the automated layer is, once in the domain method it is common to want to throw some http error codes from the domain. Each of the error [helpers here](https://github.com/acrontum/openapi-nodegen-typescript-server/tree/master/src/http/nodegen/errors) have their own handle [middleware](https://github.com/acrontum/openapi-nodegen-typescript-server/tree/master/src/http/nodegen/middleware). For more info on each take a read of the comments within the files.  
+However nice all the automated layer is, once in the domain method it is common to want to throw some http error codes from the domain. Each of the error [helpers here](https://github.com/acr-lfr/openapi-nodegen-typescript-server/tree/master/src/http/nodegen/errors) have their own handle [middleware](https://github.com/acr-lfr/openapi-nodegen-typescript-server/tree/master/src/http/nodegen/middleware). For more info on each take a read of the comments within the files.  
 
 It's recommended you use the `Exception.ts` classes when throwing errors - the `4xx.ts` files are deprecated and exist for backwards compatibility reasons.  
 
@@ -294,7 +319,7 @@ Add to the dev dependencies openapi-nodegen
 Add the nodegen generate the server to the package.json scripts object. The following will load a local swagger file api.1.0.0.yml and generate the server with the given git repository:
 ```
   "scripts": {
-      "generate:nodegen": "openapi-nodegen ./api_1.0.0.yml -t https://github.com/acrontum/openapi-nodegen-typescript-server.git",
+      "generate:nodegen": "openapi-nodegen ./api_1.0.0.yml -t https://github.com/acr-lfr/openapi-nodegen-typescript-server.git",
 ```
 
 #### Specifying basePath in OA3
@@ -313,7 +338,7 @@ routesImporter(app, '/v1');
 Typically the generation is only done during development. Typically you would orchestrate a full spec file from many little files then build 1 file to share to both openapi-nodegen and things like AWS or other gateways. To make life easier, you can simply point openapi-nodegen to the working directory of your api file repo, instead of manually copying the built file:
  ```
    "scripts": {
-       "generate:nodegen": "openapi-nodegen ../auth-api-d/built/api_1.0.0.yml -t https://github.com/acrontum/openapi-nodegen-typescript-server.git",
+       "generate:nodegen": "openapi-nodegen ../auth-api-d/built/api_1.0.0.yml -t https://github.com/acr-lfr/openapi-nodegen-typescript-server.git",
  ```
 
 #### Tip 2 for older versions of openapi-nodegen
@@ -321,5 +346,5 @@ Typically the generation is only done during development. Typically you would or
 Reference a tag:
 ```
   "scripts": {
-      "generate:nodegen": "openapi-nodegen ./swagger/api_1.0.0.yml -t https://github.com/acrontum/openapi-nodegen-typescript-server.git#3.0.6",
+      "generate:nodegen": "openapi-nodegen ./swagger/api_1.0.0.yml -t https://github.com/acr-lfr/openapi-nodegen-typescript-server.git#3.0.6",
 ```
