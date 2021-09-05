@@ -113,7 +113,7 @@ export default async (port: number): Promise<Http> => {
 These templates inject into the code helpful elements depending on the provided api file.
 
 #### Access full request in domain
-Accessing the full request object is handled by the core feature: [pass-full-request-object-to-\_\_\_stub-method](https://acr-lfr.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)
+Accessing the full request object is handled by the core feature: [pass-full-request-object-to-\_\_\_stub-method](https://acr-lfr.github.io/generate-it/#/_pages/features?id=pass-full-request-object-to-___stub-method). Similarly, you can also get access to the response using `x-passResponse`. **NOTE** you must manually complete the response (eg `res.json({ hello: 'world' })`), otherwise your HTTP call will hang.  
 
 #### Allow non authenticated request to access domain
 With some API designs there is the need to offer 1 API route which returns content for authenticated users and non-authenticated users. The content could be a newsfeed for example with authenticated users getting a extra attributes in the new objects returned compared to non-authenticated users.
