@@ -2,7 +2,7 @@ import { {% for interface in importInterfaces(operations) -%}{{ interface }},{%-
 {% set domainClassName = ucFirst(operation_name) + 'Domain' %}
 {% set domainInterfaceName = ucFirst(operation_name) + 'DomainInterface' %}
 import { {{domainInterfaceName}} } from '@/http/nodegen/domainInterfaces/{{domainInterfaceName}}';
-{% if pathMethodsHaveAttr(operations, 'security', 'jwtToken') %}import {JwtAccess} from '@/http/nodegen/interfaces/JwtAccess';{% endif %}
+{% if pathMethodsHaveAttr(operations, 'security', 'jwtToken') %}import { {{ nodegenRc.helpers.stub.jwtType }} } from '@/http/nodegen/interfaces/JwtAccess';{% endif %}
 {% if pathMethodsHaveAttr(operations, 'x-passRequest') %}import NodegenRequest from '../http/interfaces/NodegenRequest';{% endif %}
 {% if mockServer %}import {{ ucFirst(operation_name) }}DomainMock from './__mocks__/{{ ucFirst(operation_name) }}DomainMock'{% endif %}
 
