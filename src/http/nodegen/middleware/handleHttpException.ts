@@ -17,9 +17,5 @@ export default () => (err: any, req: NodegenRequest, res: express.Response, next
     err = createHttpExceptionFromErr(err);
   }
 
-  if (err.isJson()) {
-    return res.status(err.status).json(err.body);
-  } else {
-    return res.status(err.status).send(err.body);
-  }
+  return res.status(err.status).json(err);
 };
