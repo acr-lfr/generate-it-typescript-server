@@ -1,22 +1,22 @@
-import { CelebrateInternalError } from 'celebrate';
 import config from '@/config';
-import { HttpException } from '@/http/nodegen/errors';
+import { HttpException, UnprocessableEntityException } from '@/http/nodegen/errors';
+import { CelebrateError, isCelebrateError } from 'celebrate';
 
 export const createHttpExceptionFromErr = (
-  error: Error,
+  error: Error | CelebrateError,
   options?: { status?: number; body?: Record<string, any> }
 ): HttpException => {
-  if ((error as unknown as CelebrateInternalError).joi) {
-    return new HttpException(422, error);
+  if (isCelebrateError(error)) {
+    // TODO: parse into something normal
+    return new UnprocessableEntityException(Object.fromEntries(error.details));
   }
 
-  const body = {
-    body: 'Internal server error',
-    message: error?.name || error?.message,
-    status: options?.status ?? 500,
-    stack: config.env !== 'production' ? error?.stack : null,
-    ...(options?.body || {}),
-  };
+  const httpException = new HttpException(options?.status ?? 500, options?.body ?? error.message);
+  httpException.message = error.name;
 
-  return new HttpException(body.status, body);
+  if (config.env !== 'production') {
+    httpException.stack = error?.stack;
+  }
+
+  return httpException;
 };
