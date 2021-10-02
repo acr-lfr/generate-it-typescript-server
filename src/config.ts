@@ -15,7 +15,7 @@ export default {
   }],
 
   // Instance
-  env: ConfigHelper.withDefault('ENVIRONMENT', 'production'),
+  env: ConfigHelper.withDefault('NODE_ENV', 'production'),
   port: ConfigHelper.withDefault('PORT', 8000),
 
   // Cors white list of URLs
