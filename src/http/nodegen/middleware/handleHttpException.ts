@@ -1,8 +1,8 @@
+import { createHttpExceptionFromErr } from '@/http/nodegen/utils/createHttpExceptionFromErr';
+import { LoggingService } from '@/services/LoggingService';
 import * as express from 'express';
 import { HttpException } from '../errors';
 import NodegenRequest from '../interfaces/NodegenRequest';
-import { createHttpExceptionFromErr } from '@/http/nodegen/utils/createHttpExceptionFromErr';
-import { LoggerService } from '@/services';
 
 /**
  * Http Exception handler
@@ -12,7 +12,7 @@ export default () => (err: HttpException, req: NodegenRequest, res: express.Resp
     err = createHttpExceptionFromErr(err);
   }
 
-  LoggerService.error(err);
+  LoggingService.error(err.stack || err);
 
   return res.status(err.status).json(err);
 };

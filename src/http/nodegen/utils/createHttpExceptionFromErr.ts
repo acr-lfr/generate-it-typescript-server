@@ -1,4 +1,3 @@
-import config from '@/config';
 import { HttpException, UnprocessableEntityException } from '@/http/nodegen/errors';
 import { CelebrateError, isCelebrateError } from 'celebrate';
 
@@ -18,7 +17,7 @@ export const createHttpExceptionFromErr = (
     httpException = new HttpException(options?.status ?? 500, options?.body ?? error.message);
   }
 
-  httpException.message = error.name;
+  httpException.message = error.message;
   httpException.stack = error.stack;
 
   return httpException;
