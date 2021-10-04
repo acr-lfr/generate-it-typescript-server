@@ -7,7 +7,6 @@ import {
   headersCaching,
   inferResponseType,
 } from '@/http/nodegen/middleware';
-import bodyParser from 'body-parser';
 import express from 'express';
 import expressFormData from 'express-form-data';
 import morgan from 'morgan';
@@ -29,7 +28,7 @@ export const requestParser = (app: express.Application): void => {
       uploadDir: tmpdir(),
     })
   );
-  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(express.json({ limit: '50mb' }));
 
   // clear all empty files (size == 0)
   app.use(expressFormData.format());
@@ -38,8 +37,7 @@ export const requestParser = (app: express.Application): void => {
   app.use(expressFormData.union());
 
   // parse the body
-  app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(bodyParser.json());
+  app.use(express.urlencoded({ extended: false }));
 
   app.use(requestIp.mw());
 };
