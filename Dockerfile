@@ -1,8 +1,8 @@
-FROM node:12-alpine as environment
+FROM node:14-alpine as environment
 
-# @TODO: Build node_modules into the build
-COPY ./package.json ./package-lock.json /code/
 WORKDIR /code
+
+COPY ./package.json ./package-lock.json /code/
 
 RUN npm ci
 
