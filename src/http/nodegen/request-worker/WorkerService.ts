@@ -43,7 +43,7 @@ const HTTP_ERROR_CONSTRUCTORS: Record<string, (message?: string) => HttpExceptio
   http422,
   http423,
   http429,
-  HttpException: HttpException.bind(HttpException, 500),
+  HttpException: (message?: string) => new HttpException(500, message),
 };
 
 // Check the config default config to ensure you have the

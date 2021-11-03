@@ -5,10 +5,10 @@
  * @param  {string}  accept       The accept header
  * @param  {array}   mimes        Our desired response types (in order as defined in the openapi file)
  *
- * @return {string | undefined}   If the accept header contains something we would like to
+ * @return {string | null}        If the accept header contains something we would like to
  *                                send, it will be returned, else undefined.
  */
-export default (accept: string, mimes: string[]): string => {
+ export default (accept: string, mimes: string[]): string | null => {
   if (!accept || !mimes?.length) {
     return null;
   }
@@ -16,7 +16,7 @@ export default (accept: string, mimes: string[]): string => {
   // escape all special chars except *
   const formatRegex = (s: string) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
 
-  const priority: string[][] = accept.split(/\s*,\s*/).reduce((acc, val) => {
+  const priority: string[][] = accept.split(/\s*,\s*/).reduce((acc: any[], val) => {
     const [mime, ...extra] = val.split(/\s*;\s*/);
 
     // extension might look like { q: '0.1', charset: 'utf-8' }
@@ -35,7 +35,7 @@ export default (accept: string, mimes: string[]): string => {
     return acc;
   }, []);
 
-  const parts = [...mimes, '*/*'].reduce((acc, mime) => {
+  const parts = [...mimes, '*/*'].reduce((acc: any[], mime) => {
     if (!mime) {
       return acc;
     }
@@ -51,11 +51,11 @@ export default (accept: string, mimes: string[]): string => {
   const matchingAccept = priority.find((mimeTypes) => mimeTypes.find((mime) => willAccept.test(mime)))?.[0];
 
   if (!matchingAccept) {
-    return;
+    return null;
   }
 
 
   const matchRegex = new RegExp(matchingAccept.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*'));
 
-  return mimes.find((mime) => matchRegex.test(mime));
+  return mimes.find((mime) => matchRegex.test(mime)) || null;
 };

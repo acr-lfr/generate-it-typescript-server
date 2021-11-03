@@ -5,5 +5,5 @@ import express from 'express';
 export default interface NodegenRequest extends express.Request{% if nodegenRc.helpers.stub.requestTypeExtensionPath %}, Ext{% endif %} {
   jwtData: {{ nodegenRc.helpers.stub.jwtType if nodegenRc.helpers.stub.jwtType else 'any' }};
   originalToken: string;
-  clientIp: string;
+  clientIp?: string;
 }
