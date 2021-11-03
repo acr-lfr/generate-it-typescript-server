@@ -107,9 +107,9 @@ const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, st
 
     // TODO: either mock a file or figure out what to do with it
     if (schema.in === 'formData') {
-      exportData.set(varName, `export const ${varName} = Buffer.from('${varName}');`);
+      exportData.set(varName, `export const ${varName}: any = Buffer.from('${varName}');`);
     } else {
-      exportData.set(varName, `export const ${varName} = ${JSON.stringify(mockItGenerator(paramDef?.schema || paramDef))};`);
+      exportData.set(varName, `export const ${varName}: any = ${JSON.stringify(mockItGenerator(paramDef?.schema || paramDef))};`);
     }
   }
 
@@ -487,7 +487,7 @@ export const responseValidator = (responseKey: string, schema: any): { error?: J
 const writeTestDataFile = (path: string, domainSpec: DomainSpec, validatorSchemas: string[]): void => {
   const dataExports: string[] = mapValues(domainSpec.exports).filter((key) => key !== 'true');
   if (validatorSchemas?.length) {
-    dataExports.unshift(`import * as Joi from 'joi';`);
+    dataExports.unshift(`import Joi from 'joi';`);
     dataExports.push(getValidator(validatorSchemas));
   }
   createFormattedFile(path, dataExports.join('\n\n'));
