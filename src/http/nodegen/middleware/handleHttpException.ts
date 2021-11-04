@@ -15,7 +15,7 @@ export default () => (err: HttpException, req: NodegenRequest, res: express.Resp
   console.error(err.stack || err);
 
   if (err.status === 500 && config.env === 'production') {
-    return res.status(err.status);
+    return res.status(err.status).json({ message: 'Internal server error' });
   } else {
     return res.status(err.status).json(err);
   }
