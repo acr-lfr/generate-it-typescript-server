@@ -1,0 +1,10 @@
+.DS_Store
+**/.env
+.git
+.idea
+.openapi-nodegen
+build
+coverage
+dist
+githooks
+node_modules
