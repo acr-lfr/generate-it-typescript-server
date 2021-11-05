@@ -1,6 +1,7 @@
 import { {% for interface in importInterfaces(operations) -%}{{ interface }},{%- endfor %} } from '@/http/nodegen/interfaces';
 {% if pathMethodsHaveAttr(operations, 'security', 'jwtToken') %}import { {{ nodegenRc.helpers.stub.jwtType }} } from '@/http/nodegen/interfaces';{% endif %}
 {% if pathMethodsHaveAttr(operations, 'x-passRequest') %}import NodegenRequest from '@/http/interfaces/NodegenRequest';{% endif %}
+{% if pathMethodsHaveAttr(operations, 'x-passResponse') %}import { Response } from 'express';{% endif %}
 
 export interface {{ ucFirst(operation_name) }}DomainInterface {
   {% for op in operations -%}
