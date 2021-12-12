@@ -16,5 +16,12 @@ export default (script: string, cliArgs: Record<string, any>): void => {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require(`./${script}`).default(cliArgs);
+  require(`./${script}`)
+    .default(cliArgs)
+    .then((out: any) => {
+      console.log('SUCCESS: ' + script, out);
+    })
+    .catch((e: any) => {
+      console.error('FAILURE: ' + script, e);
+    });
 }
