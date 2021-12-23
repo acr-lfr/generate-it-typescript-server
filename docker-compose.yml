@@ -1,10 +1,6 @@
 {%- set serviceName =  _.kebabCase(package.name) | replace(r/[-_]*swagger$/, "") -%}
 version: "3"
 
-# virtual volume
-volumes:
-  build:
-
 services:
   {{ serviceName }}:
     image: "${IMAGE_PREFIX}{{ serviceName }}-image:${IMAGE_TAG:-latest}"
@@ -14,16 +10,19 @@ services:
     env_file:
       - .env
     volumes:
-      - build:/code/build
       - ./global.d.ts:/code/global.d.ts
       - ./server.ts:/code/server.ts
       - ./tsconfig.json:/code/tsconfig.json
       - ./src:/code/src/
     ports:
       - "8080:8000"
-    networks:
-      - {{ serviceName }}
-      - default
+    # networks:
+    #   - some-external-network
     working_dir: /code
     entrypoint: /bin/sh
     command: '-c "npx tsc-watch --preserveWatchOutput --compiler /code/node_modules/.bin/ttsc --onSuccess "/sbin/docker-entrypoint.sh prod""'
+
+# networks:
+#   some-external-network:
+#     external:
+#       name: some-external-network
