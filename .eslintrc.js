@@ -5,7 +5,7 @@ module.exports = {
   // Which files to not lint
   ignorePatterns: [
     'src/domains/__mocks__/**/*',
-    'src/http/nodegen/**/*',
+    'src/http/**/*',
   ],
 
   parserOptions: {
@@ -19,6 +19,7 @@ module.exports = {
   extends: [
     // Uses the recommended rules from the @typescript-eslint/eslint-plugin
     'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
   ],
 
   // additional function from 3rd parties
@@ -36,7 +37,7 @@ module.exports = {
     // Eslint overrides
     'curly': ['error', 'all'],
     'quotes': ['error', 'single', { avoidEscape: true }],
-    'max-lines-per-function': ['error', 40],
+    'max-lines-per-function': ['error', 50],
 
     // Typescript overrides
     '@typescript-eslint/no-empty-function': 'off',
