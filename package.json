@@ -18,7 +18,7 @@
     "pm2:start:prod": "pm2 start pm2.prod.config.js",
     "test": "npm run build && npm run lint && npm run test:unit",
     "test:unit": "ENVIRONMENT=test && jest --silent --runInBand",
-    "test:unit:single": "ENVIRONMENT=test && jest --collect-coverage false --verbose --forceExit --detectOpenHandles"
+    "test:unit:single": "jest --clearCache && ENVIRONMENT=test && jest --collect-coverage false --verbose --forceExit --detectOpenHandles"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
