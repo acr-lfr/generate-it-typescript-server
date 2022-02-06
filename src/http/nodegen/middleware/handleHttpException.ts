@@ -1,22 +1,6 @@
-import { createHttpExceptionFromErr } from '@/http/nodegen/utils/createHttpExceptionFromErr';
-import * as express from 'express';
-import { HttpException } from '../errors';
-import NodegenRequest from '../interfaces/NodegenRequest';
-import config from '@/config';
+import ErrorHandler from '@/services/ErrorHandler';
 
 /**
- * Http Exception handler
+ * Http Exception handler proxied through to the ErrorHandler service
  */
-export default () => (err: HttpException, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
-  if (!(err instanceof HttpException)) {
-    err = createHttpExceptionFromErr(err);
-  }
-
-  console.error(err.stack || err);
-
-  if (err.status === 500 && config.env === 'production') {
-    return res.status(err.status).json({ message: 'Internal server error' });
-  } else {
-    return res.status(err.status).json(err);
-  }
-};
+export default () => ErrorHandler.express;
