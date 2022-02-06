@@ -1,7 +1,7 @@
 import express, { Express } from 'express';
 import http from 'http';
 import { AddressInfo } from 'net';
-import { requestMiddleware, responseMiddleware } from '@/http/nodegen/middleware';
+import { handleDomain404, handleExpress404, handleHttpException, requestMiddleware } from '@/http/nodegen/middleware';
 import routesImporter, { RoutesImporter } from '@/http/nodegen/routesImporter';
 import packageJson from '../../package.json';
 
@@ -12,7 +12,7 @@ export interface Http {
 
 export interface HttpOptions {
   // a preconfigured express app, if present the api will use this express app opposed to generating a new one.
-  app?: Express
+  app?: Express;
 
   // Options injectable into the routes importer
   routesImporter?: RoutesImporter;
@@ -46,11 +46,13 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
   // The actual API routes
   routesImporter(app, options?.routesImporter);
 
-  // Generally middlewares that should parse the request if no route was hit
-  responseMiddleware(app);
+  // Response middlwares
+  app.use(handleExpress404());
+  app.use(handleDomain404());
   if (options?.postRouteApplicationRequestHandlers) {
     useRequestHandlers(options?.postRouteApplicationRequestHandlers);
   }
+  app.use(handleHttpException());
 
   return {
     expressApp: app,
