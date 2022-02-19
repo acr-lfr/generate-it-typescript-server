@@ -181,7 +181,13 @@ Both the input and output are provided the request and response object, respecti
 
 This means that once in the domain layer you can be safe to think that there is no additional content in the request object than that specified in the swagger file.
 
-Conversely as the output is reduced, should a domain accidentally return attributes it shouldn't they will never be passed back out to the client.
+Conversely, as the output is reduced, should a domain accidentally return attributes it shouldn't they will never be passed back out to the client.
+
+Celebrate is the express middleware validating input, it uses Joi under the hood. You can inject Joi options on a path by path level via x-joi-options eg:
+```yaml
+x-joi-options:
+  allowUnknown: true
+```
 
 #### Async route validation 
 Celebrate will cover 90% of the validation needs of an API, but there is always a % of use cases wherein you need to perform an async action to before permitting the user to hit a domain layer. The most common use case is when you want to validate incoming data against a database record, for example, a registration form checking that a given email/username is not already registered. These types of validators do no always fit the Joi style of validation that is under the hood of celebrate.
