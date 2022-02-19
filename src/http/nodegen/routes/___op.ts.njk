@@ -27,7 +27,7 @@ export default function() {
         '{{op.subresource}}',
         {% if securityNames %}accessTokenMiddleware({{ securityNames }}  {% if path['x-passThruWithoutJWT'] %}, {passThruWithoutJWT: true}{% endif %}), /* Validate request security tokens */{% endif %}
         {% if path['x-permission'] %}permissionMiddleware('{{ path['x-permission'] }}'), /* Check permission of the incoming user */ {% endif %}
-        {% if pathsHasParamsToValidate(path) %}celebrate({{ _.camelCase(operation_name) }}Validators.{{path.operationId}}{% if path['x-joi-options'] %}{{ path['x-joi-options'] | dump }}{% endif %}), /* Validate the request data and return validation errors, options passed in via x-joi-options */ {% endif %}
+        {% if pathsHasParamsToValidate(path) %}celebrate({{ _.camelCase(operation_name) }}Validators.{{path.operationId}}{% if path['x-joi-options'] %}, {{ path['x-joi-options'] | dump }}{% endif %}), /* Validate the request data and return validation errors, options passed in via x-joi-options */ {% endif %}
         {% if path['x-async-validators'] %}asyncValidationMiddleware({{ path['x-async-validators'] | dump }}), /* Call an async validator function and throw an appropriate error */ {% endif %}
         {% if path['x-cache'] %}apiCaching({{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}), /* Lastly, if x-cache is found, call the api cache middleware */ {% endif %}
         async (req: any, res: GenerateItExpressResponse) => {
