@@ -188,6 +188,7 @@ Celebrate is the express middleware validating input, it uses Joi under the hood
 x-joi-options:
   allowUnknown: true
 ```
+All options can be found here: https://github.com/sideway/joi/blob/master/API.md#anyvalidatevalue-options
 
 #### Async route validation 
 Celebrate will cover 90% of the validation needs of an API, but there is always a % of use cases wherein you need to perform an async action to before permitting the user to hit a domain layer. The most common use case is when you want to validate incoming data against a database record, for example, a registration form checking that a given email/username is not already registered. These types of validators do no always fit the Joi style of validation that is under the hood of celebrate.
