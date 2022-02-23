@@ -17,8 +17,8 @@ export interface HttpOptions {
   // a preconfigured express app, if present the api will use this express app opposed to generating a new one.
   app?: Express;
 
-  // Optionally inject options into the http exception handler
-  httpExceptionOpts?: HandleExceptionOpts;
+  // Options injectable into the routes importer
+  routesImporter?: RoutesImporter;
 
   // An array of valid express ApplicationRequestHandlers (middlewares) injected BEFORE loading routes
   preRouteMiddleware?: Middlewares;
@@ -36,12 +36,12 @@ export interface HttpOptions {
    */
   postRouteApplicationRequestHandlers?: Middlewares;
 
-  // Options injectable into the routes importer
-  routesImporter?: RoutesImporter;
+  // Optionally inject options into the http exception handler
+  exceptionOpts?: HandleExceptionOpts;
 }
 
 export default async (port: number, options: HttpOptions = {}): Promise<Http> => {
-  const app = options?.app || express();
+  const app = options.app || express();
 
   const middlewareInjector = (middlewares: Middlewares) => {
     middlewares.forEach((handler: any) => {
@@ -53,36 +53,36 @@ export default async (port: number, options: HttpOptions = {}): Promise<Http> =>
     });
   };
 
-  options.preRouteMiddleware = options?.preRouteMiddleware || options?.preRouteApplicationRequestHandlers
-  options.postRouteMiddleware = options?.postRouteMiddleware || options?.postRouteApplicationRequestHandlers
+  options.preRouteMiddleware = options.preRouteMiddleware || options.preRouteApplicationRequestHandlers;
+  options.postRouteMiddleware = options.postRouteMiddleware || options.postRouteApplicationRequestHandlers;
 
   // Generally middlewares that should parse the request before hitting a route
   requestMiddleware(app);
-  if (options?.preRouteMiddleware) {
-    middlewareInjector(options?.preRouteMiddleware);
+  if (options.preRouteMiddleware) {
+    middlewareInjector(options.preRouteMiddleware);
   }
 
   // The actual API routes
-  routesImporter(app, options?.routesImporter);
+  routesImporter(app, options.routesImporter);
 
   // Built in 404 handlers
   app.use(handleExpress404());
   app.use(handleDomain404());
 
   // Custom response middlewares
-  if (options?.postRouteMiddleware) {
-    middlewareInjector(options?.postRouteMiddleware);
+  if (options.postRouteMiddleware) {
+    middlewareInjector(options.postRouteMiddleware);
   }
 
   // Lastly the catchAll handler
-  app.use(handleHttpException(options.httpExceptionOpts));
+  app.use(handleHttpException(options.exceptionOpts));
 
   // Deprecation warnings
-  if(options?.preRouteApplicationRequestHandlers){
-    console.log('preRouteApplicationRequestHandlers will be deprecated soon, please use preRouteMiddleware instead')
+  if (options.preRouteApplicationRequestHandlers) {
+    console.log('preRouteApplicationRequestHandlers will be deprecated soon, please use preRouteMiddleware instead');
   }
-  if(options?.postRouteApplicationRequestHandlers){
-    console.log('postRouteApplicationRequestHandlers will be deprecated soon, please use postRouteMiddleware instead')
+  if (options.postRouteApplicationRequestHandlers) {
+    console.log('postRouteApplicationRequestHandlers will be deprecated soon, please use postRouteMiddleware instead');
   }
 
   return {

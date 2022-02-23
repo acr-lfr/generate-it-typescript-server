@@ -103,10 +103,14 @@ export default async (port: number): Promise<Http> => {
   // Return the http layer, to inject custom middleware pass the HttpOptions
   // argument. See the @/http/index.ts
   return http(port, {
+    // Here we are injecting an express static route into the API, preRouteMiddleware will be injected before your API routes 
+    // Other examples useful here are API throttling middleware
     preRouteMiddleware: [
       ['/image', express.static(path.join(config.file.baseFolderPath, config.file.resizedMount,), { maxAge: oneYearMS })]
     ],
-    httpExceptionOpts: {
+    // This server comes built with a generic exception handler, should you wish to inject additional custom handlers for 
+    // differing status codes here would be a good place
+    exceptionOpts: {
       hookForStatus: {
         500: customError500Handle
       }
