@@ -79,13 +79,14 @@ Alternatively (or additionally) see the [known-templates](https://acr-lfr.github
 ## Injecting into the http layer
 You can inject some customization into the http layer from the app.ts file.
 
-Here is an example, injecting a static route to be loaded before the http routes:
+Here is an example, injecting a static route to be loaded before the http routes and a custom 500 error handler:
 ````typescript
 import express from 'express';
 import path from 'path';
 import config from '@/config';
 import RabbitMQService from '@/events/rabbitMQ/RabbitMQService';
 import http, { Http } from '@/http';
+import customError500Handle from 'customError500Handle'
 
 /**
  * Returns a promise allowing the server or cli script to know
@@ -102,9 +103,14 @@ export default async (port: number): Promise<Http> => {
   // Return the http layer, to inject custom middleware pass the HttpOptions
   // argument. See the @/http/index.ts
   return http(port, {
-    preRouteApplicationRequestHandlers: [
+    preRouteMiddleware: [
       ['/image', express.static(path.join(config.file.baseFolderPath, config.file.resizedMount,), { maxAge: oneYearMS })]
-    ]
+    ],
+    httpExceptionOpts: {
+      hookForStatus: {
+        500: customError500Handle
+      }
+    }
   });
 };
 ````

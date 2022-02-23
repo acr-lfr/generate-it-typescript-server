@@ -11,27 +11,39 @@ export interface Http {
   start: () => Promise<http.Server>;
 }
 
+type Middlewares = Array<(...args: any) => any> | Array<[string, any]>
+
 export interface HttpOptions {
   // a preconfigured express app, if present the api will use this express app opposed to generating a new one.
   app?: Express;
 
-  // Additional hooks will be called by the handleHttpException if present and the status code matches
+  // Optionally inject options into the http exception handler
   httpExceptionOpts?: HandleExceptionOpts;
 
   // An array of valid express ApplicationRequestHandlers (middlewares) injected BEFORE loading routes
-  preRouteApplicationRequestHandlers?: any | [string, any][];
+  preRouteMiddleware?: Middlewares;
+
+  /**
+   * @deprecated Please use preRouteMiddleware instead, this will be removed soon
+   */
+  preRouteApplicationRequestHandlers?: Middlewares;
 
   // an array of valid express ApplicationRequestHandlers (middlewares) injected AFTER loading routes
-  postRouteApplicationRequestHandlers?: any | [string, any][];
+  postRouteMiddleware?: Middlewares;
+
+  /**
+   * @deprecated Please use preRouteMiddleware instead, this will be removed soon
+   */
+  postRouteApplicationRequestHandlers?: Middlewares;
 
   // Options injectable into the routes importer
   routesImporter?: RoutesImporter;
 }
 
-export default async (port: number, options?: HttpOptions): Promise<Http> => {
+export default async (port: number, options: HttpOptions = {}): Promise<Http> => {
   const app = options?.app || express();
 
-  const middlewareInjector = (middlewares: Array<(...args: any) => any> | Array<[string, any]>) => {
+  const middlewareInjector = (middlewares: Middlewares) => {
     middlewares.forEach((handler: any) => {
       if (Array.isArray(handler)) {
         app.use(handler[0], handler[1]);
@@ -41,10 +53,13 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
     });
   };
 
+  options.preRouteMiddleware = options?.preRouteMiddleware || options?.preRouteApplicationRequestHandlers
+  options.postRouteMiddleware = options?.postRouteMiddleware || options?.postRouteApplicationRequestHandlers
+
   // Generally middlewares that should parse the request before hitting a route
   requestMiddleware(app);
-  if (options?.preRouteApplicationRequestHandlers) {
-    middlewareInjector(options?.preRouteApplicationRequestHandlers);
+  if (options?.preRouteMiddleware) {
+    middlewareInjector(options?.preRouteMiddleware);
   }
 
   // The actual API routes
@@ -55,12 +70,20 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
   app.use(handleDomain404());
 
   // Custom response middlewares
-  if (options?.postRouteApplicationRequestHandlers) {
-    middlewareInjector(options?.postRouteApplicationRequestHandlers);
+  if (options?.postRouteMiddleware) {
+    middlewareInjector(options?.postRouteMiddleware);
   }
 
   // Lastly the catchAll handler
   app.use(handleHttpException(options.httpExceptionOpts));
+
+  // Deprecation warnings
+  if(options?.preRouteApplicationRequestHandlers){
+    console.log('preRouteApplicationRequestHandlers will be deprecated soon, please use preRouteMiddleware instead')
+  }
+  if(options?.postRouteApplicationRequestHandlers){
+    console.log('postRouteApplicationRequestHandlers will be deprecated soon, please use postRouteMiddleware instead')
+  }
 
   return {
     expressApp: app,
