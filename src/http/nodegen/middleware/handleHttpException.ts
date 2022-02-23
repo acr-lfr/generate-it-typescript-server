@@ -3,15 +3,20 @@ import * as express from 'express';
 import { HttpException } from '../errors';
 import NodegenRequest from '../interfaces/NodegenRequest';
 import config from '@/config';
+import packageJson from '../../../../package.json';
 
-export interface HandleExceptionInjection {
-  handle500?: (err: HttpException) => void;
+export type exceptionHook = (err: HttpException & { serviceName: string, time: string }) => void
+
+export interface HandleExceptionOpts {
+  hookForStatus?: {
+    [statusCode: number]: exceptionHook
+  };
 }
 
 /**
  * Http Exception handler
  */
-export default (handleExceptionInjection: HandleExceptionInjection = {}) => {
+export default (options: HandleExceptionOpts = {}) => {
   return (err: HttpException, req: NodegenRequest, res: express.Response) => {
     if (!(err instanceof HttpException)) {
       err = createHttpExceptionFromErr(err);
@@ -19,8 +24,12 @@ export default (handleExceptionInjection: HandleExceptionInjection = {}) => {
 
     console.error(err.stack || err);
 
-    if (err.status === 500 && handleExceptionInjection.handle500) {
-      handleExceptionInjection.handle500(err);
+    if (options.hookForStatus && options.hookForStatus[err.status]) {
+      options.hookForStatus[err.status]({
+        ...err,
+        serviceName: packageJson.name,
+        time: new Date().toDateString()
+      });
     }
 
     if (err.status === 500 && config.env === 'production') {

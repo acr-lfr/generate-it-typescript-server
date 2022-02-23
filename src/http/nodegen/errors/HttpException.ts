@@ -2,6 +2,7 @@ import { HttpStatusMessage } from '@/http/nodegen/errors';
 
 export class HttpException extends Error {
   public status: number;
+  public message: string;
   public body: string | Record<string, any>;
 
   constructor(status: number, body?: string | Record<string, any>) {
@@ -13,14 +14,5 @@ export class HttpException extends Error {
 
     // https://github.com/Microsoft/TypeScript/wiki/FAQ#why-doesnt-extending-built-ins-like-error-array-and-map-work
     Object.setPrototypeOf(this, HttpException.prototype);
-  }
-
-  toJSON() {
-    return {
-      name: this.name,
-      status: this.status,
-      message: this.message,
-      body: this.body,
-    }
   }
 }

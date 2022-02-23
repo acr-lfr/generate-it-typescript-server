@@ -4,7 +4,7 @@ import { AddressInfo } from 'net';
 import { handleDomain404, handleExpress404, handleHttpException, requestMiddleware } from '@/http/nodegen/middleware';
 import routesImporter, { RoutesImporter } from '@/http/nodegen/routesImporter';
 import packageJson from '../../package.json';
-import { HandleExceptionInjection } from '@/http/nodegen/middleware/handleHttpException';
+import { HandleExceptionOpts } from '@/http/nodegen/middleware/handleHttpException';
 
 export interface Http {
   expressApp: express.Application;
@@ -15,8 +15,8 @@ export interface HttpOptions {
   // a preconfigured express app, if present the api will use this express app opposed to generating a new one.
   app?: Express;
 
-  // Custom injection into the src/http/nodegen/middleware/handleHttpException.ts
-  handleExceptionInjection?: HandleExceptionInjection;
+  // Additional hooks will be called by the handleHttpException if present and the status code matches
+  httpExceptionOpts?: HandleExceptionOpts;
 
   // An array of valid express ApplicationRequestHandlers (middlewares) injected BEFORE loading routes
   preRouteApplicationRequestHandlers?: any | [string, any][];
@@ -58,8 +58,9 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
   if (options?.postRouteApplicationRequestHandlers) {
     middlewareInjector(options?.postRouteApplicationRequestHandlers);
   }
+
   // Lastly the catchAll handler
-  app.use(handleHttpException(options.handleExceptionInjection));
+  app.use(handleHttpException(options.httpExceptionOpts));
 
   return {
     expressApp: app,
