@@ -25,11 +25,15 @@ export default (options: HandleExceptionOpts = {}) => {
     console.error(err.stack || err);
 
     if (options.hookForStatus && options.hookForStatus[err.status]) {
-      options.hookForStatus[err.status]({
-        ...err,
-        serviceName: packageJson.name,
-        time: new Date().toDateString()
-      });
+      try {
+        options.hookForStatus[err.status]({
+          ...err,
+          serviceName: packageJson.name,
+          time: new Date().toDateString()
+        });
+      } catch (e) {
+        console.error(`Error in status ${err.status} hook:`, e);
+      }
     }
 
     if (err.status === 500 && config.env === 'production') {
