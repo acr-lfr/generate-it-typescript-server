@@ -109,6 +109,44 @@ export default async (port: number): Promise<Http> => {
 };
 ````
 
+Example of injecting custom error logging middleware:
+````typescript
+import express from 'express';
+import path from 'path';
+import config from '@/config';
+import RabbitMQService from '@/events/rabbitMQ/RabbitMQService';
+import http, { Http } from '@/http';
+import { errorLogger } from '@/shared/logger';
+
+const logApplicationExceptionsMiddleware = (error: unknown, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
+  const errorCode = error?.status ?? error?.statusCode;
+  if (typeof errorCode === 'undefined' || errorCode === 500) {
+    errorLogger(error);
+  }
+
+  return next(error);
+};
+
+/**
+ * Returns a promise allowing the server or cli script to know
+ * when the app is ready; eg database connections established
+ */
+export default async (port: number): Promise<Http> => {
+  // Here is a good place to connect to databases if required or setup
+  // filesystems or any other async action required before starting:
+  await RabbitMQService.setup(config.rabbitMQ);
+
+  // Milliseconds for 1 year
+  const oneYearMS = 1000 * 60 * 60 * 24 * 365;
+
+  // Return the http layer, to inject custom middleware pass the HttpOptions
+  // argument. See the @/http/index.ts
+  return http(port, {
+    postRouteApplicationRequestHandlers: [logApplicationExceptionsMiddleware]
+  });
+};
+````
+
 ## API Spec file helpers/features
 These templates inject into the code helpful elements depending on the provided api file.
 
