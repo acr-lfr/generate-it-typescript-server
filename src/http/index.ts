@@ -1,7 +1,7 @@
 import express, { Express } from 'express';
 import http from 'http';
 import { AddressInfo } from 'net';
-import { handleDomain404, handleExpress404, handleHttpException, requestMiddleware } from '@/http/nodegen/middleware';
+import { handleDomain404, handleExpress404, handleHttpException, handleValidationException, requestMiddleware } from '@/http/nodegen/middleware';
 import routesImporter, { RoutesImporter } from '@/http/nodegen/routesImporter';
 import packageJson from '../../package.json';
 
@@ -49,6 +49,7 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
   // Response middlwares
   app.use(handleExpress404());
   app.use(handleDomain404());
+  app.use(handleValidationException());
   if (options?.postRouteApplicationRequestHandlers) {
     useRequestHandlers(options?.postRouteApplicationRequestHandlers);
   }
