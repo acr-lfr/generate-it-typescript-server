@@ -9,3 +9,5 @@ export { default as handleHttpException } from './handleHttpException';
 export { default as headersCaching } from './headersCaching';
 export { default as permissionMiddleware } from './permissionMiddleware';
 export { default as queryArrayParserMiddleware } from './queryArrayParserMiddleware';
+export {default as httpExceptionFormateMiddleware}  from '@/http/nodegen/middleware/httpExceptionFormateMiddleware';
+export {default as httpCatchAllMiddleware} from '@/http/nodegen/middleware/httpCatchAllMiddleware';
