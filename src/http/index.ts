@@ -21,10 +21,10 @@ export interface HttpOptions {
   routesImporter?: RoutesImporter;
 
   // An array of valid express ApplicationRequestHandlers (middlewares) injected BEFORE loading routes
-  preRouteMiddleware?: any | [string, any][];
+  requestMiddleware?: any | [string, any][];
 
   // an array of valid express ApplicationRequestHandlers (middlewares) injected AFTER loading routes
-  postRouteMiddleware?: any | [string, any][];
+  errorMiddleware?: any | [string, any][];
 
   // optional logger which replaces console.error on application error
   errorLogger?: (error: any) => void;
@@ -45,8 +45,8 @@ export default async (port: number, options: HttpOptions = {}): Promise<Http> =>
 
   // Generally middlewares that should parse the request before hitting a route
   requestMiddleware(app);
-  if (options.preRouteMiddleware) {
-    useRequestHandlers(options.preRouteMiddleware);
+  if (options.requestMiddleware) {
+    useRequestHandlers(options.requestMiddleware);
   }
 
   // The actual API routes
@@ -56,8 +56,8 @@ export default async (port: number, options: HttpOptions = {}): Promise<Http> =>
   app.use(handleExpress404());
   app.use(handleDomain404());
   app.use(formatErrorMiddeware);
-  if (options.postRouteMiddleware) {
-    useRequestHandlers(options.postRouteMiddleware);
+  if (options.errorMiddleware) {
+    useRequestHandlers(options.errorMiddleware);
   }
   app.use(exceptionLogMiddleware(options.errorLogger));
   app.use(exceptionCatchAll());
