@@ -22,6 +22,9 @@ export interface HttpOptions {
 
   // an array of valid express ApplicationRequestHandlers (middlewares) injected AFTER loading routes
   postRouteApplicationRequestHandlers?: any | [string, any][];
+
+  // optional logger which replaces console.error on application error
+  errorLogger?: (error: any) => void;
 }
 
 export default async (port: number, options?: HttpOptions): Promise<Http> => {
@@ -52,7 +55,7 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
   if (options?.postRouteApplicationRequestHandlers) {
     useRequestHandlers(options?.postRouteApplicationRequestHandlers);
   }
-  app.use(handleHttpException());
+  app.use(handleHttpException(options.errorLogger));
 
   return {
     expressApp: app,

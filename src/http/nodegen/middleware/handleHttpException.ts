@@ -7,16 +7,24 @@ import config from '@/config';
 /**
  * Http Exception handler
  */
-export default () => (err: HttpException, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
-  if (!(err instanceof HttpException)) {
-    err = createHttpExceptionFromErr(err);
+export default (errorLogger?: (error: any) => void) => {
+  let logErrors = (error: HttpException) => console.error(error.stack || error);
+
+  if (typeof errorLogger === 'function') {
+    logErrors = errorLogger;
   }
 
-  console.error(err.stack || err);
+  return (err: HttpException, req: NodegenRequest, res: express.Response, next: express.NextFunction) => {
+    if (!(err instanceof HttpException)) {
+      err = createHttpExceptionFromErr(err);
+    }
 
-  if (err.status === 500 && config.env === 'production') {
-    return res.status(err.status).json({ message: 'Internal server error' });
-  } else {
-    return res.status(err.status).json(err);
-  }
+    logErrors(err);
+
+    if (err.status === 500 && config.env === 'production') {
+      return res.status(err.status).json({ message: 'Internal server error' });
+    } else {
+      return res.status(err.status).json(err);
+    }
+  };
 };
