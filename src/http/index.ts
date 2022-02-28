@@ -18,19 +18,22 @@ export interface HttpOptions {
   routesImporter?: RoutesImporter;
 
   // An array of valid express ApplicationRequestHandlers (middlewares) injected BEFORE loading routes
-  preRouteApplicationRequestHandlers?: any | [string, any][];
+  requestMiddleware?: any | [string, any][];
 
   // an array of valid express ApplicationRequestHandlers (middlewares) injected AFTER loading routes
-  postRouteApplicationRequestHandlers?: any | [string, any][];
+  errorMiddleware?: any | [string, any][];
 
-  // optional logger which replaces console.error on application error
+  // optional error hook function on application error
+  errorHook?: (error: any) => void;
+
+  // optional error logger which replaces console.error on application error
   errorLogger?: (error: any) => void;
 }
 
-export default async (port: number, options?: HttpOptions): Promise<Http> => {
+export default async (port: number, options: HttpOptions = {}): Promise<Http> => {
   const app = options?.app || express();
 
-  const useRequestHandlers = (requestHandlers: Array<(...args: any) => any> | Array<[string, any]>) => {
+  const useMiddlewares = (requestHandlers: Array<(...args: any) => any> | Array<[string, any]>) => {
     requestHandlers.forEach((handler: any) => {
       if (Array.isArray(handler)) {
         app.use(handler[0], handler[1]);
@@ -42,20 +45,25 @@ export default async (port: number, options?: HttpOptions): Promise<Http> => {
 
   // Generally middlewares that should parse the request before hitting a route
   requestMiddleware(app);
-  if (options?.preRouteApplicationRequestHandlers) {
-    useRequestHandlers(options?.preRouteApplicationRequestHandlers);
+  if (options.requestMiddleware) {
+    useMiddlewares(options.requestMiddleware);
   }
 
   // The actual API routes
   routesImporter(app, options?.routesImporter);
 
-  // Response middlwares
+  // Error/ response middlewares
   app.use(handleExpress404());
   app.use(handleDomain404());
-  if (options?.postRouteApplicationRequestHandlers) {
-    useRequestHandlers(options?.postRouteApplicationRequestHandlers);
+  if (options.errorMiddleware) {
+    useMiddlewares(options.errorMiddleware);
   }
-  app.use(handleHttpException(options.errorLogger));
+  app.use(
+    handleHttpException({
+      errorLogger: options.errorLogger,
+      errorHook: options.errorHook
+    })
+  );
 
   return {
     expressApp: app,
