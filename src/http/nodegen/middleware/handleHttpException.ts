@@ -17,7 +17,7 @@ export default (options: HttpExceptionOptions = {}) => {
     console.error(error.stack || error);
   };
 
-  if (options.errorLogger && typeof options.errorLogger === 'function') {
+  if (typeof options.errorLogger === 'function') {
     errorLogger = options.errorLogger;
   }
 
