@@ -23,11 +23,24 @@ export interface HttpOptions {
   // an array of valid express ApplicationRequestHandlers (middlewares) injected AFTER loading routes
   errorMiddleware?: any | [string, any][];
 
-  // optional error hook function on application error
-  errorHook?: (error: any) => void;
+  // Options passed to handleHttpException middleware
+  httpException?: {
+    // optional error hook function called on application error
+    errorHook?: (error: any) => void;
 
-  // optional error logger which replaces console.error on application error
-  errorLogger?: (error: any) => void;
+    // optional error logger which replaces console.error on application error
+    errorLogger?: (error: any) => void;
+  };
+
+  /**
+   *  @deprecated Use the requestMiddleware instead
+   */
+  preRouteApplicationRequestHandlers?: any | [string, any][];
+
+  /**
+   *  @deprecated Use the errorMiddleware instead
+   */
+  postRouteApplicationRequestHandlers?: any | [string, any][];
 }
 
 export default async (port: number, options: HttpOptions = {}): Promise<Http> => {
@@ -59,10 +72,7 @@ export default async (port: number, options: HttpOptions = {}): Promise<Http> =>
     useMiddlewares(options.errorMiddleware);
   }
   app.use(
-    handleHttpException({
-      errorLogger: options.errorLogger,
-      errorHook: options.errorHook
-    })
+    handleHttpException(options.httpException)
   );
 
   return {
