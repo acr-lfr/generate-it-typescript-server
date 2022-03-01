@@ -77,15 +77,24 @@ The integration tests are stubfiles - meaning they are not overwritten during ge
 Alternatively (or additionally) see the [known-templates](https://acr-lfr.github.io/generate-it/#/_pages/known-templates) page for the API test rig which allows you to test your API using mocks.
 
 ## Injecting into the http layer
-You can inject some customization into the http layer from the app.ts file.
+You can inject some customization into the http layer from the app.ts file, common use cases are to inject additional request middlewares or error handlers. It is also possible to override the stock error logger and optionally inject a hook called when the http exception is hit.
 
-Here is an example, injecting a static route to be loaded before the http routes:
+Here is an example using all the options available, custom request and error middlewares and error logger and hook into the httpException handler.
 ````typescript
 import express from 'express';
+import expressRateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser'
 import path from 'path';
+import { typeOrmErrorHandler, httpErrorLogger, httpErrorHook } from 'your-project/common-utils' 
 import config from '@/config';
 import RabbitMQService from '@/events/rabbitMQ/RabbitMQService';
 import http, { Http } from '@/http';
+
+// Rate limiting
+const limiter = expressRateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15 * 60 // 1 request per second
+});
 
 /**
  * Returns a promise allowing the server or cli script to know
@@ -102,9 +111,21 @@ export default async (port: number): Promise<Http> => {
   // Return the http layer, to inject custom middleware pass the HttpOptions
   // argument. See the @/http/index.ts
   return http(port, {
-    preRouteApplicationRequestHandlers: [
-      ['/image', express.static(path.join(config.file.baseFolderPath, config.file.resizedMount,), { maxAge: oneYearMS })]
-    ]
+    // Injecting static routes, an API limiter an a cookie parser into the app:
+    requestMiddleware: [
+      ['/image', express.static(path.join(config.file.baseFolderPath, config.file.resizedMount,), { maxAge: oneYearMS })],
+      limiter,
+      cookieParser
+    ],
+    // Injecting custom database error handlers making use of the raw error as thrown from the app
+    errorMiddleware: [
+      typeOrmErrorHandler
+    ],
+    // Injecting a custom error logger and error hook into the catchall htp exception handeler
+    httpException: {
+      errorHook: httpErrorHook,
+      errorLogger: httpErrorLogger
+    }
   });
 };
 ````
