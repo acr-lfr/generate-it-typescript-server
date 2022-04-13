@@ -379,9 +379,18 @@ import { default as AccessTokenService } from '@/services/AccessTokenService';
 import { NextFunction, RequestHandler, Response } from 'express';
 import { default as supertest } from 'supertest';
 
-// sucks these can't be on-demand - jest needs to hoist them so that anything importing them gets the mock.
-jest.mock('morgan', () => () => (req: NodegenRequest, res: Response, next: NextFunction) => next());
-jest.mock('@/http/nodegen/middleware/asyncValidationMiddleware', () => () => (req: NodegenRequest, res: Response, next: NextFunction) => next());
+// to remove these default mocks:
+//   morganSpy.clearAllMocks();
+//   asyncValidationMiddlewareSpy.clearAllMocks();
+export const morganSpy = jest.mock(
+  'morgan',
+  () => () => (req: NodegenRequest, res: Response, next: NextFunction) => next()
+);
+export const asyncValidationMiddlewareSpy = jest.mock(
+  '@/http/nodegen/middleware/asyncValidationMiddleware',
+  () => () => (req: NodegenRequest, res: Response, next: NextFunction) => next()
+);
+
 
 export const baseUrl = root.replace(/\\/*$/, '');
 export let request: supertest.SuperTest<supertest.Test>;
