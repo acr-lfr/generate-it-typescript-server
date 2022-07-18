@@ -8,15 +8,15 @@
  * @return {string | undefined}   If the accept header contains something we would like to
  *                                send, it will be returned, else undefined.
  */
-export default (accept: string, mimes: string[]): string => {
+export default (accept: string, mimes: string[]): string | undefined => {
   if (!accept || !mimes?.length) {
-    return null;
+    return;
   }
 
   // escape all special chars except *
   const formatRegex = (s: string) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
 
-  const priority: string[][] = accept.split(/\s*,\s*/).reduce((acc, val) => {
+  const priority: string[][] = accept.split(/\s*,\s*/).reduce((acc: string[][], val) => {
     const [mime, ...extra] = val.split(/\s*;\s*/);
 
     // extension might look like { q: '0.1', charset: 'utf-8' }
@@ -35,7 +35,7 @@ export default (accept: string, mimes: string[]): string => {
     return acc;
   }, []);
 
-  const parts = [...mimes, '*/*'].reduce((acc, mime) => {
+  const parts = [...mimes, '*/*'].reduce((acc: string[], mime) => {
     if (!mime) {
       return acc;
     }

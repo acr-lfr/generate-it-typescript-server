@@ -12,7 +12,7 @@ export default () => {
     return cors()
   }
   return cors({
-    origin: (origin: string, callback: any) => {
+    origin: (origin: string | undefined, callback: any) => {
       if (whitelist.indexOf(origin) !== -1) {
         callback(null, true)
       } else {

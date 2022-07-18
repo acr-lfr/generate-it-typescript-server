@@ -45,7 +45,7 @@ export default () => {
 
       // No "produces", or json in the openapi file
       if (/(application\/json|application\/vnd\.api\+json)(;.*)?/.test(responseContentType)) {
-        return res.status(status).json(objectReduceByMap(dataOrPath, outputMap{% if nodegenRc.helpers.objectReduceByMapOptions %}, {{ nodegenRc.helpers.objectReduceByMapOptions | dump }}{% endif %}));
+        return res.status(status).json(objectReduceByMap(dataOrPath, outputMap as object{% if nodegenRc.helpers.objectReduceByMapOptions %}, {{ nodegenRc.helpers.objectReduceByMapOptions | dump }}{% endif %}));
       }
 
       // All images use with sendFile
