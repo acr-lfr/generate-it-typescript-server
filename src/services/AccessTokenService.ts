@@ -41,9 +41,12 @@ class AccessTokenService {
    * @param headers
    * @param headerNames
    */
-  public extractAuthHeader (headers: IncomingHttpHeaders, headerNames: string[]): { jwtToken: string, apiKey: string } {
-    let jwtToken: string;
-    let apiKey: string;
+  public extractAuthHeader (headers: IncomingHttpHeaders, headerNames: string[]): {
+    jwtToken: string | undefined;
+    apiKey: string | undefined;
+  } {
+    let jwtToken: string | undefined;
+    let apiKey: string | undefined;
     for (let i = 0; i < headerNames.length; ++i) {
       const tokenRaw = String(headers[headerNames[i].toLowerCase()] || headers[headerNames[i]] || '');
       if (tokenRaw.length > 0) {

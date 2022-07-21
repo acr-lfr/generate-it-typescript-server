@@ -2,9 +2,10 @@
   "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
-    "target": "es2019",
+    "target": "es2021",
     "moduleResolution": "node",
     "noImplicitAny": true,
+    "strict": true,
     "sourceMap": true,
     "outDir": "build",
     "baseUrl": "./",

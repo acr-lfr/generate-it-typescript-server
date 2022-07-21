@@ -15,13 +15,13 @@ import { WorkerMessage, WorkerResult } from './types';
   if (!(config.requestWorker as any).silent) {
     console.debug(`[request worker] thread ready`);
   }
-  parentPort.on('message', async ({ callId, data }: WorkerMessage) => {
+  parentPort!.on('message', async ({ callId, data }: WorkerMessage) => {
     const { domainName, domainFunction, domainFunctionArgs } = data;
 
     const timeout = setTimeout(() => {
       console.warn('[request worker] timed out');
 
-      parentPort.postMessage({
+      parentPort!.postMessage({
         callId,
         error: Error('timed out')
       });
@@ -38,14 +38,14 @@ import { WorkerMessage, WorkerResult } from './types';
         response
       };
 
-      parentPort.postMessage(result);
+      parentPort!.postMessage(result);
     } catch (error) {
       const result: WorkerResult = {
         callId,
         error
       };
 
-      parentPort.postMessage(result);
+      parentPort!.postMessage(result);
     }
 
     clearTimeout(timeout);

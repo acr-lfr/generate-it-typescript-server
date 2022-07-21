@@ -43,7 +43,7 @@ const HTTP_ERROR_CONSTRUCTORS: Record<string, (message?: string) => HttpExceptio
   http422,
   http423,
   http429,
-  HttpException: HttpException.bind(HttpException, 500),
+  HttpException: HttpException.bind(HttpException, 500) as any, // @NOTE: TypeScript does not like the .bind() function
 };
 
 // Check the config default config to ensure you have the
@@ -100,7 +100,7 @@ class WorkerService {
 
         try {
           throw ErrorConstructor(error.message);
-        } catch (err) {
+        } catch (err: any) {
           err.stack = error.stack;
           return reject(err);
         }
