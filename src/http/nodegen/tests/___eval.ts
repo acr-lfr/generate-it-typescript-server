@@ -109,7 +109,7 @@ const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, st
     if (schema.in === 'formData') {
       exportData.set(varName, `export const ${varName} = Buffer.from('${varName}');`);
     } else {
-      exportData.set(varName, `export const ${varName} = ${JSON.stringify(mockItGenerator(paramDef?.schema || paramDef))};`);
+      exportData.set(varName, `export const ${varName} = mockItGenerator(${JSON.stringify(paramDef?.schema || paramDef)});`);
     }
   }
 
@@ -487,7 +487,7 @@ export const responseValidator = (responseKey: string, schema: any): { error?: J
 const writeTestDataFile = (path: string, domainSpec: DomainSpec, validatorSchemas: string[]): void => {
   const dataExports: string[] = mapValues(domainSpec.exports).filter((key) => key !== 'true');
   if (validatorSchemas?.length) {
-    dataExports.unshift(`import * as Joi from 'joi';`);
+    dataExports.unshift(`import * as Joi from 'joi';\nimport { mockItGenerator } from 'generate-it-mockers';`);
     dataExports.push(getValidator(validatorSchemas));
   }
   createFormattedFile(path, dataExports.join('\n\n'));
