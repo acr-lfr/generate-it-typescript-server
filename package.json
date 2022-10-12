@@ -16,9 +16,10 @@
     "start": "node ./build/server.js",
     "pm2:start:dev": "pm2 start pm2.dev.config.js",
     "pm2:start:prod": "pm2 start pm2.prod.config.js",
+    "jest": "node --random-seed=42 node_modules/.bin/jest",
     "test": "npm run build && npm run lint && npm run test:unit",
-    "test:unit": "ENVIRONMENT=test && jest --silent --runInBand",
-    "test:unit:single": "jest --clearCache && ENVIRONMENT=test && jest --collect-coverage false --verbose --forceExit --detectOpenHandles"
+    "test:unit": "ENVIRONMENT=test && npm run jest --silent --runInBand",
+    "test:unit:single": "npm run jest --clearCache && ENVIRONMENT=test && npm run jest --collect-coverage false --verbose --forceExit --detectOpenHandles"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
