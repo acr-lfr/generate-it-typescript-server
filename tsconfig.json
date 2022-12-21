@@ -36,13 +36,7 @@
       "@/*": [
         "src/*"
       ]
-    },
-    "plugins": [
-      {
-        "transform": "@zerollup/ts-transform-paths",
-        "exclude": ["*"]
-      }
-    ]
+    }
   },
   "include": [
     "src",
