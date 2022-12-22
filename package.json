@@ -34,7 +34,7 @@
     "express-promise-router": "^4.1.1",
     "generate-it-logger": "^1.2.7",
     "generate-it-mockers": "^1.1.2",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
     "node-worker-threads-pool": "^1.5.1",
