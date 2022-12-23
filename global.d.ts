@@ -1,8 +1,12 @@
 /**
- * IMPORTANT - do not use imports in this file!
- * Use this file to declare attribute for the global, if you must.
+ * EXAMPLE: how to declare global type.
  */
-declare namespace NodeJS {
-  export interface Global {
-  }
-}
+
+// import { QWrapperDomain } from 'q-wrapper/lib/domains/QWrapperDomain';
+//
+// /* eslint-disable no-var */
+// declare global {
+//   var qWrapper: QWrapperDomain;
+// }
+//
+// export {};

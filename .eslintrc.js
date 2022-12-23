@@ -4,11 +4,14 @@ module.exports = {
 
   // Which files to not lint
   ignorePatterns: [
+    '.eslintrc.js',
     'src/domains/__mocks__/**/*',
     'src/http/**/*',
   ],
 
   parserOptions: {
+    // Project required to enable no-floating-promises rule
+    project: './tsconfig.json',
     // Allows for the parsing of modern ECMAScript features
     ecmaVersion: 2020,
     // Allows for the use of imports
@@ -17,6 +20,7 @@ module.exports = {
 
   // The base rules this project extends from
   extends: [
+    "eslint:recommended",
     // Uses the recommended rules from the @typescript-eslint/eslint-plugin
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
@@ -46,6 +50,10 @@ module.exports = {
       'error',
       { vars: 'all', args: 'none', ignoreRestSiblings: false },
     ],
+    '@typescript-eslint/no-floating-promises': [
+      'error',
+      { ignoreVoid: true }
+    ]
   },
   overrides: [
     {
