@@ -1,4 +1,4 @@
-FROM node:16 as build
+FROM node:18 as build
 
 WORKDIR /code
 
@@ -9,7 +9,7 @@ COPY . /code
 RUN npm run build
 
 # -----------------------------------------------------
-FROM node:16-alpine as runtime
+FROM node:18-alpine as runtime
 
 WORKDIR /code
 
