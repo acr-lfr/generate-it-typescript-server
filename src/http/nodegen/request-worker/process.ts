@@ -1,7 +1,7 @@
 import { Worker } from 'worker_threads';
 import config from '@/config';
 import { WorkerData, WorkerMessage } from './types';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 // Check the config default config to ensure you have the
 // worker attibutes: https://github.com/acrontum/openapi-nodegen-typescript-server/blob/master/src/config.ts
@@ -37,7 +37,7 @@ const initStaticPool = () => {
       }
 
       const worker = workers[currentWorkerIndex];
-      const currentCallId = uuidv4();
+      const currentCallId = randomUUID();
 
       const handleMessage = ({ callId, error, response }: any) => {
         if (callId !== currentCallId) {

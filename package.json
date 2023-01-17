@@ -42,7 +42,6 @@
     "request-ip": "^2.1.3",
     "swagger-ui-express": "^4.3.0",
     "tslib": "^2.3.1",
-    "uuid": "^9.0.0",
     "winston": "^3.4.0",
     "worker-farm": "^1.7.0",
     "yamljs": "^0.3.0"
@@ -61,7 +60,6 @@
     "@types/request-ip": "^0.0.37",
     "@types/supertest": "^2.0.11",
     "@types/swagger-ui-express": "^4.1.3",
-    "@types/uuid": "^8.3.1",
     "@types/validator": "^13.6.3",
     "@types/yamljs": "^0.2.31",
     "@typescript-eslint/eslint-plugin": "^5.47.0",
