@@ -10,17 +10,13 @@ command="${1:-prod}"
 
 case $command in
   watch)
-    NODE_ENV=development
-    npm install
-    npm run dev:build-watch
-  ;;
-  dev)
-    NODE_ENV=development
+    # install dev deps, but preserve container's NODE_ENV
+    NODE_ENV=development npm install
+
     echo "Running dev server..."
-    npm run start
+    npm run dev:start
   ;;
   prod)
-    NODE_ENV=production
     echo "Running server..."
     npm run start
   ;;
