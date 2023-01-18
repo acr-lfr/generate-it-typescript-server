@@ -19,8 +19,7 @@ services:
     # networks:
     #   - some-external-network
     working_dir: /code
-    entrypoint: /bin/sh
-    command: '-c "npx tsc-watch --preserveWatchOutput --compiler /code/node_modules/.bin/ttsc --onSuccess "/sbin/docker-entrypoint.sh prod""'
+    command: watch
 
 # networks:
 #   some-external-network:
