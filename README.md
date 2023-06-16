@@ -7,10 +7,11 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [High level design](#high-level-design)
-  - [Design Philosophy](#design-philosophy)
-  - [Accessing your API via CLI](#accessing-your-api-via-cli)
-  - [Testing](#testing)
+    - [Design Philosophy](#design-philosophy)
+    - [Accessing your API via CLI](#accessing-your-api-via-cli)
+    - [Testing](#testing)
 - [Injecting into the http layer](#injecting-into-the-http-layer)
+- [Configuring builtin middlewares](#configuring-builtin-middlewares)
 - [API Spec file helpers/features](#api-spec-file-helpersfeatures)
     - [Access full request in domain](#access-full-request-in-domain)
     - [Allow non authenticated request to access domain](#allow-non-authenticated-request-to-access-domain)
@@ -125,6 +126,38 @@ export default async (port: number): Promise<Http> => {
     httpException: {
       errorHook: httpErrorHook,
       errorLogger: httpErrorLogger
+    }
+  });
+};
+````
+
+## Configuring builtin middlewares
+Some of the parameters to the builtin app middlewares can be customized using the `appMiddlewareOptions` parameter.
+
+In the following example we disable accesss logger middleware for a specific URL so we don't pollute our log file with empty "GET" request logs.
+````typescript
+import express from 'express';
+import path from 'path';
+import config from '@/config';
+import RabbitMQService from '@/events/rabbitMQ/RabbitMQService';
+import http, { Http } from '@/http';
+// ...
+
+/**
+ * Returns a promise allowing the server or cli script to know
+ * when the app is ready; eg database connections established
+ */
+export default async (port: number): Promise<Http> => {
+  // Here is a good place to connect to databases if required or setup
+  // filesystems or any other async action required before starting:
+  await RabbitMQService.setup(config.rabbitMQ);
+
+  // Return the http layer, to inject custom middleware pass the HttpOptions
+  // argument. See the @/http/index.ts
+  return http(port, {
+    accessLogger: {
+      // Disable logging for requests to our healthcheck endpoint
+      skip: (req) => req.method === 'GET' && req.originalUrl === '/health'
     }
   });
 };

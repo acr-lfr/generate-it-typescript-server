@@ -14,6 +14,12 @@ import { tmpdir } from 'os';
 import requestIp from 'request-ip';
 import packageJson from '../../../../package.json';
 
+type AccessLoggerOptions = morgan.Options<express.Request, express.Response>;
+
+export type AppMiddlewareOptions = {
+  accessLogger?: AccessLoggerOptions;
+};
+
 export const responseHeaders = (app: express.Application): void => {
   app.use(corsMiddleware());
   app.use(headersCaching());
@@ -42,7 +48,7 @@ export const requestParser = (app: express.Application): void => {
   app.use(requestIp.mw());
 };
 
-export const accessLogger = (app: express.Application): void => {
+export const accessLogger = (app: express.Application, accessLoggerOpts?: AccessLoggerOptions): void => {
   // A bug in the morgan logger results in IPs being dropped when the node instance is running behind a proxy.
   // The following pattern uses the requestIp middleware "req.client" and adds the response time.
   // `[${packageJson.name}] :remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]`
@@ -60,15 +66,15 @@ export const accessLogger = (app: express.Application): void => {
       tokens['response-time'](req, res),
       'ms'
     ].join(' ');
-  }));
+  }, accessLoggerOpts));
 };
 
 /**
  * Injects routes into the passed express app
  * @param app
  */
-export const requestMiddleware = (app: express.Application): void => {
-  accessLogger(app);
+export const requestMiddleware = (app: express.Application, appMiddlewareOpts?: AppMiddlewareOptions): void => {
+  accessLogger(app, appMiddlewareOpts?.accessLogger);
   requestParser(app);
   responseHeaders(app);
   app.use(inferResponseType());
