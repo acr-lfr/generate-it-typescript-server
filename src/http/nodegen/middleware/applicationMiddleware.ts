@@ -11,7 +11,6 @@ import express from 'express';
 import expressFormData from 'express-form-data';
 import morgan from 'morgan';
 import { tmpdir } from 'os';
-import requestIp from 'request-ip';
 import packageJson from '../../../../package.json';
 
 type AccessLoggerOptions = morgan.Options<express.Request, express.Response>;
@@ -44,9 +43,33 @@ export const requestParser = (app: express.Application): void => {
 
   // parse the body
   app.use(express.urlencoded({ extended: false }));
-
-  app.use(requestIp.mw());
 };
+
+const ipHeaders = [
+  'x-client-ip',
+  'x-forwarded-for',
+  'cf-connecting-ip',
+  'do-connecting-ip',
+  'fastly-client-ip',
+  'true-client-ip',
+  'x-real-ip',
+  'x-cluster-client-ip',
+  'x-forwarded',
+  'forwarded-for',
+  'forwarded',
+  'x-appengine-user-ip',
+  'cf-pseudo-ipv4',
+];
+
+const getIpHeader = (req: express.Request): string => {
+  for (const header of ipHeaders) {
+    if (req[header]?.length) {
+      return req[header];
+    }
+  }
+
+  return req.socket.remoteAddress;
+}
 
 export const accessLogger = (app: express.Application, accessLoggerOpts?: AccessLoggerOptions): void => {
   // A bug in the morgan logger results in IPs being dropped when the node instance is running behind a proxy.
@@ -55,7 +78,7 @@ export const accessLogger = (app: express.Application, accessLoggerOpts?: Access
   app.use(morgan(function (tokens, req, res) {
     return [
       '[' + packageJson.name + ']',
-      req.clientIp,
+      getIpHeader(req),
       '[' + new Date().toISOString() + ']',
       '"' + tokens.method(req, res),
       tokens.url(req, res),
