@@ -19,6 +19,37 @@ export type AppMiddlewareOptions = {
   accessLogger?: AccessLoggerOptions;
 };
 
+const ipHeaders = [
+  'x-client-ip',
+  'x-forwarded-for',
+  'cf-connecting-ip',
+  'do-connecting-ip',
+  'fastly-client-ip',
+  'true-client-ip',
+  'x-real-ip',
+  'x-cluster-client-ip',
+  'x-forwarded',
+  'forwarded-for',
+  'forwarded',
+  'x-appengine-user-ip',
+  'cf-pseudo-ipv4',
+];
+
+const addIpToReq = (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+  for (const header of ipHeaders) {
+    if (req.get(header)?.length) {
+      req.clientIp = req.get(header);
+
+      return next();
+    }
+  }
+
+  req.clientIp = req.socket.remoteAddress;
+
+  return next();
+};
+
+
 export const responseHeaders = (app: express.Application): void => {
   app.use(corsMiddleware());
   app.use(headersCaching());
@@ -43,53 +74,31 @@ export const requestParser = (app: express.Application): void => {
 
   // parse the body
   app.use(express.urlencoded({ extended: false }));
+
+  app.use(addIpToReq);
 };
-
-const ipHeaders = [
-  'x-client-ip',
-  'x-forwarded-for',
-  'cf-connecting-ip',
-  'do-connecting-ip',
-  'fastly-client-ip',
-  'true-client-ip',
-  'x-real-ip',
-  'x-cluster-client-ip',
-  'x-forwarded',
-  'forwarded-for',
-  'forwarded',
-  'x-appengine-user-ip',
-  'cf-pseudo-ipv4',
-];
-
-const getIpHeader = (req: express.Request): string => {
-  for (const header of ipHeaders) {
-    if (req[header]?.length) {
-      return req[header];
-    }
-  }
-
-  return req.socket.remoteAddress;
-}
 
 export const accessLogger = (app: express.Application, accessLoggerOpts?: AccessLoggerOptions): void => {
   // A bug in the morgan logger results in IPs being dropped when the node instance is running behind a proxy.
   // The following pattern uses the requestIp middleware "req.client" and adds the response time.
   // `[${packageJson.name}] :remote-addr [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]`
-  app.use(morgan(function (tokens, req, res) {
-    return [
-      '[' + packageJson.name + ']',
-      getIpHeader(req),
-      '[' + new Date().toISOString() + ']',
-      '"' + tokens.method(req, res),
-      tokens.url(req, res),
-      'HTTP/' + tokens['http-version'](req, res) + '"',
-      tokens.status(req, res),
-      tokens.res(req, res, 'content-length'),
-      '-',
-      tokens['response-time'](req, res),
-      'ms'
-    ].join(' ');
-  }, accessLoggerOpts));
+  app.use(
+    morgan(function (tokens, req, res) {
+      return [
+        '[' + packageJson.name + ']',
+        req.clientIp,
+        '[' + new Date().toISOString() + ']',
+        '"' + tokens.method(req, res),
+        tokens.url(req, res),
+        'HTTP/' + tokens['http-version'](req, res) + '"',
+        tokens.status(req, res),
+        tokens.res(req, res, 'content-length'),
+        '-',
+        tokens['response-time'](req, res),
+        'ms',
+      ].join(' ');
+    }, accessLoggerOpts)
+  );
 };
 
 /**
