@@ -135,6 +135,7 @@ export default async (port: number): Promise<Http> => {
 Some of the parameters to the builtin app middlewares can be customized using the `appMiddlewareOptions` parameter.
 
 In the following example we disable accesss logger middleware for a specific URL so we don't pollute our log file with empty "GET" request logs.
+We can also customize the default helmet settings in the same way.
 ````typescript
 import express from 'express';
 import path from 'path';
@@ -158,7 +159,10 @@ export default async (port: number): Promise<Http> => {
     accessLogger: {
       // Disable logging for requests to our healthcheck endpoint
       skip: (req) => req.method === 'GET' && req.originalUrl === '/health'
-    }
+    },
+    helmet: {
+      hidePoweredBy: true,
+    },
   });
 };
 ````
