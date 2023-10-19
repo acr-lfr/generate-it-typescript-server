@@ -1,4 +1,3 @@
-// http/nodegen/middleware/applicationMiddleware.ts
 import {
   corsMiddleware,
   handleDomain404,
@@ -13,11 +12,13 @@ import morgan from 'morgan';
 import { tmpdir } from 'os';
 import requestIp from 'request-ip';
 import packageJson from '../../../../package.json';
+import * as helmet from 'helmet'
 
 type AccessLoggerOptions = morgan.Options<express.Request, express.Response>;
 
 export type AppMiddlewareOptions = {
   accessLogger?: AccessLoggerOptions;
+  helmet?: helmet.HelmetOptions;
 };
 
 export const responseHeaders = (app: express.Application): void => {
@@ -69,12 +70,18 @@ export const accessLogger = (app: express.Application, accessLoggerOpts?: Access
   }, accessLoggerOpts));
 };
 
+export const helmetMiddleware = (app: express.Application, helmetOptions?: helmet.HelmetOptions): void => {
+  app.use(helmet.default((helmetOptions)));
+}
+
 /**
  * Injects routes into the passed express app
  * @param app
+ * @param appMiddlewareOpts
  */
 export const requestMiddleware = (app: express.Application, appMiddlewareOpts?: AppMiddlewareOptions): void => {
   accessLogger(app, appMiddlewareOpts?.accessLogger);
+  helmetMiddleware(app, appMiddlewareOpts?.helmet)
   requestParser(app);
   responseHeaders(app);
   app.use(inferResponseType());
