@@ -75,9 +75,8 @@ const mapKeys = (map: Map<any, any>) => Array.from(map, ([key]) => key);
 
 const mapValues = (map: Map<any, any>) => Array.from(map, ([_, value]) => value);
 
-const createFormattedFile = (path: string, data: string) =>
-  fs.writeFileSync(
-    path,
+const createFormattedFile = (path: string, data: string) => {
+  Promise.resolve(
     format(data, {
       bracketSpacing: true,
       endOfLine: 'auto',
@@ -87,7 +86,10 @@ const createFormattedFile = (path: string, data: string) =>
       quoteProps: 'consistent',
       filepath: path,
     })
-  );
+  ).then((file) => {
+    fs.writeFileSync(path, file);
+  });
+};
 
 const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, string>, opId: string): ReqParams => {
   if (!params?.length) {
