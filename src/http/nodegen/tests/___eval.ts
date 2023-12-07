@@ -86,8 +86,8 @@ const createFormattedFile = (path: string, data: string) => {
       quoteProps: 'consistent',
       filepath: path,
     })
-  ).then((file) => {
-    fs.writeFileSync(path, file);
+  ).then((formattedData) => {
+    fs.writeFileSync(path, formattedData);
   });
 };
 
