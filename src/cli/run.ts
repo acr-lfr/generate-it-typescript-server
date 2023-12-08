@@ -12,7 +12,9 @@ export default (script: string, cliArgs: Record<string, any>): void => {
   }
   const fullPath = path.join(process.cwd(), 'build/src/cli', script + '.js');
   if (!existsSync(fullPath)) {
-    throw new Error(`The script requested "${fullPath}" could not be found. Ensure you pass a string to the command eg "npm run cli-script -- user-seeder"`);
+    throw new Error(
+      `The script requested "${fullPath}" could not be found. Ensure you pass a string to the command eg "npm run cli-script -- user-seeder"`
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -24,4 +26,4 @@ export default (script: string, cliArgs: Record<string, any>): void => {
     .catch((e: any) => {
       console.error('FAILURE: ' + script, e);
     });
-}
+};

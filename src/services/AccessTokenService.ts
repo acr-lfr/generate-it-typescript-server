@@ -23,11 +23,11 @@ class AccessTokenService {
    * @param msg
    * @param headersProvidedString
    */
-  private denyRequest (
+  private denyRequest(
     res: express.Response,
     e = 'AccessTokenService did not match the given keys or tokens',
     msg = 'Invalid auth token provided',
-    headersProvidedString = '',
+    headersProvidedString = ''
   ): void {
     console.error(e);
     res.status(401).json({
@@ -41,7 +41,10 @@ class AccessTokenService {
    * @param headers
    * @param headerNames
    */
-  public extractAuthHeader (headers: IncomingHttpHeaders, headerNames: string[]): {
+  public extractAuthHeader(
+    headers: IncomingHttpHeaders,
+    headerNames: string[]
+  ): {
     jwtToken: string | undefined;
     apiKey: string | undefined;
   } {
@@ -62,7 +65,7 @@ class AccessTokenService {
     }
     return {
       jwtToken,
-      apiKey
+      apiKey,
     };
   }
 
@@ -76,18 +79,19 @@ class AccessTokenService {
    * @param headerNames
    * @param options
    */
-  public validateRequest (req: NodegenRequest, res: express.Response, next: express.NextFunction, headerNames: string[], options?: ValidateRequestOptions): void {
+  public validateRequest(
+    req: NodegenRequest,
+    res: express.Response,
+    next: express.NextFunction,
+    headerNames: string[],
+    options?: ValidateRequestOptions
+  ): void {
     const { jwtToken, apiKey } = this.extractAuthHeader(req.headers, headerNames);
     if (!jwtToken && !apiKey) {
       if (options && options.passThruWithoutJWT) {
         return next();
       }
-      return this.denyRequest(
-        res,
-        'No token to parse',
-        'No auth token provided.',
-        JSON.stringify(req.headers)
-      );
+      return this.denyRequest(res, 'No token to parse', 'No auth token provided.', JSON.stringify(req.headers));
     }
     if (jwtToken) {
       // verify the JWT token
@@ -112,30 +116,38 @@ class AccessTokenService {
    * Generates a JTW token
    * @param details
    */
-  public generateJWToken (details: JwtDetails) {
+  public generateJWToken(details: JwtDetails) {
     if (typeof details.maxAge !== 'number') {
       details.maxAge = 3600;
     }
 
-    details.sessionData = _.reduce(details.sessionData || {}, (memo: any, val: any, key: string) => {
-      if (typeof val !== 'function' && key !== 'password') {
-        memo[key] = val;
+    details.sessionData = _.reduce(
+      details.sessionData || {},
+      (memo: any, val: any, key: string) => {
+        if (typeof val !== 'function' && key !== 'password') {
+          memo[key] = val;
+        }
+        return memo;
+      },
+      {}
+    );
+    return jwt.sign(
+      {
+        data: details.sessionData,
+      },
+      config.jwtAccessSecret,
+      {
+        algorithm: 'HS256',
+        expiresIn: details.maxAge,
       }
-      return memo;
-    }, {});
-    return jwt.sign({
-      data: details.sessionData,
-    }, config.jwtAccessSecret, {
-      algorithm: 'HS256',
-      expiresIn: details.maxAge,
-    });
+    );
   }
 
   /**
    * Verify a JWT and return its payload
    * @param token
    */
-  public verifyJWT (token: string): Promise<any> {
+  public verifyJWT(token: string): Promise<any> {
     return new Promise((resolve) => {
       jwt.verify(token, config.jwtAccessSecret, (err: any, data: any) => {
         if (err) {
