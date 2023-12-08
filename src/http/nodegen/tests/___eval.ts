@@ -532,7 +532,7 @@ const buildSpecFiles = async (ctx: Context): Promise<void> => {
   const domains = parseAllPaths(ctx.swagger);
   let domainUsesWorkers = false;
 
-  Object.entries(domains).forEach(([opName, domainSpec]) => {
+  for (const domainSpec of Object.values(domains)) {
     const specFileName = `${domainSpec.domainName}`;
     const dataTemplates: string[] = [];
     const stubTemplates: string[] = [];
@@ -567,7 +567,7 @@ const buildSpecFiles = async (ctx: Context): Promise<void> => {
 
     await writeTestHelperFile(`${ctx.dest}/${specFileName}.ts`, domainSpec.domainName, dataTemplates, domainImports.helper);
     await writeTestStubFile(testOutput, domainSpec, stubTemplates, useAuth, domainImports.stub);
-  });
+  };
 
   writeTestIndexFile(`${ctx.dest}/index.ts`, indexExports, domainUsesWorkers);
 };
