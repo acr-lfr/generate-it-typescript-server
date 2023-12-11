@@ -9,10 +9,12 @@ dotenv.config();
 export default {
   // Swagger file
   loadSwaggerUIRoute: ConfigHelper.withDefault('LOAD_SWAGGER_UI_ROUTE', false),
-  swaggerBasicAuth: [{
-    basicAuthUname: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_UNAME', 'user')),
-    basicAuthPword: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_PWORD', 'password')),
-  }],
+  swaggerBasicAuth: [
+    {
+      basicAuthUname: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_UNAME', 'user')),
+      basicAuthPword: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_PWORD', 'password')),
+    },
+  ],
 
   // Instance
   env: ConfigHelper.withDefault('ENVIRONMENT', 'production'),
@@ -27,18 +29,12 @@ export default {
 
   // Request worker config - allThreadsCount = processes * threadsPerProcess
   requestWorker: {
-    processes: Number.parseInt(
-      ConfigHelper.withDefault('REQUEST_WORKER_PROCESSES', 1),
-      10
-    ),
-    threadsPerProcess: Number.parseInt(
-      ConfigHelper.withDefault('REQUEST_WORKER_THREADS_PER_PROCESS', 10),
-      10
-    ),
+    processes: Number.parseInt(ConfigHelper.withDefault('REQUEST_WORKER_PROCESSES', 1), 10),
+    threadsPerProcess: Number.parseInt(ConfigHelper.withDefault('REQUEST_WORKER_THREADS_PER_PROCESS', 10), 10),
     timeoutMs: Number.parseInt(
       ConfigHelper.withDefault('REQUEST_WORKER_TIMEOUT_MS', 300000), // 5 minutes
       10
     ),
     silent: true, // disable thread / proc start logs
-  }
+  },
 };

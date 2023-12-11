@@ -75,19 +75,26 @@ const mapKeys = (map: Map<any, any>) => Array.from(map, ([key]) => key);
 
 const mapValues = (map: Map<any, any>) => Array.from(map, ([_, value]) => value);
 
-const createFormattedFile = (path: string, data: string) =>
-  fs.writeFileSync(
-    path,
-    format(data, {
-      bracketSpacing: true,
-      endOfLine: 'auto',
-      semi: true,
-      printWidth: 120,
-      singleQuote: true,
-      quoteProps: 'consistent',
-      filepath: path,
-    })
-  );
+const createFormattedFile = async (path: string, data: string) => {
+  try {
+    const formattedData = await Promise.resolve(
+      format(data, {
+        bracketSpacing: true,
+        endOfLine: 'auto',
+        semi: true,
+        printWidth: 120,
+        singleQuote: true,
+        quoteProps: 'consistent',
+        filepath: path,
+      })
+    );
+
+    fs.writeFileSync(path, formattedData);
+  } catch (e) {
+    console.error(`Error formatting ${path} - writing unformatted data instead`);
+    fs.writeFileSync(path, data);
+  }
+};
 
 const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, string>, opId: string): ReqParams => {
   if (!params?.length) {
@@ -349,7 +356,7 @@ const buildMethodDataFile = (testData: TestData): DataFileParams => {
   return { dataTemplate, stubTemplate, validatorSchema };
 };
 
-const writeTestHelperFile = (filename: string, domainName: string, classBody: string[], imports = ''): void => {
+const writeTestHelperFile = async (filename: string, domainName: string, classBody: string[], imports = ''): Promise<void> => {
   const content = `\
 ${imports ? imports + '\n' : ''}\
 import { baseUrl, request } from '@/http/nodegen/tests';
@@ -359,7 +366,7 @@ export class Test${domainName} {
 ${classBody.join('\n\n')}
 }
 `;
-  createFormattedFile(filename, content);
+  await createFormattedFile(filename, content);
 };
 
 const writeTestIndexFile = (filename: string, toExport: string[], usesWorkers: boolean = false): void => {
@@ -432,7 +439,7 @@ ${toExport?.length ? toExport.join('\n') : ''}
   fs.writeFileSync(filename, content);
 };
 
-const writeTestStubFile = (basePath: string, domainSpec: DomainSpec, tests: string[], useAuth?: boolean, importString?: string): boolean => {
+const writeTestStubFile = async (basePath: string, domainSpec: DomainSpec, tests: string[], useAuth?: boolean, importString?: string): Promise<boolean> => {
   basePath = basePath.replace(/\/+$/, '');
 
   const outputPath = `${basePath}/${domainSpec.domainName}.api.spec.ts`;
@@ -461,7 +468,7 @@ describe('${domainSpec.domainName}', () => {${
 });
 `;
 
-  createFormattedFile(outputPath, template);
+  await createFormattedFile(outputPath, template);
 
   return true;
 };
@@ -484,13 +491,13 @@ export const responseValidator = (responseKey: string, schema: any): { error?: J
   return validationSchemas[responseKey].validate(schema);
 }`;
 
-const writeTestDataFile = (path: string, domainSpec: DomainSpec, validatorSchemas: string[]): void => {
+const writeTestDataFile = async (path: string, domainSpec: DomainSpec, validatorSchemas: string[]): Promise<void> => {
   const dataExports: string[] = mapValues(domainSpec.exports).filter((key) => key !== 'true');
   if (validatorSchemas?.length) {
     dataExports.unshift(`import * as Joi from 'joi';\nimport { mockItGenerator } from 'generate-it-mockers';`);
     dataExports.push(getValidator(validatorSchemas));
   }
-  createFormattedFile(path, dataExports.join('\n\n'));
+  await createFormattedFile(path, dataExports.join('\n\n'));
 };
 
 const getImports = (domainSpec: DomainSpec, specFileName: string): { helper: string; stub: string } => {
@@ -516,7 +523,7 @@ const getImports = (domainSpec: DomainSpec, specFileName: string): { helper: str
   return { helper, stub };
 };
 
-const buildSpecFiles = (ctx: Context): void => {
+const buildSpecFiles = async (ctx: Context): Promise<void> => {
   if (!ctx.nodegenRc?.helpers?.tests) {
     return;
   }
@@ -525,7 +532,7 @@ const buildSpecFiles = (ctx: Context): void => {
   const domains = parseAllPaths(ctx.swagger);
   let domainUsesWorkers = false;
 
-  Object.entries(domains).forEach(([opName, domainSpec]) => {
+  for (const domainSpec of Object.values(domains)) {
     const specFileName = `${domainSpec.domainName}`;
     const dataTemplates: string[] = [];
     const stubTemplates: string[] = [];
@@ -555,12 +562,12 @@ const buildSpecFiles = (ctx: Context): void => {
     const testOutput = path.join(ctx.targetDir, ctx.nodegenRc?.helpers?.tests?.outDir || 'src/domains/__tests__');
 
     if (domainSpec.exports.size > 0) {
-      writeTestDataFile(`${ctx.dest}/${specFileName}.data.ts`, domainSpec, validatorSchemas);
+      await writeTestDataFile(`${ctx.dest}/${specFileName}.data.ts`, domainSpec, validatorSchemas);
     }
 
-    writeTestHelperFile(`${ctx.dest}/${specFileName}.ts`, domainSpec.domainName, dataTemplates, domainImports.helper);
-    writeTestStubFile(testOutput, domainSpec, stubTemplates, useAuth, domainImports.stub);
-  });
+    await writeTestHelperFile(`${ctx.dest}/${specFileName}.ts`, domainSpec.domainName, dataTemplates, domainImports.helper);
+    await writeTestStubFile(testOutput, domainSpec, stubTemplates, useAuth, domainImports.stub);
+  };
 
   writeTestIndexFile(`${ctx.dest}/index.ts`, indexExports, domainUsesWorkers);
 };

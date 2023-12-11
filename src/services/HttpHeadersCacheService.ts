@@ -9,7 +9,7 @@ class HttpHeadersCacheService {
    * @param res
    * @param next
    */
-  middleware (req: NodegenRequest, res: express.Response, next: express.NextFunction) {
+  middleware(req: NodegenRequest, res: express.Response, next: express.NextFunction) {
     res.header('Cache-Control', 'no-store, no-cache, must-revalidate');
     res.header('Expires', 'Thu, 19 Nov 1981 08:52:00 GMT');
     next();

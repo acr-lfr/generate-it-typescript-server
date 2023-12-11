@@ -3,7 +3,7 @@ import express from 'express';
 // import { ForbiddenException } from '@/http/nodegen/errors';
 
 class PermissionService {
-  middleware (req: NodegenRequest, res: express.Response, next: express.NextFunction, permission: string) {
+  middleware(req: NodegenRequest, res: express.Response, next: express.NextFunction, permission: string) {
     // Please inject your own logic here, below is a very crude and simple example.
     /**
      * This will never be overridden.

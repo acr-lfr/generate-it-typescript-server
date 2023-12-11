@@ -6,7 +6,7 @@ class AsyncValidationService {
    * @param req
    * @param asyncValidatorParams
    */
-  async uniqueUsername (req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
+  async uniqueUsername(req: NodegenRequest, asyncValidatorParams: string[]): Promise<void> {
     /**
      * // Run the async function and throw the required error when needed
      * const user = await db.user.find({ username: req.body.username })
