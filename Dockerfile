@@ -1,4 +1,8 @@
-FROM node:18 as build
+FROM node:20 AS build
+
+# Arguments defined in docker-compose.yml
+ARG user
+ARG uid
 
 WORKDIR /code
 
@@ -9,13 +13,13 @@ COPY . /code
 RUN npm run build
 
 # -----------------------------------------------------
-FROM node:18-alpine as runtime
+FROM node:20-alpine AS runtime
 
 WORKDIR /code
 
 COPY --from=build /code/package.json /code/package.json
-# FIXME: should only install prod deps for runtime
-# RUN npm i --production
+
+RUN npm i --production
 COPY --from=build /code/node_modules /code/node_modules
 COPY --from=build /code/build /code/build
 
