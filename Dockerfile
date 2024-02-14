@@ -28,5 +28,7 @@ COPY --from=build /code/openapi-nodegen-api-file.yml /code/openapi-nodegen-api-f
 COPY ./docker-entrypoint.sh /sbin/
 RUN chmod 755 /sbin/docker-entrypoint.sh
 
+USER $user
+
 ENTRYPOINT [ "/sbin/docker-entrypoint.sh" ]
 CMD ["prod"]
