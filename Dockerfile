@@ -18,7 +18,6 @@ FROM node:20-alpine AS runtime
 WORKDIR /code
 
 COPY --from=build /code/package.json /code/package.json
-
 RUN npm i --production
 COPY --from=build /code/node_modules /code/node_modules
 COPY --from=build /code/build /code/build
