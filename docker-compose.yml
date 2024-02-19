@@ -7,9 +7,6 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
-      args:
-        user: acr
-        uid: 1000
     env_file:
       - .env
     volumes:
