@@ -19,7 +19,6 @@ COPY --from=build /code/package-lock.json /code/package-lock.json
 RUN npm ci --omit=optional --omit=dev && npm cache clean --force
 RUN npm audit --omit=optional --omit=dev
 
-COPY --from=build /code/node_modules /code/node_modules
 COPY --from=build /code/build /code/build
 COPY --from=build /code/openapi-nodegen-api-file.yml /code/openapi-nodegen-api-file.yml
 
