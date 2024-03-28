@@ -1,3 +1,9 @@
+import express from 'express';
+import expressFormData from 'express-form-data';
+import * as helmet from 'helmet'
+import morgan from 'morgan';
+import IP from 'ip';
+import { tmpdir } from 'os';
 import {
   corsMiddleware,
   handleDomain404,
@@ -6,13 +12,9 @@ import {
   headersCaching,
   inferResponseType,
 } from '@/http/nodegen/middleware';
-import express from 'express';
-import expressFormData from 'express-form-data';
-import morgan from 'morgan';
-import { tmpdir } from 'os';
-import requestIp from 'request-ip';
+import NodegenRequest from '@/http/interfaces/NodegenRequest';
+import GenerateItExpressResponse from '@/http/nodegen/interfaces/GenerateItExpressResponse';
 import packageJson from '../../../../package.json';
-import * as helmet from 'helmet'
 
 type AccessLoggerOptions = morgan.Options<express.Request, express.Response>;
 
@@ -46,7 +48,11 @@ export const requestParser = (app: express.Application): void => {
   // parse the body
   app.use(express.urlencoded({ extended: false }));
 
-  app.use(requestIp.mw());
+  // inject the IP into the request object
+  app.use((req: NodegenRequest, res: GenerateItExpressResponse, next: express.NextFunction) => {
+    req.clientIp = IP.address();
+    next();
+  });
 };
 
 export const accessLogger = (app: express.Application, accessLoggerOpts?: AccessLoggerOptions): void => {
