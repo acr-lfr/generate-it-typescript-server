@@ -18,7 +18,7 @@ export default () => {
       outputMap?: Record<string, any>
     ) => {
       // Send only a status when data is undefined
-      if (dataOrPath === undefined) {
+      if (dataOrPath === undefined || dataOrPath === null) {
         return res.sendStatus(status);
       }
 
