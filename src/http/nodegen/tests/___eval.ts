@@ -422,14 +422,15 @@ export const defaultSetupTeardown = () => {
  * If your auth flow requires side-effects (eg setting req.user = 'something') then
  * you will want to pass in a custom middleware mocker to handle that case
  *
- * @param {RequestHandler}  middleware  Replaces AccessTokenService.validateRequest
+ * @param {typeof AccessTokenService.validateRequest}  middleware  Replaces AccessTokenService.validateRequest
  */
-export const mockAuth = (middleware?: RequestHandler) => {
+export const mockAuth = (middleware?: typeof AccessTokenService.validateRequest) => {
   jest
     .spyOn(AccessTokenService, 'validateRequest')
     .mockImplementation(
       middleware ||
-        ((req: NodegenRequest, res: Response, next: NextFunction) => next())
+        (((req: NodegenRequest, res: Response, next: NextFunction) =>
+          next()) as unknown as typeof AccessTokenService.validateRequest),
     );
 };
 
