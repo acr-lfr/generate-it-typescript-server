@@ -10,6 +10,7 @@
     "dev:build": "tsc-watch --preserveWatchOutput --onSuccess 'npx tsc-alias'",
     "dev:setup": "git config core.hooksPath githooks && cp -n .env.example .env",
     "dev:start": "tsc-watch --preserveWatchOutput --onSuccess 'sh -c \"npx tsc-alias && npm start\"'",
+    "dev:debug": "tsc-watch --preserveWatchOutput --onSuccess 'sh -c \"npx tsc-alias && node --inspect=127.0.0.1:9229 ./build/server.js\"'",
     "jest": "node --random-seed=42 node_modules/.bin/jest",
     "lint": "eslint 'src/**/*.{js,ts,tsx}'",
     "lint:fix": "npm run lint -- --fix",
