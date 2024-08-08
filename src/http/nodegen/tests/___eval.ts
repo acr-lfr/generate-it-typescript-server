@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import { ConfigExtendedBase, Path, Schema, TemplateRenderer } from 'generate-it';
-import { mockItGenerator } from 'generate-it-mockers';
 import SwaggerUtils from 'generate-it/build/lib/helpers/SwaggerUtils';
 import * as path from 'path';
 import { format } from 'prettier';
@@ -66,7 +65,8 @@ interface DataFileParams {
 
 const ucFirst = (input: string): string => `${input.charAt(0).toUpperCase()}${input.slice(1)}`;
 
-const pascalCase = (input: string): string => input.replace(/([0-9].|^[a-z])|[^a-zA-Z0-9]+(.)?/g, (_, s = '', q = '') => (s || q).toUpperCase());
+const pascalCase = (input: string): string =>
+  input.replace(/([0-9].|^[a-z])|[^a-zA-Z0-9]+(.)?/g, (_, s = '', q = '') => (s || q).toUpperCase());
 
 const camelCase = (input: string): string =>
   input.replace(/([0-9].)|[^a-zA-Z0-9]+(.)?/g, (_, s = '', q = '', i) => (i ? (s || q).toUpperCase() : s || q));
@@ -104,7 +104,10 @@ const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, st
   const variables = {} as ReqParams;
 
   for (const schema of params || []) {
-    const varName = schema.in === 'path' ? camelCase(`${schema.in}-${schema.name}`) : camelCase(`${opId}-${schema.in}-${schema.name}`);
+    const varName =
+      schema.in === 'path'
+        ? camelCase(`${schema.in}-${schema.name}`)
+        : camelCase(`${opId}-${schema.in}-${schema.name}`);
     const paramDef = schema.in === 'body' ? (schema as Schema.BodyParameter).schema : schema;
 
     variables[schema.in] = {
@@ -116,7 +119,10 @@ const extractReqParams = (params: Schema.Parameter[], exportData: Map<string, st
     if (schema.in === 'formData') {
       exportData.set(varName, `export const ${varName} = Buffer.from('${varName}');`);
     } else {
-      exportData.set(varName, `export const ${varName} = mockItGenerator(${JSON.stringify(paramDef?.schema || paramDef)});`);
+      exportData.set(
+        varName,
+        `export const ${varName} = mockItGenerator(${JSON.stringify(paramDef?.schema || paramDef)});`
+      );
     }
   }
 
@@ -135,7 +141,8 @@ const extractResponses = (responses: Schema.Spec['responses']): Variables => {
 
     // handle oa3 content-type responses (by ignoring all but the first)
     if ((schema as any).content) {
-      const contentSchema = (schema as any).content['application/json'] || Object.entries((schema as any).content)[0][1];
+      const contentSchema =
+        (schema as any).content['application/json'] || Object.entries((schema as any).content)[0][1];
       variables[code] = contentSchema;
     }
   });
@@ -356,7 +363,12 @@ const buildMethodDataFile = (testData: TestData): DataFileParams => {
   return { dataTemplate, stubTemplate, validatorSchema };
 };
 
-const writeTestHelperFile = async (filename: string, domainName: string, classBody: string[], imports = ''): Promise<void> => {
+const writeTestHelperFile = async (
+  filename: string,
+  domainName: string,
+  classBody: string[],
+  imports = ''
+): Promise<void> => {
   const content = `\
 ${imports ? imports + '\n' : ''}\
 import { baseUrl, request } from '@/http/nodegen/tests';
@@ -378,13 +390,14 @@ import { baseUrl as root } from '@/http/nodegen/routesImporter';
 import { default as AccessTokenService } from '@/services/AccessTokenService';
 import { NextFunction, RequestHandler, Response } from 'express';
 import { default as supertest } from 'supertest';
+import TestAgent from 'supertest/lib/agent';
 
 // sucks these can't be on-demand - jest needs to hoist them so that anything importing them gets the mock.
 jest.mock('morgan', () => () => (req: NodegenRequest, res: Response, next: NextFunction) => next());
 jest.mock('@/http/nodegen/middleware/asyncValidationMiddleware', () => () => (req: NodegenRequest, res: Response, next: NextFunction) => next());
 
 export const baseUrl = root.replace(/\\/*$/, '');
-export let request: supertest.SuperTest<supertest.Test>;
+export let request: TestAgent<supertest.Test>;
 
 // don't call twice...
 let setupCalled = false;
@@ -440,7 +453,13 @@ ${toExport?.length ? toExport.join('\n') : ''}
   fs.writeFileSync(filename, content);
 };
 
-const writeTestStubFile = async (basePath: string, domainSpec: DomainSpec, tests: string[], useAuth?: boolean, importString?: string): Promise<boolean> => {
+const writeTestStubFile = async (
+  basePath: string,
+  domainSpec: DomainSpec,
+  tests: string[],
+  useAuth?: boolean,
+  importString?: string
+): Promise<boolean> => {
   basePath = basePath.replace(/\/+$/, '');
 
   const outputPath = `${basePath}/${domainSpec.domainName}.api.spec.ts`;
@@ -511,7 +530,10 @@ const getImports = (domainSpec: DomainSpec, specFileName: string): { helper: str
       }),
       {}
     );
-    helper = Object.entries(importLines).reduce((all, [file, names]) => all + `import { ${names.sort().join(', ')} } from '${file}';`, '');
+    helper = Object.entries(importLines).reduce(
+      (all, [file, names]) => all + `import { ${names.sort().join(', ')} } from '${file}';`,
+      ''
+    );
   }
 
   const stub = domainSpec.exports.size
@@ -566,9 +588,14 @@ const buildSpecFiles = async (ctx: Context): Promise<void> => {
       await writeTestDataFile(`${ctx.dest}/${specFileName}.data.ts`, domainSpec, validatorSchemas);
     }
 
-    await writeTestHelperFile(`${ctx.dest}/${specFileName}.ts`, domainSpec.domainName, dataTemplates, domainImports.helper);
+    await writeTestHelperFile(
+      `${ctx.dest}/${specFileName}.ts`,
+      domainSpec.domainName,
+      dataTemplates,
+      domainImports.helper
+    );
     await writeTestStubFile(testOutput, domainSpec, stubTemplates, useAuth, domainImports.stub);
-  };
+  }
 
   writeTestIndexFile(`${ctx.dest}/index.ts`, indexExports, domainUsesWorkers);
 };
