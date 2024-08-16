@@ -40,11 +40,9 @@ export default function() {
           {% if not path['x-passResponse'] -%}{{ getSingleSuccessResponse(path.responses) or 200 }},
             {% if path.produces -%}'{{ path.produces }}'
             {% elif path.responses['200'].content -%}
-               {% set responseKeys = _.keys(path.responses['200'].content) %}
+               {% set responseKeys = _.keys(path.responses['200'].content) -%}
                '{{ responseKeys[0] }}'
-            {% else %}
-              undefined
-            {% endif %},
+            {% else %}undefined{% endif -%},
             {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
           ){% endif %}
         }
