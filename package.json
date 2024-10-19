@@ -27,7 +27,7 @@
     "cors": "^2.8.5",
     "custom-error": "^0.2.1",
     "dotenv": "^16.4.5",
-    "express": "^4.21.0",
+    "express": "^4.21.1",
     "express-auth-middle": "^1.1.2",
     "express-form-data": "^2.0.23",
     "express-promise-router": "^4.1.1",
