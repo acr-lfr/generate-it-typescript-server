@@ -5,6 +5,7 @@
   "segmentFirstGrouping": 2,
   "segmentSecondGrouping": 4,
   "helpers": {
+    "noDomainDocBlock": false,
     "stub": {
       "jwtType": "JwtAccess",
       "requestType": "NodegenRequest"

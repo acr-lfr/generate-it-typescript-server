@@ -324,6 +324,7 @@ The default `.nodegenrc` will contain:
   "nodegenMockDir": "src/domains/__mocks__",
   "nodegenType": "server",
   "helpers": {
+    "noDomainDocBlock": false,
     "stub": {
       "jwtType": "JwtAccess",
       "requestType": "NodegenRequest",
@@ -332,9 +333,10 @@ The default `.nodegenrc` will contain:
   }
 }
 ```
-The stub helpers will mean the domain method types will be `JwtAccess` or `NodegenRequest` opposed to `any`.
 
-The `NodegenRequest` interface is [provided by these templates](https://github.com/acr-lfr/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/interfaces/NodegenRequest.ts) out of the box so nothing extra required (a domain gets a full req object based on the [core feature](https://acr-lfr.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)). This interface extends the express request interface with the additional attributes added by this setup.
+- "noDomainDocBlock" will omit the docblock for each domain method from the output when true.
+- The stub helpers will mean the domain method types will be `JwtAccess` or `NodegenRequest` opposed to `any`.
+  - The `NodegenRequest` interface is [provided by these templates](https://github.com/acr-lfr/openapi-nodegen-typescript-server/blob/master/src/http/nodegen/interfaces/NodegenRequest.ts) out of the box so nothing extra required (a domain gets a full req object based on the [core feature](https://acr-lfr.github.io/openapi-nodegen/#/_pages/features?id=pass-full-request-object-to-___stub-method)). This interface extends the express request interface with the additional attributes added by this setup.
 
 ##### Jwt Definition 
 The `JwtAccess` interface is not provided, it expects that you have in your api file a definition by this name. You can see an example in the core: [example JwtAccess interface](https://github.com/acr-lfr/openapi-nodegen/blob/develop/test_swagger.yml#L176). If you want to use a different interface name, change the value of "jwtType", if you don't want it at all, just delete it from your `.nodegenrc` file.

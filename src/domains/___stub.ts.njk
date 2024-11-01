@@ -23,7 +23,7 @@ class {{ domainClassName }} implements {{ domainInterfaceName }} {
   {% set docBlock = docBlock + '
   **/' %}
 
-  {{ docBlock }}
+  {% if not nodegenRc.helpers.noDomainDocBlock === true -%}{{ docBlock }}{%- endif %}
   {%- set singleSuccessResponse = getSingleSuccessResponse(path['x-response-definitions']) %}
   public async {{ path.operationId }} ({{ pathParamsToDomainParams(method, path, true, false, 'params') }}): Promise<{{ path['x-response-definitions'][singleSuccessResponse] if singleSuccessResponse else 'any' }}> {
     {% if mockServer %}
