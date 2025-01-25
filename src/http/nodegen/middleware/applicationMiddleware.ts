@@ -35,7 +35,6 @@ export const requestParser = (app: express.Application): void => {
       uploadDir: tmpdir(),
     })
   );
-  app.use(express.json({ limit: '50mb' }));
 
   // clear all empty files (size == 0)
   app.use(expressFormData.format());
@@ -46,6 +45,7 @@ export const requestParser = (app: express.Application): void => {
   // parse the body
   app.use(express.urlencoded({ extended: false }));
 
+  // inject the request ip to the req. object
   app.use(requestIp.mw());
 };
 

@@ -17,19 +17,53 @@ export default function() {
   {% for op in operations -%}
     {% for method, path in op.path -%}
       {% if isValidMethod(method)%}
-  /**
-   * Operation ID: {{ path.operationId }}
-   * {% if path.summary %}Summary: {{ path.summary }}{% endif %}
-   * {% if path.description %}Description: {{ path.description | trim }}{% endif %}
-   */
+      /**
+       * Operation ID: {{ path.operationId }}
+       * {% if path.summary %}Summary: {{ path.summary }}{% endif %}
+       * {% if path.description %}Description: {{ path.description | trim }}{% endif %}
+       */
       {% set securityNames = getSecurityNames(path, swagger) %}
       router.{{method}}(
         '{{op.subresource}}',
-        {% if securityNames %}accessTokenMiddleware({{ securityNames }}  {% if path['x-passThruWithoutJWT'] %}, {passThruWithoutJWT: true}{% endif %}), /* Validate request security tokens */{% endif %}
-        {% if path['x-permission'] %}permissionMiddleware('{{ path['x-permission'] }}'), /* Check permission of the incoming user */ {% endif %}
-        {% if pathsHasParamsToValidate(path) %}celebrate({{ _.camelCase(operation_name) }}Validators.{{path.operationId}}{% if path['x-joi-options'] %}, {{ path['x-joi-options'] | dump }}{% endif %}), /* Validate the request data and return validation errors, options passed in via x-joi-options */ {% endif %}
-        {% if path['x-async-validators'] %}asyncValidationMiddleware({{ path['x-async-validators'] | dump }}), /* Call an async validator function and throw an appropriate error */ {% endif %}
-        {% if path['x-cache'] %}apiCaching({{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}), /* Lastly, if x-cache is found, call the api cache middleware */ {% endif %}
+        {%- if path['x-raw-body'] %}
+          /* x-raw-body on path found: Ensure body is raw */
+          express.raw({ type: '*/*' }),
+        {% else -%}
+          /* x-raw-body on path not found: Format the body */
+          express.json({ limit: '50mb' }),
+          {%- if securityNames %}
+            /* security on path found: Validate request security tokens */
+            accessTokenMiddleware(
+              {{ securityNames }},
+              {%- if path['x-passThruWithoutJWT'] %}
+                /* x-passThruWithoutJWT found on path: Inject bool true */
+                {passThruWithoutJWT: true}
+              {% endif -%}
+            ),
+          {% endif -%}
+          {%- if path['x-permission'] %}
+            /* x-permission on path found: Check permission of the incoming user */
+            permissionMiddleware('{{ path['x-permission'] }}'),
+          {% endif -%}
+          {%- if pathsHasParamsToValidate(path) %}
+            /* Validate the request data and return validation errors */
+            celebrate(
+              {{ _.camelCase(operation_name) }}Validators.{{path.operationId}},
+              {%- if path['x-joi-options'] %}
+                /* x-joi-options found on path: inject into celebrate */
+                {{ path['x-joi-options'] | dump }}
+              {% endif -%}
+            ),
+          {% endif -%}
+          {%- if path['x-async-validators'] %}
+            /* x-async-validators on path found: Call an async validator function and throw an appropriate error */
+            asyncValidationMiddleware({{ path['x-async-validators'] | dump }}),
+          {% endif -%}
+          {%- if path['x-cache'] %}
+            /* x-cache found on path: call the api cache middleware */
+            apiCaching({{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}),
+          {% endif -%}
+        {% endif -%}
         async (req: any, res: GenerateItExpressResponse) => {
           {% if not path['x-passResponse'] -%}res.inferResponseType( {% endif %}
             {% if path['x-worker'] -%}
