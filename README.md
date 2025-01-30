@@ -307,8 +307,6 @@ class AsyncValidationService {
 }
 ```
 
-
-
 #### Permission helper
 `src/http/nodegen/routes/___op.ts.njk` will look for the `x-permission` attribute within a path object eg:
 ```
@@ -376,6 +374,18 @@ However nice all the automated layer is, once in the domain method it is common 
 It's recommended you use the `Exception.ts` classes when throwing errors - the `4xx.ts` files are deprecated and exist for backwards compatibility reasons.  
 
 Additionally, using the exception classes allows for control over the error response format by passing all errors through the error pre-formatter [HttpErrorsService.ts](src/services/HttpErrorsService.ts). This way, you can define custom error responses for all errors.
+
+#### Raw body
+
+If you require the express raw body add this to the respective path:
+```
+x-raw-body: true
+```
+
+This will result in no validation, no token checks, no body parsing, the domain will be provided the body in a raw format,
+
+If you are handling webhooks from 3rd parties such as Stripe, you will need this flag set.
+
 
 ## Setup
 In a new directory run: `npm init`
