@@ -5,13 +5,10 @@
   "segmentFirstGrouping": 2,
   "segmentSecondGrouping": 4,
   "helpers": {
-    "noDomainDocBlock": false,
+    "noDomainDocBlock": true,
     "stub": {
       "jwtType": "JwtAccess",
       "requestType": "NodegenRequest"
-    },
-    "tests": {
-      "outDir": "src/domains/__tests__"
     },
     "objectReduceByMapOptions": {
       "allowNullish": false,
