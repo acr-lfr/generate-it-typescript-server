@@ -7,15 +7,6 @@ dotenv.config();
  * Add and remove config that you need.
  */
 export default {
-  // Swagger file
-  loadSwaggerUIRoute: ConfigHelper.withDefault('LOAD_SWAGGER_UI_ROUTE', false),
-  swaggerBasicAuth: [
-    {
-      basicAuthUname: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_UNAME', 'user')),
-      basicAuthPword: String(ConfigHelper.withDefault('SWAGGER_BASIC_AUTH_PWORD', 'password')),
-    },
-  ],
-
   // Instance
   env: ConfigHelper.withDefault('ENVIRONMENT', 'production'),
   port: ConfigHelper.withDefault('PORT', 8000),

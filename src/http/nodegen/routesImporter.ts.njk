@@ -17,8 +17,4 @@ export default function (app: express.Application, options: RoutesImporter = {ba
   app.use(basePath + '/{{firstUrlSegment if firstUrlSegment != 'root' else ''}}', {{_.camelCase(groupName)}}Routes());
 
   {% endfor -%}
-
-  if (config.loadSwaggerUIRoute) {
-    app.use(basePath + '/swagger', require('./routes/swaggerRoutes').default());
-  }
 }
