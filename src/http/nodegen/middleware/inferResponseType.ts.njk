@@ -32,7 +32,6 @@ export default () => {
       let responseContentType = getPreferredResponseFormat(accept, possibleResponseTypes);
 
       if (!responseContentType) {
-        console.error(`Requested content-type "${accept}" not supported`);
         throw new NotAcceptableException(
           `Requested content-type "${accept}" not supported. Supported content types are "${possibleResponseTypes.join('", "')}"`,
         );
