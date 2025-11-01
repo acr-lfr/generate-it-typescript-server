@@ -28,9 +28,7 @@ export default () => {
         produces ? [...produces.split(',')] : ['application/json', ...apiProduces]
       ).filter(Boolean);
 
-      // Calculate the responseContentType based on the provided accept header
-      let responseContentType = getPreferredResponseFormat(accept, possibleResponseTypes);
-
+      const responseContentType = getPreferredResponseFormat(accept, possibleResponseTypes) || req.defaultContentType;
       if (!responseContentType) {
         throw new NotAcceptableException(
           `Requested content-type "${accept}" not supported. Supported content types are "${possibleResponseTypes.join('", "')}"`,
