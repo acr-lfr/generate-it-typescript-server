@@ -71,11 +71,12 @@ export default function() {
             {% else -%}
             await {{ucFirst(operation_name)}}Domain.{{path.operationId}}({{pathParamsToDomainParams(method, path, false, true, 'params')}}){% if not path['x-passResponse'] -%},{% endif %}
             {% endif -%}
-          {% if not path['x-passResponse'] -%}{{ getSingleSuccessResponse(path.responses) or 200 }},
-            {% if path.produces -%}'{{ path.produces }}'
-            {% elif path.responses['200'].content -%}
-               {% set responseKeys = _.keys(path.responses['200'].content) -%}
-               '{{ responseKeys[0] }}'
+          {% if not path['x-passResponse'] -%}
+            {% set responseCode = getSingleSuccessResponse(path.responses) or 200 -%}{{ responseCode }},
+            {% if path.produces -%}
+              '{{ path.produces }}'
+            {% elif path.responses[responseCode].content -%}
+              {% set responseKeys = _.keys(path.responses[responseCode].content).join(',') -%}'{{ responseKeys }}'
             {% else %}undefined{% endif -%},
             {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
           ){% endif %}
