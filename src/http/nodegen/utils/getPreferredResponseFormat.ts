@@ -27,19 +27,19 @@ export default (accept: string, produces: string[]): string | undefined => {
   for (const mime of produces) {
     (producable[mime] ||= []).push(mime);
     (producable['*/*'] ||= []).push(mime);
-    const main = mime.split('/')[0].trim();
-    (producable[main] ||= []).push(mime);
+    const type = mime.split('/')[0].trim();
+    (producable[type] ||= []).push(mime);
   }
 
-  const prioritizedAccept: { full: string; main: string; sub: string; q: number }[] = [];
+  const prioritizedAccept: { full: string; type: string; subType: string; q: number }[] = [];
   for (const option of accept.split(',')) {
-    const [mime, ...extras] = option.split(';').map((x) => x.trim());
+    const [mime, ...parameters] = option.split(';').map((x) => x.trim());
 
-    const [main, sub] = mime.split('/');
-    const acceptOption = { full: mime, main, sub, q: 1 };
+    const [type, subType] = mime.split('/');
+    const acceptOption = { full: mime, type, subType, q: 1 };
 
-    for (const extra of extras) {
-      const [key, value] = extra.split('=').map((x) => x.trim());
+    for (const param of parameters) {
+      const [key, value] = param.split('=').map((x) => x.trim());
       // basic impl: just ignore every other option besides priority (eg charset, lang)
       if (key === 'q') {
         const val = parseFloat(value);
@@ -55,16 +55,16 @@ export default (accept: string, produces: string[]): string | undefined => {
     prioritizedAccept.push(acceptOption);
   }
 
-  // for same prio, length of main + sub is a good enough proxy for specificity taking preference
+  // for same prio, length of type + subType is a good enough proxy for specificity taking preference
   // https://httpwg.org/specs/rfc9110.html#field.accept "Media ranges can be overridden by more specific media ranges..."
-  prioritizedAccept.sort((a, b) => b.q - a.q || (b.main + b.sub).length - (a.main + a.sub).length);
+  prioritizedAccept.sort((a, b) => b.q - a.q || (b.type + b.subType).length - (a.type + a.subType).length);
 
   for (const acceptable of prioritizedAccept) {
     if (acceptable.full in producable) {
       return producable[acceptable.full][0];
     }
-    if (acceptable.sub === '*' && acceptable.main in producable) {
-      return producable[acceptable.main][0];
+    if (acceptable.subType === '*' && acceptable.type in producable) {
+      return producable[acceptable.type][0];
     }
   }
 };

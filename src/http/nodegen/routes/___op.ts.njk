@@ -76,7 +76,7 @@ export default function() {
             {% if path.produces -%}
               '{{ path.produces }}'
             {% elif path.responses[responseCode].content -%}
-              {% set responseKeys = _.keys(path.responses[responseCode].content).sort().join(',') -%}'{{ responseKeys }}'
+              {% set responseKeys = _.keys(path.responses[responseCode].content).join(',') -%}'{{ responseKeys }}'
             {% else %}undefined{% endif -%},
             {{_.camelCase(operation_name)}}TransformOutputs.{{path.operationId}}
           ){% endif %}
