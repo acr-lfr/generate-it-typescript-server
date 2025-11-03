@@ -24,23 +24,16 @@ export default () => {
 
       const accept = (req.headers['accept'] || '*/*').toLowerCase();
 
-      const possibleResponseTypes: string[] = produces
-        ? [...produces.split(',')]
-        : ['application/json', ...apiProduces];
+      const possibleResponseTypes: string[] = (
+        produces ? [...produces.split(',')] : ['application/json', ...apiProduces]
+      ).filter(Boolean);
 
-      // Calculate the responseContentType based on the provided accept header
-      let responseContentType = getPreferredResponseFormat(accept, possibleResponseTypes);
-
-      // TEMP FIX - with a */* present in the request accept header, but responseContentType is empty
-      // we blindly take the 1st from that defined in the openapi file: possibleResponseTypes[0].
-      // The real fix should be handled in the getPreferredResponseFormat thus this is only a temp fix.
-      if (!responseContentType && !accept.includes('*/*')) {
-        console.error(`Requested content-type "${accept}" not supported`);
-        throw new NotAcceptableException(`Requested content-type "${accept}" not supported`);
-      } else {
-        responseContentType = possibleResponseTypes[0]
+      const responseContentType = getPreferredResponseFormat(accept, possibleResponseTypes) || req.defaultContentType;
+      if (!responseContentType) {
+        throw new NotAcceptableException(
+          `Requested content-type "${accept}" not supported. Supported content types are "${possibleResponseTypes.join('", "')}"`,
+        );
       }
-
       res.set('Content-Type', responseContentType);
 
       // No "produces", or json in the openapi file

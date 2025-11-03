@@ -7,6 +7,8 @@ declare global {
       jwtData: {{ nodegenRc.helpers.stub.jwtType if nodegenRc.helpers.stub.jwtType else 'any' }};
       originalToken: string;
       clientIp?: string;
+      /** If content-negotiation fails, default to this Content-Type instead of throwing. Can be set in the domain. */
+      defaultContentType?: string;
     }
   }
 }

@@ -28,7 +28,7 @@
     "custom-error": "^0.2.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "express-form-data": "^2.0.23",
+    "express-form-data": "^3.0.1",
     "express-promise-router": "^4.1.1",
     "generate-it-logger": "^2.0.0",
     "generate-it-mockers": "^1.1.4",
