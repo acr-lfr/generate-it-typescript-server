@@ -15,6 +15,7 @@ export * from './NotAcceptableException';
 export * from './NotFoundException';
 export * from './NotImplementedException';
 export * from './PayloadTooLargeException';
+export * from './PaymentRequiredException';
 export * from './PreconditionFailedException';
 export * from './RequestTimeoutException';
 export * from './ServiceUnavailableException';
