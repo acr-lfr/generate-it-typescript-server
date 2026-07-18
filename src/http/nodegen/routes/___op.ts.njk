@@ -27,7 +27,7 @@ export default function() {
         '{{op.subresource}}',
         {%- if path['x-raw-body'] %}
           /* x-raw-body on path found: Ensure body is raw */
-          express.raw({ type: '*/*' }),
+          express.raw({ type: '*/*', limit: '50mb' }),
         {% else -%}
           /* x-raw-body on path not found: Format the body */
           express.json({ limit: '50mb' }),
