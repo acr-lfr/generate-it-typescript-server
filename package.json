@@ -34,7 +34,7 @@
     "generate-it-mockers": "^1.1.4",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "morgan": "^1.10.0",
     "node-worker-threads-pool": "^1.5.1",
     "object-reduce-by-map": "^3.3.0",
